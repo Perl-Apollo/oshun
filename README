@@ -1,0 +1,46 @@
+Data::Checks version 0.002
+
+    This is NOT a type system for Perl.
+
+    The fundamental problem with type systems is that every individual programmer
+    knows exactly what they mean by – and want in – and need from – a “type system”
+    ...but no two programmers can ever agree precisely what that is.
+
+    What most Perl users actually need is a practical way to ensure that, when a value
+    that is assigned to a variable, or passed to a parameter, or returned from a
+    subroutine, that value conforms to the designer’s original expectations and
+    assumptions (e.g. did their subroutine get passed a positive integer and a
+    filehandle, and did it return a reference to a hash of strings?)
+
+    So this is not a compile-time type-system for Perl.
+    It’s a runtime data-checking system for Perl: a system of “checks”.
+
+    A check is an assertion about the value(s) that can be assigned to a variable,
+    passed to a parameter, or returned by a subroutine. This module provides
+    a large number of built-in checks and will eventually offer a mechanism
+    for specifying user-defined checks as well.
+
+
+INSTALLATION
+
+To install this module, run the following commands:
+
+    perl Makefile.PL
+    make
+    make test
+    make install
+
+
+DEPENDENCIES
+
+Requires Perl 5.22 or later.
+
+Also requires the non-core PPR and Variable::Magic modules.
+
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2023, Damian Conway
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
