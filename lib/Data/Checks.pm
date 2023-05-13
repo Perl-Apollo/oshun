@@ -54,7 +54,7 @@ my %CHECK = (
 );
 
 # Cache information as it generated...
-my %CHECK_UNAVAILABLE;
+my %CHECK_UNAVAILABLE;  # XXX Not used yet?
 my %CHECK_IMPL;
 
 # Normalize and instantiate built-in checks...
@@ -68,7 +68,7 @@ for my $CHECK_NAME (keys %CHECK) {
     }
 
     # Instantiate...
-    # TODO
+    # TODO XXX???
 }
 
 # Returns checks need a little extra contextual verification...
@@ -192,7 +192,7 @@ my $CHECK_EXPR = qr{
 
 # General purpose failure handler (during parsing, it inserts a die into the code itself)...
 sub FAIL  (@msg) { _FAIL(0, @msg) }
-sub FAIL1 (@msg) { _FAIL(1, @msg) }
+sub FAIL1 (@msg) { _FAIL(1, @msg) }  # XXX Unused?
 
 sub _FAIL ($uplevel, @msg) {
     # Build the message...
@@ -253,7 +253,7 @@ sub _gen_returns_check_code ($check) {
             : $+{params}           ? _gen_parameterized_returns_check_code($subcheck, $+{params})
             : $+{error}            ? Data::Checks::FAIL "Can't specify $+{error}"
             :                        $RETURNS_CHECK{ $subcheck } // Data::Checks::FAIL "Unknown check: $subcheck\n",
-        }grexmso;
+        }grexmso; # XXX Is the 'o' switch still used?
     } . ')';
 }
 
@@ -1489,6 +1489,8 @@ attributes {
         return if ($hints->{'Data::Checks/mode'}//q{}) eq 'NONE';
 
         # Unpack the components of the :of attribute...
+        # XXX our import hack might work here, but this is csalled multiple
+        # times per block of code, so it's not perfect.
         my (undef, $package, $referent, $CHECK_NAME) = @_;
         my $reftype = Data::Checks::reftype($referent);
 
@@ -1552,6 +1554,7 @@ sub _build_scalar_wizard_for ($CHECK_NAME, $VARNAME) {
     # Generate, cache, and return the implementation...
     return $SCALAR_WIZARD_FOR{$VARNAME . '/' . $CHECK_NAME} //= do {
         # Exception objects need a personalized classname...
+        # XXX $EXCEPTION_CLASS is unused?
         my $EXCEPTION_CLASS = $CHECK_NAME =~ /\A[a-zA-Z]+\z/ ? $CHECK_NAME : 'EXPR';
 
         # Build the code that performs the check...
@@ -1577,6 +1580,7 @@ sub _build_scalar_wizard_for ($CHECK_NAME, $VARNAME) {
 # Utilities used by rewritten subs...
 
 # This is used to initialize uninitialized declarations...
+# XXX Except it appears to be unused
 sub _init_var_decl { return }
 
 # This replaces the CORE::caller() in the implementation of a subroutine with a return check...
