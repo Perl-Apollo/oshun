@@ -37,30 +37,30 @@ OKAY { state @uninitialized :of(INT) }    'uninitialized state array';
 
 # List assignments must likewise pass the INT check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { @state_array = $good_value                } "state array = $good_value_str";
 }
 
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_ASSIGN { @state_array = $bad_value } "state array = $bad_value_str";
 }
 
 # Element assignments must pass the INT check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { $state_array[0] = $good_value }  "state array[0] = $good_value_str";
 }
 
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_ASSIGN { $state_array[0] = $bad_value }  "state array[0] = $bad_value_str";
 }
 
 # Element assignments that introduce undef-gaps can never pass the INT check, even for good values...
 @state_array = (0..2);
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     FAIL_ON_ASSIGN { $state_array[13] = $good_value }  "state array[13] = $good_value_str";
 }
 

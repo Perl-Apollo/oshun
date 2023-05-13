@@ -52,7 +52,7 @@ state $state_scalar :of(HASH[NUM[0..99] => UINT | (REF & !ARRAY)]) = do { my %x;
 
 # Variables have to be initialized with something that passes the HASH[NUM[0..99] => UINT | (REF & !ARRAY)] check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { my $var    = $good_value }   "   my scalar = $good_value_str";
     OKAY { our $var   = $good_value }   "  our scalar = $good_value_str";
     OKAY { state $var = $good_value }   "state scalar = $good_value_str";
@@ -65,7 +65,7 @@ FAIL_ON_INIT { state $uninitialized :of(HASH[NUM[0..99] => UINT | (REF & !ARRAY)
 
 # Other explicit initializer values also don't pass the HASH[NUM[0..99] => UINT | (REF & !ARRAY)] check...
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_INIT { my $uninitialized :of(HASH[NUM[0..99] => UINT | (REF & !ARRAY)])    = $bad_value }  "   my scalar = $bad_value_str";
     FAIL_ON_INIT { our $uninitialized :of(HASH[NUM[0..99] => UINT | (REF & !ARRAY)])   = $bad_value }  "  our scalar = $bad_value_str";
     FAIL_ON_INIT { state $uninitialized :of(HASH[NUM[0..99] => UINT | (REF & !ARRAY)]) = $bad_value }  "state scalar = $bad_value_str";
@@ -73,14 +73,14 @@ for my $bad_value (BAD_VALUES) {
 
 # Assignments must likewise pass the HASH[NUM[0..99] => UINT | (REF & !ARRAY)] check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { $my_scalar    = $good_value }  "   my scalar = $good_value_str";
     OKAY { $our_scalar   = $good_value }  "  our scalar = $good_value_str";
     OKAY { $state_scalar = $good_value }  "state scalar = $good_value_str";
 }
 
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_ASSIGN { $my_scalar    = $bad_value }  "   my scalar = $bad_value_str";
     FAIL_ON_ASSIGN { $our_scalar   = $bad_value }  "  our scalar = $bad_value_str";
     FAIL_ON_ASSIGN { $state_scalar = $bad_value }  "state scalar = $bad_value_str";
@@ -101,7 +101,7 @@ state sub state_ret_sub : returns(HASH[NUM[0..99] => UINT | (REF & !ARRAY)])  ($
 
 # With values that should pass the HASH[NUM[0..99] => UINT | (REF & !ARRAY)] check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
 
     # Scalar context return okay...
     OKAY { scalar   old_sub( $good_value ) }   "  old_sub( $good_value_str )";
@@ -124,7 +124,7 @@ for my $good_value (GOOD_VALUES) {
 
 # With values that SHOULDN'T pass the HASH[NUM[0..99] => UINT | (REF & !ARRAY)] check...
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
 
     # Can't pass invalid values as arguments...
     FAIL_ON_UNPACK { scalar   old_sub( $bad_value ) }       "  old_sub( $bad_value_str )";

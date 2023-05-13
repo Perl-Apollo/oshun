@@ -36,7 +36,7 @@ our   %our_hash   :of(REF);
 
 # Variables have to be initialized with something that passes the REF check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { my %var  :of(REF) = (goodkey => $good_value) }   "   my hash = goodkey => $good_value_str";
     OKAY { our %var :of(REF) = (goodkey => $good_value) }   "  our hash = goodkey => $good_value_str";
 }
@@ -47,14 +47,14 @@ OKAY { our %uninitialized :of(REF)   }    'uninitialized our hash';
 
 # Other explicit initializer values also don't pass the REF check...
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_INIT { my %var :of(REF)    = (badkey => $bad_value) }  "   my hash = badkey => $bad_value_str";
     FAIL_ON_INIT { our %var :of(REF)   = (badkey => $bad_value) }  "  our hash = badkey => $bad_value_str";
 }
 
 # List assignments must likewise pass the REF check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { %my_hash    = (goodkey=>$good_value)                } "my hash = $good_value_str";
     OKAY { %my_hash    = (goodkey=>$good_value, goodkey2=>$good_value) } "my hash = $good_value_str x 2";
     OKAY { %our_hash   = (goodkey=>$good_value)               } "our hash = $good_value_str";
@@ -62,7 +62,7 @@ for my $good_value (GOOD_VALUES) {
 
 for my $bad_value (BAD_VALUES) {
 for my $good_value ((GOOD_VALUES)[1,4,9]) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_ASSIGN { %my_hash    = (badkey=>$bad_value)               } "   my hash = badkey=>$bad_value_str";
     FAIL_ON_ASSIGN { %my_hash    = (goodkey=>$good_value, badkey=>$bad_value) } "   my hash = (gk=>good, badkey=>$bad_value_str)";
     FAIL_ON_ASSIGN { %our_hash   = (badkey=>$bad_value)                } "  our hash = badkey=>$bad_value_str";
@@ -71,13 +71,13 @@ for my $good_value ((GOOD_VALUES)[1,4,9]) {
 
 # Element assignments must pass the REF check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { $my_hash{key}  = $good_value }  "   my hash{key} = $good_value_str";
     OKAY { $our_hash{key} = $good_value }  "  our hash{key} = $good_value_str";
 }
 
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_ASSIGN { $my_hash{key}    = $bad_value }  "   my hash{key} = $bad_value_str";
     FAIL_ON_ASSIGN { $our_hash{key}   = $bad_value }  "  our hash{key} = $bad_value_str";
 }
@@ -85,11 +85,11 @@ for my $bad_value (BAD_VALUES) {
 # Other modifications that can succeed or fail...
 %my_hash = %our_hash = ();
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { @my_hash{'gv1','gv2'} = ($good_value, $good_value) }  "\@my_hash{gv1,gv2) = $good_value_str";
 }
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_ASSIGN { @my_hash{'bv1','bv2'} = ($bad_value, $bad_value) }  "\@my_hash{bv1,bv2) = $bad_value_str";
 }
 
@@ -102,7 +102,7 @@ state sub state_sub :returns(REF)  (%param :of(REF))  { return $param{key} }
 
 # With values that should pass the REF check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
 
     # List context return okay if list length = 1...
     OKAY { () =     old_sub( key => $good_value ) }   "  old_sub( $good_value_str )";
@@ -113,7 +113,7 @@ for my $good_value (GOOD_VALUES) {
 
 # With values that SHOULDN'T pass the REF check...
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
 
     # Can't pass invalid values as arguments...
     FAIL_ON_UNPACK { scalar   old_sub( key => $bad_value ) }       "  old_sub( $bad_value_str )";

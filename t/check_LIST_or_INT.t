@@ -45,7 +45,7 @@ state sub state_ret_sub : returns(LIST|INT)  ($param)  { return ($param, $param,
 
 # With values that should pass the LIST|INT check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
 
     # Scalar context return is okay...
     OKAY { scalar   old_ret_sub( $good_value ) }   "  old_ret_sub( $good_value_str )";

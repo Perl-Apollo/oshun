@@ -43,7 +43,7 @@ state sub state_sub :returns(SEQ[NUM, UINT, OPT[STR], OPT[HASH], ETC])  ($param)
 
 # With values that should pass the SEQ[NUM, UINT, OPT[STR], OPT[HASH], ETC] check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
 
     # Scalar context return should always fail...
     FAIL_ON_RETURN { scalar   old_sub( $good_value ) }   "  old_sub( $good_value_str )";
@@ -66,7 +66,7 @@ for my $good_value (GOOD_VALUES) {
 
 # With values that SHOULDN'T pass the SEQ[NUM, UINT, OPT[STR], OPT[HASH], ETC] check...
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
 
     # Can't return invalid values in any context...
     FAIL_ON_RETURN { scalar   old_sub( $bad_value ) }   "  old_sub( $bad_value_str )";

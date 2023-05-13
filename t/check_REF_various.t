@@ -38,7 +38,7 @@ package REF_ANY {
 
     # Variables have to be initialized with something that passes the REF[ANY] check...
     for my $good_value (GOOD_VALUES) {
-        my $good_value_str = Data::Checks::pp($good_value);
+        my $good_value_str = Data::Checks::Parser::pp($good_value);
         OKAY { my $var    = $good_value }   "   my scalar = $good_value_str";
         OKAY { our $var   = $good_value }   "  our scalar = $good_value_str";
         OKAY { state $var = $good_value }   "state scalar = $good_value_str";
@@ -51,7 +51,7 @@ package REF_ANY {
 
     # Other explicit initializer values also don't pass the REF[ANY] check...
     for my $bad_value (BAD_VALUES) {
-        my $bad_value_str = Data::Checks::pp($bad_value);
+        my $bad_value_str = Data::Checks::Parser::pp($bad_value);
         FAIL_ON_INIT { my $uninitialized :of(REF[ANY])    = $bad_value }  "   my scalar = $bad_value_str";
         FAIL_ON_INIT { our $uninitialized :of(REF[ANY])   = $bad_value }  "  our scalar = $bad_value_str";
         FAIL_ON_INIT { state $uninitialized :of(REF[ANY]) = $bad_value }  "state scalar = $bad_value_str";
@@ -59,14 +59,14 @@ package REF_ANY {
 
     # Assignments must likewise pass the REF[ANY] check...
     for my $good_value (GOOD_VALUES) {
-        my $good_value_str = Data::Checks::pp($good_value);
+        my $good_value_str = Data::Checks::Parser::pp($good_value);
         OKAY { $my_scalar    = $good_value }  "   my scalar = $good_value_str";
         OKAY { $our_scalar   = $good_value }  "  our scalar = $good_value_str";
         OKAY { $state_scalar = $good_value }  "state scalar = $good_value_str";
     }
 
     for my $bad_value (BAD_VALUES) {
-        my $bad_value_str = Data::Checks::pp($bad_value);
+        my $bad_value_str = Data::Checks::Parser::pp($bad_value);
         FAIL_ON_ASSIGN { $my_scalar    = $bad_value }  "   my scalar = $bad_value_str";
         FAIL_ON_ASSIGN { $our_scalar   = $bad_value }  "  our scalar = $bad_value_str";
         FAIL_ON_ASSIGN { $state_scalar = $bad_value }  "state scalar = $bad_value_str";
@@ -87,7 +87,7 @@ package REF_ANY {
 
     # With values that should pass the REF[ANY] check...
     for my $good_value (GOOD_VALUES) {
-        my $good_value_str = Data::Checks::pp($good_value);
+        my $good_value_str = Data::Checks::Parser::pp($good_value);
 
         # Scalar context return okay...
         OKAY { scalar   old_sub( $good_value ) }   "  old_sub( $good_value_str )";
@@ -110,7 +110,7 @@ package REF_ANY {
 
     # With values that SHOULDN'T pass the REF[ANY] check...
     for my $bad_value (BAD_VALUES) {
-        my $bad_value_str = Data::Checks::pp($bad_value);
+        my $bad_value_str = Data::Checks::Parser::pp($bad_value);
 
         # Can't pass invalid values as arguments...
         FAIL_ON_UNPACK { scalar   old_sub( $bad_value ) }       "  old_sub( $bad_value_str )";
@@ -167,7 +167,7 @@ package REF_INT {
 
     # Variables have to be initialized with something that passes the REF[INT] check...
     for my $good_value (GOOD_VALUES) {
-        my $good_value_str = Data::Checks::pp($good_value);
+        my $good_value_str = Data::Checks::Parser::pp($good_value);
         OKAY { my $var    = $good_value }   "   my scalar = $good_value_str";
         OKAY { our $var   = $good_value }   "  our scalar = $good_value_str";
         OKAY { state $var = $good_value }   "state scalar = $good_value_str";
@@ -180,7 +180,7 @@ package REF_INT {
 
     # Other explicit initializer values also don't pass the REF[INT] check...
     for my $bad_value (BAD_VALUES) {
-        my $bad_value_str = Data::Checks::pp($bad_value);
+        my $bad_value_str = Data::Checks::Parser::pp($bad_value);
         FAIL_ON_INIT { my $uninitialized :of(REF[INT])    = $bad_value }  "   my scalar = $bad_value_str";
         FAIL_ON_INIT { our $uninitialized :of(REF[INT])   = $bad_value }  "  our scalar = $bad_value_str";
         FAIL_ON_INIT { state $uninitialized :of(REF[INT]) = $bad_value }  "state scalar = $bad_value_str";
@@ -188,14 +188,14 @@ package REF_INT {
 
     # Assignments must likewise pass the REF[INT] check...
     for my $good_value (GOOD_VALUES) {
-        my $good_value_str = Data::Checks::pp($good_value);
+        my $good_value_str = Data::Checks::Parser::pp($good_value);
         OKAY { $my_scalar    = $good_value }  "   my scalar = $good_value_str";
         OKAY { $our_scalar   = $good_value }  "  our scalar = $good_value_str";
         OKAY { $state_scalar = $good_value }  "state scalar = $good_value_str";
     }
 
     for my $bad_value (BAD_VALUES) {
-        my $bad_value_str = Data::Checks::pp($bad_value);
+        my $bad_value_str = Data::Checks::Parser::pp($bad_value);
         FAIL_ON_ASSIGN { $my_scalar    = $bad_value }  "   my scalar = $bad_value_str";
         FAIL_ON_ASSIGN { $our_scalar   = $bad_value }  "  our scalar = $bad_value_str";
         FAIL_ON_ASSIGN { $state_scalar = $bad_value }  "state scalar = $bad_value_str";
@@ -216,7 +216,7 @@ package REF_INT {
 
     # With values that should pass the REF[INT] check...
     for my $good_value (GOOD_VALUES) {
-        my $good_value_str = Data::Checks::pp($good_value);
+        my $good_value_str = Data::Checks::Parser::pp($good_value);
 
         # Scalar context return okay...
         OKAY { scalar   old_sub( $good_value ) }   "  old_sub( $good_value_str )";
@@ -239,7 +239,7 @@ package REF_INT {
 
     # With values that SHOULDN'T pass the REF[INT] check...
     for my $bad_value (BAD_VALUES) {
-        my $bad_value_str = Data::Checks::pp($bad_value);
+        my $bad_value_str = Data::Checks::Parser::pp($bad_value);
 
         # Can't pass invalid values as arguments...
         FAIL_ON_UNPACK { scalar   old_sub( $bad_value ) }       "  old_sub( $bad_value_str )";
@@ -304,7 +304,7 @@ package REF_HASH {
 
     # Variables have to be initialized with something that passes the REF[HASH] check...
     for my $good_value (GOOD_VALUES) {
-        my $good_value_str = Data::Checks::pp($good_value);
+        my $good_value_str = Data::Checks::Parser::pp($good_value);
         OKAY { my $var    = $good_value }   "   my scalar = $good_value_str";
         OKAY { our $var   = $good_value }   "  our scalar = $good_value_str";
         OKAY { state $var = $good_value }   "state scalar = $good_value_str";
@@ -317,7 +317,7 @@ package REF_HASH {
 
     # Other explicit initializer values also don't pass the REF[HASH] check...
     for my $bad_value (BAD_VALUES) {
-        my $bad_value_str = Data::Checks::pp($bad_value);
+        my $bad_value_str = Data::Checks::Parser::pp($bad_value);
         FAIL_ON_INIT { my $uninitialized :of(REF[HASH])    = $bad_value }  "   my scalar = $bad_value_str";
         FAIL_ON_INIT { our $uninitialized :of(REF[HASH])   = $bad_value }  "  our scalar = $bad_value_str";
         FAIL_ON_INIT { state $uninitialized :of(REF[HASH]) = $bad_value }  "state scalar = $bad_value_str";
@@ -325,14 +325,14 @@ package REF_HASH {
 
     # Assignments must likewise pass the REF[HASH] check...
     for my $good_value (GOOD_VALUES) {
-        my $good_value_str = Data::Checks::pp($good_value);
+        my $good_value_str = Data::Checks::Parser::pp($good_value);
         OKAY { $my_scalar    = $good_value }  "   my scalar = $good_value_str";
         OKAY { $our_scalar   = $good_value }  "  our scalar = $good_value_str";
         OKAY { $state_scalar = $good_value }  "state scalar = $good_value_str";
     }
 
     for my $bad_value (BAD_VALUES) {
-        my $bad_value_str = Data::Checks::pp($bad_value);
+        my $bad_value_str = Data::Checks::Parser::pp($bad_value);
         FAIL_ON_ASSIGN { $my_scalar    = $bad_value }  "   my scalar = $bad_value_str";
         FAIL_ON_ASSIGN { $our_scalar   = $bad_value }  "  our scalar = $bad_value_str";
         FAIL_ON_ASSIGN { $state_scalar = $bad_value }  "state scalar = $bad_value_str";
@@ -353,7 +353,7 @@ package REF_HASH {
 
     # With values that should pass the REF[HASH] check...
     for my $good_value (GOOD_VALUES) {
-        my $good_value_str = Data::Checks::pp($good_value);
+        my $good_value_str = Data::Checks::Parser::pp($good_value);
 
         # Scalar context return okay...
         OKAY { scalar   old_sub( $good_value ) }   "  old_sub( $good_value_str )";
@@ -376,7 +376,7 @@ package REF_HASH {
 
     # With values that SHOULDN'T pass the REF[HASH] check...
     for my $bad_value (BAD_VALUES) {
-        my $bad_value_str = Data::Checks::pp($bad_value);
+        my $bad_value_str = Data::Checks::Parser::pp($bad_value);
 
         # Can't pass invalid values as arguments...
         FAIL_ON_UNPACK { scalar   old_sub( $bad_value ) }       "  old_sub( $bad_value_str )";
@@ -445,7 +445,7 @@ package REF_REF_CODE_INT {
 
     # Variables have to be initialized with something that passes the REF[REF[CODE|INT]] check...
     for my $good_value (GOOD_VALUES) {
-        my $good_value_str = Data::Checks::pp($good_value);
+        my $good_value_str = Data::Checks::Parser::pp($good_value);
         OKAY { my $var    = $good_value }   "   my scalar = $good_value_str";
         OKAY { our $var   = $good_value }   "  our scalar = $good_value_str";
         OKAY { state $var = $good_value }   "state scalar = $good_value_str";
@@ -458,7 +458,7 @@ package REF_REF_CODE_INT {
 
     # Other explicit initializer values also don't pass the REF[REF[CODE|INT]] check...
     for my $bad_value (BAD_VALUES) {
-        my $bad_value_str = Data::Checks::pp($bad_value);
+        my $bad_value_str = Data::Checks::Parser::pp($bad_value);
         FAIL_ON_INIT { my $uninitialized :of(REF[REF[CODE|INT]])    = $bad_value }  "   my scalar = $bad_value_str";
         FAIL_ON_INIT { our $uninitialized :of(REF[REF[CODE|INT]])   = $bad_value }  "  our scalar = $bad_value_str";
         FAIL_ON_INIT { state $uninitialized :of(REF[REF[CODE|INT]]) = $bad_value }  "state scalar = $bad_value_str";
@@ -466,14 +466,14 @@ package REF_REF_CODE_INT {
 
     # Assignments must likewise pass the REF[REF[CODE|INT]] check...
     for my $good_value (GOOD_VALUES) {
-        my $good_value_str = Data::Checks::pp($good_value);
+        my $good_value_str = Data::Checks::Parser::pp($good_value);
         OKAY { $my_scalar    = $good_value }  "   my scalar = $good_value_str";
         OKAY { $our_scalar   = $good_value }  "  our scalar = $good_value_str";
         OKAY { $state_scalar = $good_value }  "state scalar = $good_value_str";
     }
 
     for my $bad_value (BAD_VALUES) {
-        my $bad_value_str = Data::Checks::pp($bad_value);
+        my $bad_value_str = Data::Checks::Parser::pp($bad_value);
         FAIL_ON_ASSIGN { $my_scalar    = $bad_value }  "   my scalar = $bad_value_str";
         FAIL_ON_ASSIGN { $our_scalar   = $bad_value }  "  our scalar = $bad_value_str";
         FAIL_ON_ASSIGN { $state_scalar = $bad_value }  "state scalar = $bad_value_str";
@@ -494,7 +494,7 @@ package REF_REF_CODE_INT {
 
     # With values that should pass the REF[REF[CODE|INT]] check...
     for my $good_value (GOOD_VALUES) {
-        my $good_value_str = Data::Checks::pp($good_value);
+        my $good_value_str = Data::Checks::Parser::pp($good_value);
 
         # Scalar context return okay...
         OKAY { scalar   old_sub( $good_value ) }   "  old_sub( $good_value_str )";
@@ -517,7 +517,7 @@ package REF_REF_CODE_INT {
 
     # With values that SHOULDN'T pass the REF[REF[CODE|INT]] check...
     for my $bad_value (BAD_VALUES) {
-        my $bad_value_str = Data::Checks::pp($bad_value);
+        my $bad_value_str = Data::Checks::Parser::pp($bad_value);
 
         # Can't pass invalid values as arguments...
         FAIL_ON_UNPACK { scalar   old_sub( $bad_value ) }       "  old_sub( $bad_value_str )";

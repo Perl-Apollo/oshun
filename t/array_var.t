@@ -32,7 +32,7 @@ our   @our_array   :of(INT);
 
 # Variables have to be initialized with something that passes the INT check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { my @var    = $good_value }   "   my array = $good_value_str";
     OKAY { our @var   = $good_value }   "  our array = $good_value_str";
 }
@@ -43,14 +43,14 @@ OKAY { our @uninitialized :of(INT)   }    'uninitialized our array';
 
 # Other explicit initializer values also don't pass the INT check...
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_INIT { my @var :of(INT)    = $bad_value }  "   my array = $bad_value_str";
     FAIL_ON_INIT { our @var :of(INT)   = $bad_value }  "  our array = $bad_value_str";
 }
 
 # List assignments must likewise pass the INT check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { @my_array    = $good_value                } "my array = $good_value_str";
     OKAY { @my_array    = ($good_value, $good_value) } "my array = $good_value_str";
     OKAY { @our_array   = $good_value                } "our array = $good_value_str";
@@ -58,7 +58,7 @@ for my $good_value (GOOD_VALUES) {
 
 for my $bad_value (BAD_VALUES) {
 for my $good_value ((GOOD_VALUES)[1,4,9]) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_ASSIGN { @my_array    = $bad_value                } "   my array = $bad_value_str";
     FAIL_ON_ASSIGN { @my_array    = ($good_value, $bad_value) } "   my array = (good, $bad_value_str)";
     FAIL_ON_ASSIGN { @our_array   = $bad_value                } "  our array = $bad_value_str";
@@ -67,13 +67,13 @@ for my $good_value ((GOOD_VALUES)[1,4,9]) {
 
 # Element assignments must pass the INT check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { $my_array[0]    = $good_value }  "   my array[0] = $good_value_str";
     OKAY { $our_array[0]   = $good_value }  "  our array[0] = $good_value_str";
 }
 
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_ASSIGN { $my_array[0]    = $bad_value }  "   my array[0] = $bad_value_str";
     FAIL_ON_ASSIGN { $our_array[0]   = $bad_value }  "  our array[0] = $bad_value_str";
 }
@@ -81,7 +81,7 @@ for my $bad_value (BAD_VALUES) {
 # Element assignments that introduce undef-gaps can never pass the INT check, even for good values...
 @my_array = @our_array = (0..2);
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     FAIL_ON_ASSIGN { $my_array[4]     = $good_value }  "   my array[4]  = $good_value_str";
     FAIL_ON_ASSIGN { $our_array[7]    = $good_value }  "  our array[7]  = $good_value_str";
 }
@@ -91,7 +91,7 @@ my @undef_array :of(UNDEF) = (undef) x 10;
 my @any_array :of(ANY) = (0..9);
 @my_array = @our_array = (0..9);
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { splice @my_array, 7, 0, $good_value }  "  splice my array, 23, 0, $good_value_str";
     OKAY { push @my_array, $good_value         }  "    push my array, $good_value_str";
     OKAY { unshift @my_array, $good_value      }  " unshift my array, $good_value_str";
@@ -107,7 +107,7 @@ for my $good_value (GOOD_VALUES) {
     OKAY { delete $any_array[7];                }  "  delete our any_array[7]";
 }
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_MODIFY { splice @my_array, 7, 0, $bad_value }  "  splice my array, 23, 0, $bad_value_str";
     FAIL_ON_MODIFY { push @my_array, $bad_value         }  "    push my array, $bad_value_str";
     FAIL_ON_MODIFY { unshift @my_array, $bad_value      }  " unshift my array, $bad_value_str";
@@ -130,7 +130,7 @@ state sub state_sub :returns(INT)  (@param :of(INT))  { return $param[0] }
 
 # With values that should pass the INT check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
 
     # List context return okay if list length = 1...
     OKAY { () =     old_sub( $good_value ) }   "  old_sub( $good_value_str )";
@@ -141,7 +141,7 @@ for my $good_value (GOOD_VALUES) {
 
 # With values that SHOULDN'T pass the INT check...
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
 
     # Can't pass invalid values as arguments...
     FAIL_ON_UNPACK { scalar   old_sub( $bad_value ) }       "  old_sub( $bad_value_str )";

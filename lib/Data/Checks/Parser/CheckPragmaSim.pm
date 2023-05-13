@@ -1,4 +1,4 @@
-package Data::Checks::CheckPragmaSim 0.000001;
+package Data::Checks::Parser::CheckPragmaSim 0.000001;
 
 use 5.022;
 use strict;
@@ -22,14 +22,14 @@ sub import {
     }
 
     # Install the checking mode (defaulting to exceptions)...
-    $^H{'Data::Checks/mode'} = $mode // 'FATAL';
+    $^H{'Data::Checks::Parser/mode'} = $mode // 'FATAL';
 }
 
 sub unimport {
     if (@_ > 1) {
         die q{The "no checks" pragma doesn't take arguments at } . join(' line ', (caller)[1,2]) . "\n";
     }
-    $^H{'Data::Checks/mode'} = 'NONE';
+    $^H{'Data::Checks::Parser/mode'} = 'NONE';
 }
 
 
@@ -38,17 +38,17 @@ __END__
 
 =head1 NAME
 
-Data::Checks::CheckPragmaSim - «DESCRIPTION»
+Data::Checks::Parser::CheckPragmaSim - «DESCRIPTION»
 
 
 =head1 VERSION
 
-This document describes Data::Checks::CheckPragmaSim version 0.000001
+This document describes Data::Checks::Parser::CheckPragmaSim version 0.000001
 
 
 =head1 SYNOPSIS
 
-    use Data::Checks::CheckPragmaSim;
+    use Data::Checks::Parser::CheckPragmaSim;
 
 =for author to fill in:
     Brief code example(s) here showing commonest usage(s).
@@ -104,7 +104,7 @@ This document describes Data::Checks::CheckPragmaSim version 0.000001
     that can be set. These descriptions must also include details of any
     configuration language used.
 
-Data::Checks::CheckPragmaSim requires no configuration files or environment variables.
+Data::Checks::Parser::CheckPragmaSim requires no configuration files or environment variables.
 
 
 =head1 DEPENDENCIES

@@ -36,7 +36,7 @@ our   %our_hash   :of(STR[/^[a-z]\d+$/] => REF);
 
 # Variables have to be initialized with something that passes the STR[/^[a-z]\d+$/] => REF check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { my %var  :of(STR[/^[a-z]\d+$/] => REF) = (g006431 => $good_value) }   "   my hash = g006431 => $good_value_str";
     OKAY { our %var :of(STR[/^[a-z]\d+$/] => REF) = (g006431 => $good_value) }   "  our hash = g006431 => $good_value_str";
 }
@@ -47,14 +47,14 @@ OKAY { our %uninitialized :of(STR[/^[a-z]\d+$/] => REF)   }    'uninitialized ou
 
 # Other explicit initializer values also don't pass the STR[/^[a-z]\d+$/] => REF check...
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_INIT { my %var :of(STR[/^[a-z]\d+$/] => REF)    = (badkey => $bad_value) }  "   my hash = badkey => $bad_value_str";
     FAIL_ON_INIT { our %var :of(STR[/^[a-z]\d+$/] => REF)   = (badkey => $bad_value) }  "  our hash = badkey => $bad_value_str";
 }
 
 # List assignments must likewise pass the STR[/^[a-z]\d+$/] => REF check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { %my_hash    = (g006431=>$good_value)                } "my hash = $good_value_str";
     OKAY { %my_hash    = (g006431=>$good_value, g006431=>$good_value) } "my hash = $good_value_str x 2";
     OKAY { %our_hash   = (g006431=>$good_value)               } "our hash = $good_value_str";
@@ -62,8 +62,8 @@ for my $good_value (GOOD_VALUES) {
 
 for my $bad_value (BAD_VALUES) {
 for my $good_value ((GOOD_VALUES)[1,4,9]) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     FAIL_ON_ASSIGN { %my_hash    = (badkey=>$bad_value)   } "   my hash = badkey=>$bad_value_str";
     FAIL_ON_ASSIGN { %my_hash    = (badkey=>$good_value)  } "   my hash = goodkey=>$good_value_str";
     FAIL_ON_ASSIGN { %my_hash    = (g006431=>$good_value, badkey=>$good_value) } "   my hash = (gk=>good, badkey=>$good_value_str)";
@@ -75,13 +75,13 @@ for my $good_value ((GOOD_VALUES)[1,4,9]) {
 
 # Element assignments must pass the STR[/^[a-z]\d+$/] => REF check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { $my_hash{k1}  = $good_value }  "   my hash{k1} = $good_value_str";
     OKAY { $our_hash{k2} = $good_value }  "  our hash{k2} = $good_value_str";
 }
 
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_ASSIGN { $my_hash{k1}     = $bad_value }  "   my hash{key} = $bad_value_str";
     FAIL_ON_ASSIGN { $our_hash{k1}    = $bad_value }  "  our hash{key} = $bad_value_str";
     FAIL_ON_ASSIGN { $my_hash{key}    = $bad_value }  "   my hash{key} = $bad_value_str";
@@ -91,12 +91,12 @@ for my $bad_value (BAD_VALUES) {
 # Other modifications that can succeed or fail...
 %my_hash = %our_hash = ();
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { @my_hash{'g1','g2'} = ($good_value, $good_value) }  "\@my_hash{g1,g2) = $good_value_str";
     FAIL_ON_ASSIGN { @my_hash{'bad1','bad2'} = ($good_value, $good_value) }  "\@my_hash{bad1,bad2) = $good_value_str";
 }
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_ASSIGN { @my_hash{'b1','b2'} = ($bad_value, $bad_value) }  "\@my_hash{bv1,bv2) = $bad_value_str";
 }
 
@@ -109,7 +109,7 @@ state sub state_sub :returns(REF)  (%param :of(STR[/^[a-z]\d+$/] => REF))  { ret
 
 # With values that should pass the STR[/^[a-z]\d+$/] => REF check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
 
     # List context return okay if list length = 1...
     OKAY { () =     old_sub( g006 => $good_value ) }   "  old_sub( $good_value_str )";
@@ -126,7 +126,7 @@ for my $good_value (GOOD_VALUES) {
 
 # With values that SHOULDN'T pass the STR[/^[a-z]\d+$/] => REF check...
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
 
     # Can't pass invalid values as arguments...
     FAIL_ON_UNPACK { scalar   old_sub( g006 => $bad_value ) }       "  old_sub( $bad_value_str )";

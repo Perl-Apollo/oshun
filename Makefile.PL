@@ -3,7 +3,7 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    NAME                => 'Data::Checks',
+    NAME                => 'Data::Checks::Parser',
     AUTHOR              => 'Damian Conway <DCONWAY@CPAN.org>',
     VERSION_FROM        => 'lib/Data/Checks.pm',
     ABSTRACT_FROM       => 'lib/Data/Checks.pm',

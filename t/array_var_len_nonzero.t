@@ -35,7 +35,7 @@ our   @our_array   :of(2..10 => INT) = 0..9;
 
 # Variables have to be initialized with something that passes the 2..10=>INT check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY {  my @var :of(2..10 => INT) = ($good_value) x 5 }   "   my array = $good_value_str x 5";
     OKAY { our @var :of(2..10 => INT) = ($good_value) x 5 }   "  our array = $good_value_str x 5";
 }
@@ -45,7 +45,7 @@ FAIL_ON_LENGTH_INIT {  my @uninitialized :of(2..10=>INT);  }  'uninitialized my 
 
 # List assignments must be of the right size...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     FAIL_ON_LENGTH { @my_array  = ($good_value) x  1 } " my array = $good_value_str x  1";
     FAIL_ON_LENGTH { @our_array = ($good_value) x  1 } "our array = $good_value_str x  1";
               OKAY { @my_array  = ($good_value) x 10 } " my array = $good_value_str x 10";
@@ -56,8 +56,8 @@ for my $good_value (GOOD_VALUES) {
 
 for my $bad_value (BAD_VALUES) {
 for my $good_value ((GOOD_VALUES)[1,4,9]) {
-    my $good_value_str = Data::Checks::pp($good_value);
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_LENGTH { @my_array  = $bad_value                } " my array = $bad_value_str";
     FAIL_ON_ASSIGN { @my_array  = ($good_value, $bad_value) } " my array = (good, $bad_value_str)";
     FAIL_ON_LENGTH { @our_array = $bad_value                } "our array = $bad_value_str";
@@ -67,13 +67,13 @@ for my $good_value ((GOOD_VALUES)[1,4,9]) {
 
 # Element assignments must pass the INT check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { $my_array[0]    = $good_value }  "   my array[0] = $good_value_str";
     OKAY { $our_array[0]   = $good_value }  "  our array[0] = $good_value_str";
 }
 
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_ASSIGN { $my_array[0]    = $bad_value }  "   my array[0] = $bad_value_str";
     FAIL_ON_ASSIGN { $our_array[0]   = $bad_value }  "  our array[0] = $bad_value_str";
 }
@@ -82,7 +82,7 @@ for my $bad_value (BAD_VALUES) {
 @my_array = (0..6);
 @our_array = (0..6);
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     FAIL_ON_ASSIGN {  $my_array[9]  = $good_value }  "   my array[9]   = $good_value_str";
     FAIL_ON_ASSIGN { $our_array[9]  = $good_value }  "  our array[9]   = $good_value_str";
     FAIL_ON_LENGTH {  $my_array[10] = $good_value }  "   my array[10]  = $good_value_str";
@@ -90,7 +90,7 @@ for my $good_value (GOOD_VALUES) {
 }
 
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
 
     @my_array = (0..6);
     OKAY { splice @my_array, 7, 0, $good_value }  "  splice my array, 7, 0, $good_value_str";
@@ -105,7 +105,7 @@ for my $good_value (GOOD_VALUES) {
     OKAY { delete $our_array[-1];               }  "  delete our array[-1]";
 }
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     FAIL_ON_MODIFY { splice @my_array, 7, 0, $bad_value }  "  splice my array, 7, 0, $bad_value_str";
     FAIL_ON_MODIFY { push @my_array, $bad_value         }  "    push my array, $bad_value_str";
     FAIL_ON_MODIFY { unshift @my_array, $bad_value      }  " unshift my array, $bad_value_str";
@@ -128,7 +128,7 @@ state sub state_sub :returns(INT)  (@param :of(2..10=>INT)) { return $param[0] }
 
 # With values that should pass the INT check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
 
     # List context return okay if list length = 1...
     OKAY { () =     old_sub( ($good_value) x 2 ) }   "  old_sub( $good_value_str )";
@@ -154,7 +154,7 @@ for my $good_value (GOOD_VALUES) {
 
 # With values that SHOULDN'T pass the INT check...
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
 
     # Can't pass invalid values as arguments...
     FAIL_ON_UNPACK { scalar   old_sub( $bad_value, $bad_value ) }       "  old_sub( $bad_value_str )";

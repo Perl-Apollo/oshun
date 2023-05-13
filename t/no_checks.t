@@ -38,7 +38,7 @@ state $state_scalar :of(DEF) = 0;
 
 # Variables have to be initialized with something that passes the DEF check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { my $var    = $good_value }   "   my scalar = $good_value_str";
     OKAY { our $var   = $good_value }   "  our scalar = $good_value_str";
     OKAY { state $var = $good_value }   "state scalar = $good_value_str";
@@ -51,7 +51,7 @@ OKAY { state $uninitialized :of(DEF) }    'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the DEF check...
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     OKAY { my $uninitialized :of(DEF)    = $bad_value }  "   my scalar = $bad_value_str";
     OKAY { our $uninitialized :of(DEF)   = $bad_value }  "  our scalar = $bad_value_str";
     OKAY { state $uninitialized :of(DEF) = $bad_value }  "state scalar = $bad_value_str";
@@ -59,14 +59,14 @@ for my $bad_value (BAD_VALUES) {
 
 # Assignments must likewise pass the DEF check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
     OKAY { $my_scalar    = $good_value }  "   my scalar = $good_value_str";
     OKAY { $our_scalar   = $good_value }  "  our scalar = $good_value_str";
     OKAY { $state_scalar = $good_value }  "state scalar = $good_value_str";
 }
 
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
     OKAY { $my_scalar    = $bad_value }  "   my scalar = $bad_value_str";
     OKAY { $our_scalar   = $bad_value }  "  our scalar = $bad_value_str";
     OKAY { $state_scalar = $bad_value }  "state scalar = $bad_value_str";
@@ -87,7 +87,7 @@ state sub state_ret_sub : returns(DEF)  ($param)  { return $param }
 
 # With values that should pass the DEF check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
 
     # Scalar context return okay...
     OKAY { scalar   old_sub( $good_value ) }   "  old_sub( $good_value_str )";
@@ -110,7 +110,7 @@ for my $good_value (GOOD_VALUES) {
 
 # With values that SHOULDN'T pass the DEF check...
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
 
     # Can't pass invalid values as arguments...
     OKAY { scalar   old_sub( $bad_value ) }       "  old_sub( $bad_value_str )";

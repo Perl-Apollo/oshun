@@ -50,7 +50,7 @@ state sub state_ret_sub : returns(LIST[HASH]|INT)  ($param)  { return ($param, $
 
 # With values that should pass the INT half of the LIST[HASH]|INT check...
 for my $good_value (GOOD_VALUES_SCALAR) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
 
     # Scalar context return is okay...
     OKAY { scalar   old_ret_sub( $good_value ) }   "  old_ret_sub( $good_value_str )";
@@ -66,7 +66,7 @@ for my $good_value (GOOD_VALUES_SCALAR) {
 }
 # With values that should pass the LIST part of the LIST[HASH]|INT check...
 for my $good_value (GOOD_VALUES_LIST) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
 
     # Scalar context return is okay...
     OKAY { scalar    my_ret_sub( $good_value ) }   "   my_ret_sub( $good_value_str )";

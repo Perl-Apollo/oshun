@@ -1,4 +1,4 @@
-package Data::Checks 0.000001;
+package Data::Checks::Parser 0.000001;
 
 use 5.022;
 use warnings;
@@ -29,28 +29,28 @@ my %CHECK = (
     ANY      => q(( 1 )),
     LIST     => q(( do{BEGIN{die q{Can't use LIST check in an :of}}} )),
     VOID     => q(( do{BEGIN{die q{Can't use VOID check in an :of}}} )),
-    UNDEF    => q(( !defined(§) && \§ != \$Data::Checks::VOID )),
+    UNDEF    => q(( !defined(§) && \§ != \$Data::Checks::Parser::VOID )),
     DEF      => q(( defined(§) )),
-    HANDLE   => q(( «DEF» && Data::Checks::openhandle(§) )),
-    NONREF   => q(( «DEF» && !Data::Checks::reftype(§) )),
-    REF      => q(( Data::Checks::reftype(§) )),
-    GLOB     => q(( «NONREF» && Data::Checks::reftype(\§) eq 'GLOB' )),
+    HANDLE   => q(( «DEF» && Data::Checks::Parser::openhandle(§) )),
+    NONREF   => q(( «DEF» && !Data::Checks::Parser::reftype(§) )),
+    REF      => q(( Data::Checks::Parser::reftype(§) )),
+    GLOB     => q(( «NONREF» && Data::Checks::Parser::reftype(\§) eq 'GLOB' )),
     BOOL     => q(( «NONREF» || overload::Method(§,'bool') )),
-    NUM      => q(( «NONREF» && Data::Checks::looks_like_number(§) && § !~ /inf|nan/i || «OBJ» && overload::Method(§,'0+') )),
+    NUM      => q(( «NONREF» && Data::Checks::Parser::looks_like_number(§) && § !~ /inf|nan/i || «OBJ» && overload::Method(§,'0+') )),
     INT      => q(( «NUM» && (0+§) !~ /\./ )),
     UINT     => q(( «NUM» && (0+§) =~ /\A [+]? \d+ (?:E[+-]?\d+)? \z/ix )),
-    STR      => q(( defined(§) && (Data::Checks::reftype(\\(§)) eq 'SCALAR' || overload::Method(§,'""')) )),
-    VSTR     => q(( Data::Checks::isvstring(§) )),
+    STR      => q(( defined(§) && (Data::Checks::Parser::reftype(\\(§)) eq 'SCALAR' || overload::Method(§,'""')) )),
+    VSTR     => q(( Data::Checks::Parser::isvstring(§) )),
     CLASS    => q(( «STR» && length(§) > 0 && (§)->isa(§) )),
     ROLE     => q(( Carp::croak "ROLE check failed (can't yet detect roles)" )),
-    SCALAR   => q(( (Data::Checks::reftype(§)//'') eq 'SCALAR' || overload::Method(§,'${}') )),
-    CODE     => q(( (Data::Checks::reftype(§)//'') eq 'CODE'   || overload::Method(§,'&{}') )),
-    ARRAY    => q(( (Data::Checks::reftype(§)//'') eq 'ARRAY'  || overload::Method(§,'@{}') )),
-    HASH     => q(( (Data::Checks::reftype(§)//'') eq 'HASH'   || overload::Method(§,'%{}') )),
+    SCALAR   => q(( (Data::Checks::Parser::reftype(§)//'') eq 'SCALAR' || overload::Method(§,'${}') )),
+    CODE     => q(( (Data::Checks::Parser::reftype(§)//'') eq 'CODE'   || overload::Method(§,'&{}') )),
+    ARRAY    => q(( (Data::Checks::Parser::reftype(§)//'') eq 'ARRAY'  || overload::Method(§,'@{}') )),
+    HASH     => q(( (Data::Checks::Parser::reftype(§)//'') eq 'HASH'   || overload::Method(§,'%{}') )),
 
-    REGEXP   => q(( (Data::Checks::reftype(§)//'') eq 'REGEXP' || overload::Method(§,'qr') )),
-    OBJ      => q((  Data::Checks::blessed(§) && (Data::Checks::reftype(§)//'') ne 'REGEXP'  )),
-    CHECK    => q(( «STR» && length(§) > 0 && Data::Checks::_is_check(§) )),
+    REGEXP   => q(( (Data::Checks::Parser::reftype(§)//'') eq 'REGEXP' || overload::Method(§,'qr') )),
+    OBJ      => q((  Data::Checks::Parser::blessed(§) && (Data::Checks::Parser::reftype(§)//'') ne 'REGEXP'  )),
+    CHECK    => q(( «STR» && length(§) > 0 && Data::Checks::Parser::_is_check(§) )),
 );
 
 # Cache information as it generated...
@@ -80,7 +80,7 @@ $RETURNS_CHECK{VOID} = q((«VOID»));
 # Is this a known check???
 sub _is_check ($check) {
     if ((reftype($check)//q{}) eq 'CODE') {
-        return blessed($check) eq 'Data::Checks::CheckImpl';
+        return blessed($check) eq 'Data::Checks::Parser::CheckImpl';
     }
     else {
         return exists $CHECK{$check // q{}};
@@ -213,7 +213,7 @@ sub _FAIL ($uplevel, @msg) {
         next if $uplevel--;
 
         # Discover how the failure is supposed to be handled (if at all)...
-        my $mode = $caller[10]{'Data::Checks/mode'} // 'FATAL';
+        my $mode = $caller[10]{'Data::Checks::Parser/mode'} // 'FATAL';
         return if $mode eq 'NONE';
 
         # Add in the location information, if it's needed...
@@ -247,12 +247,12 @@ sub _gen_returns_check_code ($check) {
             my $subcheck = $+{check} // q{};
               $+{or}               ? '||'
             : $+{and}              ? '&&'
-            : $subcheck eq 'REP'   ? Data::Checks::FAIL "Can't specify $& here (only in a TUPLE or SEQ)"
+            : $subcheck eq 'REP'   ? Data::Checks::Parser::FAIL "Can't specify $& here (only in a TUPLE or SEQ)"
             : $subcheck eq 'ETC'
-            || $subcheck eq 'OPT'  ? Data::Checks::FAIL "Can't specify $& here (only in a TUPLE, SEQ, or DICT)"
+            || $subcheck eq 'OPT'  ? Data::Checks::Parser::FAIL "Can't specify $& here (only in a TUPLE, SEQ, or DICT)"
             : $+{params}           ? _gen_parameterized_returns_check_code($subcheck, $+{params})
-            : $+{error}            ? Data::Checks::FAIL "Can't specify $+{error}"
-            :                        $RETURNS_CHECK{ $subcheck } // Data::Checks::FAIL "Unknown check: $subcheck\n",
+            : $+{error}            ? Data::Checks::Parser::FAIL "Can't specify $+{error}"
+            :                        $RETURNS_CHECK{ $subcheck } // Data::Checks::Parser::FAIL "Unknown check: $subcheck\n",
         }grexmso; # XXX Is the 'o' switch still used?
     } . ')';
 }
@@ -273,12 +273,12 @@ sub _gen_of_check_code ($check, @varnames) {
             my $subcheck = $+{check} // q{};
               $+{or}               ? '||'
             : $+{and}              ? '&&'
-            : $subcheck eq 'REP'   ? Data::Checks::FAIL "Can't specify $& here (only in a TUPLE or SEQ)"
+            : $subcheck eq 'REP'   ? Data::Checks::Parser::FAIL "Can't specify $& here (only in a TUPLE or SEQ)"
             : $subcheck eq 'ETC'
-            || $subcheck eq 'OPT'  ? Data::Checks::FAIL "Can't specify $& here (only in a TUPLE, SEQ, or DICT)"
+            || $subcheck eq 'OPT'  ? Data::Checks::Parser::FAIL "Can't specify $& here (only in a TUPLE, SEQ, or DICT)"
             : $+{params}           ? _gen_parameterized_of_check_code($subcheck, $+{params})
-            : $+{error}            ? Data::Checks::FAIL "Can't specify $+{error}"
-            :                        $CHECK{ $subcheck } // Data::Checks::FAIL "Unknown check: $subcheck\n",
+            : $+{error}            ? Data::Checks::Parser::FAIL "Can't specify $+{error}"
+            :                        $CHECK{ $subcheck } // Data::Checks::Parser::FAIL "Unknown check: $subcheck\n",
         }grexmso;
     } . ')';
 
@@ -323,7 +323,7 @@ sub _gen_ranged_check ($CHECKNAME, $VAL, $DESC) {
                 push @matchers, qq(( (0+§) =~ $match{regex} ));
             }
             elsif ($match{check}) {
-                push @matchers, Data::Checks::_gen_of_check_code($match{check}, '§');
+                push @matchers, Data::Checks::Parser::_gen_of_check_code($match{check}, '§');
             }
             else { # We have an error: report it...
                 if (${^GLOBAL_PHASE} eq 'START') {
@@ -369,7 +369,7 @@ my %CHECK_GEN = (
             }
             # Number must match a nested check...
             elsif ($match{check}) {
-                push @matchers, Data::Checks::_gen_of_check_code($match{check}, '§');
+                push @matchers, Data::Checks::Parser::_gen_of_check_code($match{check}, '§');
             }
             # Something illegal in the specification...
             else {
@@ -419,11 +419,11 @@ my %CHECK_GEN = (
             # String must satisfy a parametric check...
             elsif ($match{params}) {
                 push @matchers,
-                     Data::Checks::_gen_parameterized_of_check_code(@match{'check', 'params'});
+                     Data::Checks::Parser::_gen_parameterized_of_check_code(@match{'check', 'params'});
             }
             # String must satisfy a non-parametric check...
             elsif ($match{check}) {
-                push @matchers, Data::Checks::_gen_of_check_code($match{check}, '§');
+                push @matchers, Data::Checks::Parser::_gen_of_check_code($match{check}, '§');
             }
             # Something is rotten in the state of the specification...
             else {
@@ -742,7 +742,7 @@ my sub _gen_returns_checks_source ($check, $subname) {
             );
         }
         else { # It's a "complex" check...
-            my $check_code = Data::Checks::_gen_returns_check_code($check);
+            my $check_code = Data::Checks::Parser::_gen_returns_check_code($check);
             ( syn_list_check   => ($check_code =~ s{ «LIST»   }{ 1           }gxr
                                                =~ s{ «SCALAR» }{ \$scalar    }gxr
                                                =~ s{ «VOID»   }{ 0           }gxr
@@ -764,9 +764,9 @@ my sub _gen_returns_checks_source ($check, $subname) {
 
     # Install default messages (if needed)...
     $inlines{syn_list_msg}
-        //= qq{'List return value ' . Data::Checks::pp(\@result) . qq{ failed :returns(\Q$check\E) check in call to $subname}};
+        //= qq{'List return value ' . Data::Checks::Parser::pp(\@result) . qq{ failed :returns(\Q$check\E) check in call to $subname}};
     $inlines{syn_scalar_msg}
-        //= qq{'Scalar return value ' . Data::Checks::pp(\$result) . qq{ failed :returns(\Q$check\E) check in call to $subname}};
+        //= qq{'Scalar return value ' . Data::Checks::Parser::pp(\$result) . qq{ failed :returns(\Q$check\E) check in call to $subname}};
     $inlines{syn_void_msg}
         //= qq{qq{Void return from call to $subname failed :returns(\Q$check\E) check\\n(No checkable return value in void context.)}};
 
@@ -787,11 +787,11 @@ sub _build_array_check_tieclass ($VAR_NAME, $CHECK_NAME, $uninitialized) {
 
     # Build the various optimized versions of the check for different tiemethods...
     my ($CHECK_UNDERSCORE, $CHECK_2, $CHECK_UNDEF)
-        = Data::Checks::_gen_of_check_code($CHECK_NAME, '$_', '$_[2]', 'undef()');
+        = Data::Checks::Parser::_gen_of_check_code($CHECK_NAME, '$_', '$_[2]', 'undef()');
 
     # Each variable gets it's own optimized tieclass...
     state $ARRAY_ID = 'A0000000000001';
-    my $TIE_CLASS = qq{Data::Checks::TieArray::} . $ARRAY_ID++;
+    my $TIE_CLASS = qq{Data::Checks::Parser::TieArray::} . $ARRAY_ID++;
 
     # Clean up the variable name for subsequent qq{...} interpolations...
     my $QQ_VAR_NAME = $VAR_NAME =~ m{\A \W}xms ? "\\$VAR_NAME" : $VAR_NAME;
@@ -806,8 +806,8 @@ sub _build_array_check_tieclass ($VAR_NAME, $CHECK_NAME, $uninitialized) {
             for (\@{\$_[1]}) {
                 next if $CHECK_UNDERSCORE;
                 my \$SUB_NAME = (caller 1)[3];
-                Data::Checks::FAIL1
-                     q{Can't pass }, Data::Checks::pp(\$_),
+                Data::Checks::Parser::FAIL1
+                     q{Can't pass }, Data::Checks::Parser::pp(\$_),
                     qq{ via parameter $QQ_VAR_NAME in call to \$SUB_NAME():\\n},
                      q{Value failed parameter's $CHECK_NAME check};
             }
@@ -829,14 +829,14 @@ sub _build_array_check_tieclass ($VAR_NAME, $CHECK_NAME, $uninitialized) {
         # These methods all need to verify the check, because the array is being altered...
         sub STORE {
             # Fail if the new value leaves a gap of undefs and undefs aren't allowed...
-            Data::Checks::FAIL
-                q{Can't assign value }, Data::Checks::pp(\$_[2]), qq{ to element \$_[1] },
+            Data::Checks::Parser::FAIL
+                q{Can't assign value }, Data::Checks::Parser::pp(\$_[2]), qq{ to element \$_[1] },
                 q{of $VAR_NAME: autovivified undef values would fail $CHECK_NAME check}
                     if \$_[1] > \@{\$_[0]} && !$CHECK_UNDEF;
 
             # Fail if the new value doesn't satisfy the variable's specified check...
-            Data::Checks::FAIL
-                q{Can't assign value }, Data::Checks::pp(\$_[2]), qq{ to element \$_[1] },
+            Data::Checks::Parser::FAIL
+                q{Can't assign value }, Data::Checks::Parser::pp(\$_[2]), qq{ to element \$_[1] },
                 q{of $VAR_NAME: failed $CHECK_NAME check}
                     unless $CHECK_2;
 
@@ -845,7 +845,7 @@ sub _build_array_check_tieclass ($VAR_NAME, $CHECK_NAME, $uninitialized) {
         }
         sub STORESIZE {
             # Fail if the new size adds a gap of undefs and undefs aren't allowed...
-            Data::Checks::FAIL
+            Data::Checks::Parser::FAIL
                 qq{Can't resize $QQ_VAR_NAME to \$_[1] elements: },
                  q{autovivified undef values would fail $CHECK_NAME check}
                     if \$_[1] > \@{\$_[0]} && !$CHECK_UNDEF;
@@ -855,7 +855,7 @@ sub _build_array_check_tieclass ($VAR_NAME, $CHECK_NAME, $uninitialized) {
         }
         sub DELETE {
             # Fail if the deleting the value would leave an undef, and undefs aren't allowed...
-            Data::Checks::FAIL
+            Data::Checks::Parser::FAIL
                 qq{Can't delete element \$_[1] of $QQ_VAR_NAME},
                  q{resulting undef value would fail $CHECK_NAME check}
                     if \$_[1] < \$#{\$_[0]} && !$CHECK_UNDEF;
@@ -868,8 +868,8 @@ sub _build_array_check_tieclass ($VAR_NAME, $CHECK_NAME, $uninitialized) {
 
             # Fail if any of the values being appended don't satisfy the check...
             for (\@_) {
-                Data::Checks::FAIL
-                    qq{Can't push value }, Data::Checks::pp(\$_),
+                Data::Checks::Parser::FAIL
+                    qq{Can't push value }, Data::Checks::Parser::pp(\$_),
                      q{ onto $VAR_NAME: failed $CHECK_NAME check}
                         unless $CHECK_UNDERSCORE;
             }
@@ -882,8 +882,8 @@ sub _build_array_check_tieclass ($VAR_NAME, $CHECK_NAME, $uninitialized) {
 
             # Fail if any of the values being prepended don't satisfy the check...
             for (\@_) {
-                Data::Checks::FAIL
-                    qq{Can't unshift value }, Data::Checks::pp(\$_),
+                Data::Checks::Parser::FAIL
+                    qq{Can't unshift value }, Data::Checks::Parser::pp(\$_),
                      q{ onto $VAR_NAME: failed $CHECK_NAME check}
                         unless $CHECK_UNDERSCORE;
             }
@@ -902,8 +902,8 @@ sub _build_array_check_tieclass ($VAR_NAME, $CHECK_NAME, $uninitialized) {
 
             # Fail if any new value being added doesn't satisfy the variable's specified check...
             for (\@_) {
-                Data::Checks::FAIL
-                    qq{Can't splice value }, Data::Checks::pp(\$_),
+                Data::Checks::Parser::FAIL
+                    qq{Can't splice value }, Data::Checks::Parser::pp(\$_),
                      q{ into $VAR_NAME: failed $CHECK_NAME check}
                         unless $CHECK_UNDERSCORE;
             }
@@ -936,7 +936,7 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
 
     # Work out how to check values...
     my ($CHECK_UNDERSCORE, $CHECK_2, $CHECK_UNDEF)
-        = Data::Checks::_gen_of_check_code($CHECK_NAME, '$_', '$_[2]', 'undef()');
+        = Data::Checks::Parser::_gen_of_check_code($CHECK_NAME, '$_', '$_[2]', 'undef()');
 
     # These location lookups are used in multiple places, so make them string constants...
     my $LOC0 = q{' at ' . join(' line ', (caller  )[1,2]) . "\\n"};
@@ -950,7 +950,7 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
     my $EXTEND_METHOD = qq{ sub EXTEND {
                                 # Can only extend if the new size satisfies the length check...
                                 unless ($LEN_CHECK_1) {
-                                    Data::Checks::FAIL
+                                    Data::Checks::Parser::FAIL
                                         qq{Can't assign list of length \$_[1] to $QQ_VAR_NAME: },
                                         qq{array length must be $LEN_CHECK_SPEC, not \$_[1]};
                                 }
@@ -969,7 +969,7 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
                                  # Use this to fail with suitable message if invalid CLEAR occurred...
                                  sub _fail_clear {
                                      my \$len = \$_[0] // 0;
-                                     Data::Checks::FAIL
+                                     Data::Checks::Parser::FAIL
                                         qq{Can't assign list of length \$len to $QQ_VAR_NAME: },
                                         qq{array length must be $LEN_CHECK_SPEC, not \$len},
                                         \$clear_pending, "\\n";
@@ -1002,14 +1002,14 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
 
     # Each variable gets it's own optimized tieclass...
     state $ARRAY_ID = 'AL0000000000001';
-    my $TIE_CLASS = qq{Data::Checks::TieArray::} . $ARRAY_ID++;
+    my $TIE_CLASS = qq{Data::Checks::Parser::TieArray::} . $ARRAY_ID++;
 
     # Generate and install the optimized code for this tieclass...
     eval qq{
         package $TIE_CLASS;
 
         # Make sure croaks croak at the right place...
-        our \@CARP_NOT = ('Data::Checks', 'attributes');
+        our \@CARP_NOT = ('Data::Checks::Parser', 'attributes');
 
         # Install CLEAR checking, if it's needed...
         $CLEAR_PENDING_VAR;
@@ -1018,7 +1018,7 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
         sub TIEARRAY  {
             # Verify that the array length satisfies the length check...
             if ($UNINITIALIZED && !($LEN_CHECK_AT_UNDER1)) {
-                Data::Checks::FAIL1
+                Data::Checks::Parser::FAIL1
                     q{Can't initialize $VAR_NAME with a list of }, scalar(\@{\$_[1]}),
                     q{ elements: array length must be $LEN_CHECK_SPEC, not }, scalar(\@{\$_[1]});
             }
@@ -1027,8 +1027,8 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
             for (\@{\$_[1]}) {
                 next if $CHECK_UNDERSCORE;
                 my \$SUB_NAME = (caller 1)[3];
-                Data::Checks::FAIL1
-                     q{Can't pass }, Data::Checks::pp(\$_),
+                Data::Checks::Parser::FAIL1
+                     q{Can't pass }, Data::Checks::Parser::pp(\$_),
                     qq{ via parameter $QQ_VAR_NAME in call to \$SUB_NAME():\\n},
                      q{Value failed parameter's $CHECK_NAME check};
             }
@@ -1058,20 +1058,20 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
             $CLEAR_CHECK
 
             # Verify that storing this new element doesn't make the array too long...
-            Data::Checks::FAIL
-                q{Can't assign value }, Data::Checks::pp(\$_[2]), qq{ to element \$_[1] },
+            Data::Checks::Parser::FAIL
+                q{Can't assign value }, Data::Checks::Parser::pp(\$_[2]), qq{ to element \$_[1] },
                 q{of $VAR_NAME: array length must be $LEN_CHECK_SPEC, not }, \$_[1]+1
                     unless \$_[1] < \@{\$_[0]} || $LEN_CHECK_1_PLUS_1;
 
             # Verify that storing this element doesn't leave undefs (if undef isn't allowed)...
-            Data::Checks::FAIL
-                q{Can't assign value }, Data::Checks::pp(\$_[2]), qq{ to element \$_[1] },
+            Data::Checks::Parser::FAIL
+                q{Can't assign value }, Data::Checks::Parser::pp(\$_[2]), qq{ to element \$_[1] },
                 q{of $VAR_NAME: autovivified undef values would fail $CHECK_NAME check}
                     if \$_[1] > \@{\$_[0]} && !$CHECK_UNDEF;
 
             # Verify that this new element satisfies the array's value check...
-            Data::Checks::FAIL
-                q{Can't assign value }, Data::Checks::pp(\$_[2]), qq{ to element \$_[1] },
+            Data::Checks::Parser::FAIL
+                q{Can't assign value }, Data::Checks::Parser::pp(\$_[2]), qq{ to element \$_[1] },
                 q{of $VAR_NAME: failed $CHECK_NAME check}
                     unless $CHECK_2;
 
@@ -1083,13 +1083,13 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
             $CLEAR_CHECK
 
             # The new size must satify the length check...
-            Data::Checks::FAIL
+            Data::Checks::Parser::FAIL
                 qq{Can't resize $QQ_VAR_NAME to \$_[1] elements: },
                 qq{array length must be $LEN_CHECK_SPEC, not \$_[1]}
                     unless $LEN_CHECK_1;
 
             # The new size must not introduce new undef values (if undefs would fail the check)...
-            Data::Checks::FAIL
+            Data::Checks::Parser::FAIL
                 qq{Can't resize $QQ_VAR_NAME to \$_[1] elements: },
                  q{autovivified undef values would fail $CHECK_NAME check}
                     if \$_[1] > \@{\$_[0]} && !$CHECK_UNDEF;
@@ -1102,13 +1102,13 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
             $CLEAR_CHECK
 
             # Verify that deleting this element won't make the array too short for its length check...
-            Data::Checks::FAIL
+            Data::Checks::Parser::FAIL
                 qq{Can't delete element \$_[1] of $QQ_VAR_NAME: },
                  q{array length must be $LEN_CHECK_SPEC, not }, \$_[1] + 1
                     unless \$_[1] < \$#{\$_[0]} || \$_[1] == \$#{\$_[0]} && $LEN_CHECK_LAST;
 
             # Verify that the deletion won't introduce an (invalid) undef...
-            Data::Checks::FAIL
+            Data::Checks::Parser::FAIL
                 qq{Can't delete element \$_[1] of $QQ_VAR_NAME},
                  q{resulting undef value failed $CHECK_NAME check}
                     if \$_[1] < \$#{\$_[0]} && !$CHECK_UNDEF;
@@ -1121,16 +1121,16 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
             my \$real_array_ref = shift;
 
             # Verify that appending these new values won't make the array too long...
-            Data::Checks::FAIL
-                q{Can't push }, Data::Checks::pp(\@_),
+            Data::Checks::Parser::FAIL
+                q{Can't push }, Data::Checks::Parser::pp(\@_),
                 q{ onto $VAR_NAME: array length must be $LEN_CHECK_SPEC, not },
                 \@{\$real_array_ref} + \@_
                     unless $LEN_CHECK_PLUS_ATUNDER;
 
             # Verify that each appended value satisfies the value check...
             for (\@_) {
-                Data::Checks::FAIL
-                    q{Can't push value }, Data::Checks::pp(\$_),
+                Data::Checks::Parser::FAIL
+                    q{Can't push value }, Data::Checks::Parser::pp(\$_),
                     q{ onto $VAR_NAME: failed $CHECK_NAME check}
                         unless $CHECK_UNDERSCORE;
             }
@@ -1145,7 +1145,7 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
             my \$real_array_ref = shift;
 
             # Verify that appending these new values won't make the array too long...
-            Data::Checks::FAIL
+            Data::Checks::Parser::FAIL
                 q{Can't pop $VAR_NAME: array length must be $LEN_CHECK_SPEC, not },
                 \@{\$real_array_ref} - 1
                     unless $LEN_CHECK_MINUS_1;
@@ -1160,15 +1160,15 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
             my \$real_array_ref = shift;
 
             # Verify that prepending these new values won't make the array too long...
-            Data::Checks::FAIL
+            Data::Checks::Parser::FAIL
                 q{Can't shift $VAR_NAME: array length must be $LEN_CHECK_SPEC, not },
                 \@{\$real_array_ref} - 1
                     unless $LEN_CHECK_PLUS_1;
 
             # Verify that each prepended value satisfies the value check...
             for (\@_) {
-                Data::Checks::FAIL
-                    q{Can't unshift value }, Data::Checks::pp(\$_),
+                Data::Checks::Parser::FAIL
+                    q{Can't unshift value }, Data::Checks::Parser::pp(\$_),
                     q{ onto $VAR_NAME: failed $CHECK_NAME check}
                         unless $CHECK_UNDERSCORE;
             }
@@ -1183,16 +1183,16 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
             my \$real_array_ref = shift;
 
             # Verify that prepending these new values won't make the array too long...
-            Data::Checks::FAIL
-                q{Can't unshift }, Data::Checks::pp(\@_),
+            Data::Checks::Parser::FAIL
+                q{Can't unshift }, Data::Checks::Parser::pp(\@_),
                 q{ onto $VAR_NAME: array length must be $LEN_CHECK_SPEC, not },
                 \@{\$real_array_ref} + \@_
                     unless $LEN_CHECK_PLUS_ATUNDER;
 
             # Verify that each prepended value satisfies the value check...
             for (\@_) {
-                Data::Checks::FAIL
-                    q{Can't unshift value }, Data::Checks::pp(\$_),
+                Data::Checks::Parser::FAIL
+                    q{Can't unshift value }, Data::Checks::Parser::pp(\$_),
                     q{ onto $VAR_NAME: failed $CHECK_NAME check}
                         unless $CHECK_UNDERSCORE;
             }
@@ -1213,15 +1213,15 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
             # Verify that the new array size after deletions and insertions is allowable...
             my \$newsize
                 = \$off > \$#{\$real_array_ref} ? \$off + 1 : \@{\$real_array_ref} + \@_ - \$len;
-                Data::Checks::FAIL
-                    q{Can't splice }, Data::Checks::pp(\@_),
+                Data::Checks::Parser::FAIL
+                    q{Can't splice }, Data::Checks::Parser::pp(\@_),
                     q{ into $VAR_NAME: array length must be $LEN_CHECK_SPEC, not }, \$newsize
                         unless $LEN_CHECK_NEWSIZE;
 
             # Verify that each value being inserted satisfies the array's value check...
             for (\@_) {
-                Data::Checks::FAIL
-                    q{Can't splice value }, Data::Checks::pp(\$_),
+                Data::Checks::Parser::FAIL
+                    q{Can't splice value }, Data::Checks::Parser::pp(\$_),
                     q{ into $VAR_NAME: failed $CHECK_NAME check}
                         unless $CHECK_UNDERSCORE;
             }
@@ -1249,13 +1249,13 @@ sub _build_hash_check_tieclass ($VAR_NAME, $CHECK_NAME) {
 
     # Generate specific implementations for both key and value checks...
     my ($CHECK_KEY, $CHECK_1)
-        = defined $keycheck ? Data::Checks::_gen_of_check_code($keycheck, '$key', '$_[1]') : (1,1);
+        = defined $keycheck ? Data::Checks::Parser::_gen_of_check_code($keycheck, '$key', '$_[1]') : (1,1);
     my ($CHECK_VALUE, $CHECK_2)
-        = Data::Checks::_gen_of_check_code($valcheck, '$value', '$_[2]');
+        = Data::Checks::Parser::_gen_of_check_code($valcheck, '$value', '$_[2]');
 
     # Generate a unique classname for each tied hash...
     state $HASH_ID = 'H0000000000001';
-    my $TIE_CLASS = qq{Data::Checks::TieHash::} . $HASH_ID++;
+    my $TIE_CLASS = qq{Data::Checks::Parser::TieHash::} . $HASH_ID++;
 
     # Clean up the variable name for subsequent qq{...} interpolations...
     my $QQ_VAR_NAME = $VAR_NAME =~ m{\A \W}xms ? "\\$VAR_NAME" : $VAR_NAME;
@@ -1274,8 +1274,8 @@ sub _build_hash_check_tieclass ($VAR_NAME, $CHECK_NAME) {
             while (my (\$key, \$value) = each \%{\$_[1]}) {
                 next if $CHECK_KEY && $CHECK_VALUE;
                 my \$SUB_NAME = (caller 1)[3];
-                Data::Checks::FAIL1
-                    qq{Can't pass pair '\$key' => }, Data::Checks::pp(\$value),
+                Data::Checks::Parser::FAIL1
+                    qq{Can't pass pair '\$key' => }, Data::Checks::Parser::pp(\$value),
                     qq{ via parameter $QQ_VAR_NAME in call to \$SUB_NAME():\\n},
                      q{Value failed parameter's $CHECK_NAME check};
             }
@@ -1287,8 +1287,8 @@ sub _build_hash_check_tieclass ($VAR_NAME, $CHECK_NAME) {
         # This is the only tiemethod that needs to check, because only it modifies the hash...
         sub STORE {
             # Verify that any new value being stored under a key satisfies both key and value checks...
-            Data::Checks::FAIL
-                 q{Can't assign value }, Data::Checks::pp(\$_[2]),
+            Data::Checks::Parser::FAIL
+                 q{Can't assign value }, Data::Checks::Parser::pp(\$_[2]),
                 qq{ to key '\$_[1]' of $QQ_VAR_NAME: failed \Q$CHECK_NAME\E check}
                     unless $CHECK_1 && $CHECK_2;
 
@@ -1353,24 +1353,24 @@ sub _rewrite_sub ($decl_ref) {
 
             if ($of{sigil} eq '$') {
                 # Generate and cache wizard for checking scalar parameter values...
-                Data::Checks::_build_scalar_wizard_for(@of{qw< check param >});
+                Data::Checks::Parser::_build_scalar_wizard_for(@of{qw< check param >});
 
                 # Build inline check for initialization of parameter...
-                my ($pass_check) = Data::Checks::_gen_of_check_code(@of{qw< check param >});
+                my ($pass_check) = Data::Checks::Parser::_gen_of_check_code(@of{qw< check param >});
 
                 # Install extra code at start of sub to check parameter...
-                $OF_CHECKS .= qq{Data::Checks::FAIL q{Can't pass } . Data::Checks::pp($of{param}) . q{ to parameter $of{param} in call to $decl_ref->{syn_name}\() at } . join(' line ', (caller)[1,2]) . qq{:\\nValue failed parameter's \Q$of{check}\E check.\\n} if !$pass_check; Variable::Magic::cast $of{param}, \$Data::Checks::SCALAR_WIZARD_FOR{q{$of{param}/$of{check}}}; };
+                $OF_CHECKS .= qq{Data::Checks::Parser::FAIL q{Can't pass } . Data::Checks::Parser::pp($of{param}) . q{ to parameter $of{param} in call to $decl_ref->{syn_name}\() at } . join(' line ', (caller)[1,2]) . qq{:\\nValue failed parameter's \Q$of{check}\E check.\\n} if !$pass_check; Variable::Magic::cast $of{param}, \$Data::Checks::Parser::SCALAR_WIZARD_FOR{q{$of{param}/$of{check}}}; };
             }
             elsif ($of{sigil} eq '@') {
                 # Generate tie class for checking array parameter values...
-                my $TIECLASS = Data::Checks::_build_array_check_tieclass(@of{qw< param check >}, 1);
+                my $TIECLASS = Data::Checks::Parser::_build_array_check_tieclass(@of{qw< param check >}, 1);
 
                 # Install extra code at start of sub to check parameter...
                 $OF_CHECKS .= qq{tie $of{param}, '$TIECLASS', \\$of{param}; }
             }
             else {
                 # Generate tie class for checking array parameter values...
-                my $TIECLASS = Data::Checks::_build_hash_check_tieclass(@of{qw< param check >});
+                my $TIECLASS = Data::Checks::Parser::_build_hash_check_tieclass(@of{qw< param check >});
 
                 # Install extra code at start of sub to check parameter...
                 $OF_CHECKS .= qq{tie $of{param}, '$TIECLASS', \\$of{param}; }
@@ -1422,13 +1422,13 @@ sub _rewrite_sub ($decl_ref) {
                 state sub __IMPL__ «sig» {
                     local *__ANON__ = __PACKAGE__ . q{::«name»};
                     no warnings 'once', 'redefine';
-                    local *CORE::GLOBAL::caller = \\&Data::Checks::_caller;
+                    local *CORE::GLOBAL::caller = \\&Data::Checks::Parser::_caller;
                     «block»
                 }
-                BEGIN { \$Data::Checks::$NONE_TRACKER = (\$^H{'Data::Checks/mode'}//q{}) eq 'NONE'; }
-                UNITCHECK { if (*«name»{CODE} && \$Data::Checks::$NONE_TRACKER) { no warnings; *«name» = \\&__IMPL__; } }
+                BEGIN { \$Data::Checks::Parser::$NONE_TRACKER = (\$^H{'Data::Checks::Parser/mode'}//q{}) eq 'NONE'; }
+                UNITCHECK { if (*«name»{CODE} && \$Data::Checks::Parser::$NONE_TRACKER) { no warnings; *«name» = \\&__IMPL__; } }
 
-                if (((caller 0)[10]{'Data::Checks/mode'}//q{}) ne 'NONE') {$OF_CHECKS}
+                if (((caller 0)[10]{'Data::Checks::Parser/mode'}//q{}) ne 'NONE') {$OF_CHECKS}
 
                 use if \$] >= 5.036, experimental => 'args_array_with_signatures';
 
@@ -1436,19 +1436,19 @@ sub _rewrite_sub ($decl_ref) {
                     no warnings 'once';
                     my \@result = &__IMPL__;
                     my \$scalar = \@result == 1;
-                    Data::Checks::FAIL1 «list_msg» . "\\nat " . join(' line ', (caller)[1,2]) . "\\n"
+                    Data::Checks::Parser::FAIL1 «list_msg» . "\\nat " . join(' line ', (caller)[1,2]) . "\\n"
                         unless «list_check»;
                     return \@result;
                 }
                 elsif (defined wantarray) {
                     my \$result = &__IMPL__;
-                    Data::Checks::FAIL1 «scalar_msg» . "\\nat " . join(' line ', (caller)[1,2]) . "\\n"
+                    Data::Checks::Parser::FAIL1 «scalar_msg» . "\\nat " . join(' line ', (caller)[1,2]) . "\\n"
                         unless «scalar_check»;
                     return \$result;
                 }
                 else {
                     &__IMPL__;
-                    Data::Checks::FAIL1 «void_msg» . "\\nat " . join(' line ', (caller)[1,2]) . "\\n"
+                    Data::Checks::Parser::FAIL1 «void_msg» . "\\nat " . join(' line ', (caller)[1,2]) . "\\n"
                         unless «void_check»;
                     return;
                 }
@@ -1472,7 +1472,7 @@ attributes {
     use Variable::Magic qw< wizard cast >;
 
     # Let carp and croak skip this package...
-    our @CARP_NOT = qw< Data::Checks Filter::Simple >;
+    our @CARP_NOT = qw< Data::Checks::Parser Filter::Simple >;
 
     # Cache the original attributes loader...
     state $real_import; BEGIN { $real_import = *attributes::import{CODE}; }
@@ -1486,13 +1486,13 @@ attributes {
         # :of is a no-op if checks are deactivated...
         return if $K_MODE eq '-K';
         my $hints = (caller 0)[10];
-        return if ($hints->{'Data::Checks/mode'}//q{}) eq 'NONE';
+        return if ($hints->{'Data::Checks::Parser/mode'}//q{}) eq 'NONE';
 
         # Unpack the components of the :of attribute...
         # XXX our import hack might work here, but this is csalled multiple
         # times per block of code, so it's not perfect.
         my (undef, $package, $referent, $CHECK_NAME) = @_;
-        my $reftype = Data::Checks::reftype($referent);
+        my $reftype = Data::Checks::Parser::reftype($referent);
 
         # Extract the actual check and variable info...
         my $uninitialized = $SOURCE_IS_INIT{$CHECK_NAME} ? 0 : 1;
@@ -1512,25 +1512,25 @@ attributes {
         if ($reftype eq 'SCALAR') {
             # Uninitialized scalars can only be declared with checks that also pass for an undef...
             if ($uninitialized) {
-                my ($check_undef) = Data::Checks::_gen_of_check_code($check_spec, 'undef()');
+                my ($check_undef) = Data::Checks::Parser::_gen_of_check_code($check_spec, 'undef()');
                 if (!eval $check_undef) {
-                    Data::Checks::FAIL
+                    Data::Checks::Parser::FAIL
                         qq{Can't declare $varname :of($check_spec) with no initial value:\n},
                         qq{the default undef value would fail the $check_spec check};
                 }
             }
 
             # Build the required variable magic and install it on the scalar...
-            cast ${$referent}, Data::Checks::_build_scalar_wizard_for($check_spec, $varname);
+            cast ${$referent}, Data::Checks::Parser::_build_scalar_wizard_for($check_spec, $varname);
         }
         # 2. Implement checked arrays via a tie (for completeness)...
         elsif ($reftype eq 'ARRAY') {
-            my $tie_name = Data::Checks::_build_array_check_tieclass($varname, $check_spec, $uninitialized);
+            my $tie_name = Data::Checks::Parser::_build_array_check_tieclass($varname, $check_spec, $uninitialized);
             tie @{$referent}, $tie_name, $referent;
         }
         # 3. Implement checked hashes via a tie (for convenience)...
         elsif ($reftype eq 'HASH') {
-            my $tie_name = Data::Checks::_build_hash_check_tieclass($varname, $check_spec);
+            my $tie_name = Data::Checks::Parser::_build_hash_check_tieclass($varname, $check_spec);
             tie %{$referent}, $tie_name, $referent;
         }
         # 4. Can't put an :of on a sub...
@@ -1540,7 +1540,7 @@ attributes {
         }
         # 5. ...or on anything else...
         else {
-            Data::Checks::FAIL qq{ Can't apply a check to $reftype referent};
+            Data::Checks::Parser::FAIL qq{ Can't apply a check to $reftype referent};
         }
     };
 }
@@ -1558,17 +1558,17 @@ sub _build_scalar_wizard_for ($CHECK_NAME, $VARNAME) {
         my $EXCEPTION_CLASS = $CHECK_NAME =~ /\A[a-zA-Z]+\z/ ? $CHECK_NAME : 'EXPR';
 
         # Build the code that performs the check...
-        my ($CHECK_EXPR) = Data::Checks::_gen_of_check_code($CHECK_NAME, '${$_[0]}');
+        my ($CHECK_EXPR) = Data::Checks::Parser::_gen_of_check_code($CHECK_NAME, '${$_[0]}');
 
         # Build the handler...
         wizard set => eval qq{
             sub {
                 # Check the assignment and report failure...
                 if (!eval{ $CHECK_EXPR }) {
-                    Data::Checks::REFAIL(\$@) if \$@;
+                    Data::Checks::Parser::REFAIL(\$@) if \$@;
                     my \$loc = join ' line ', (caller 1)[1,2];
-                    my \$desc = Data::Checks::pp(\${\$_[0]});
-                    Data::Checks::FAIL
+                    my \$desc = Data::Checks::Parser::pp(\${\$_[0]});
+                    Data::Checks::Parser::FAIL
                         qq{Can't assign \$desc to \\$VARNAME: failed \Q$CHECK_NAME\E check};
                 }
             }
@@ -1603,7 +1603,7 @@ state sub _FILTER {
 "PANIC: We could not determine calling package. Too many  levels of FILTER";
             }
           } while $caller =~ /\A (?:
-                Data::Checks     # Don't apply features to ourselves
+                Data::Checks::Parser     # Don't apply features to ourselves
                 | 
                 Filter::Simple   # or to our filter
             ) /x;
@@ -1631,14 +1631,14 @@ state sub _FILTER {
                              (?>(?&PerlOWSOrEND))  (?> (?<semi> ; ) | (?= \} | \z ))
 
                                     # Save internal representation...
-                                    (?{ push @Data::Checks::source_decls, {
+                                    (?{ push @Data::Checks::Parser::source_decls, {
                                             is_checks => 1,
                                             from      => $^R,
                                             len       => pos() - $^R,
                                             useno     => $+{useno},
                                             args      => $+{args},
                                             semi      => $+{semi} // q{},
-                                            container => $Data::Checks::sub_container,
+                                            container => $Data::Checks::Parser::sub_container,
                                         };
                                     })
 
@@ -1651,11 +1651,11 @@ state sub _FILTER {
 
                 # Save internal representation...
                 (?{ if ($^N eq 'eval') {
-                        push @Data::Checks::source_decls, {
+                        push @Data::Checks::Parser::source_decls, {
                             is_eval   => 1,
                             from      => pos() - 4,
                             len       => 4,
-                            container => $Data::Checks::sub_container,
+                            container => $Data::Checks::Parser::sub_container,
                         };
                     }
                 })
@@ -1683,71 +1683,71 @@ state sub _FILTER {
             # Add :returns to named sub declarations and extract internal checked vars...
             (?<PerlSubroutineDeclaration>
                 # Set up potential internal representation for this sub...
-                (?{ local $Data::Checks::sub_container
-                        = { from => pos(), container => $Data::Checks::sub_container };
+                (?{ local $Data::Checks::Parser::sub_container
+                        = { from => pos(), container => $Data::Checks::Parser::sub_container };
                 })
 
                 (?>
                     (?<lexical>     (?> my\b | our\b | state\b | )       )
-                        (?{ $Data::Checks::sub_container->{syn_lexical} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_lexical} = $^N; })
                     (?<ws_presub>   (?>(?&PerlOWS))                      )
-                        (?{ $Data::Checks::sub_container->{syn_ws_presub} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_ws_presub} = $^N; })
 
                     sub \b
 
                     (?<ws_prename>  (?>(?&PerlOWS))                      )
-                        (?{ $Data::Checks::sub_container->{syn_ws_prename} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_ws_prename} = $^N; })
                     (?<name>        (?>(?&PerlOldQualifiedIdentifier))   )
-                        (?{ $Data::Checks::sub_container->{syn_name} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_name} = $^N; })
                 |
                     (?<name>        (?> AUTOLOAD | DESTROY )             )
-                        (?{ $Data::Checks::sub_container->{syn_name} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_name} = $^N; })
                 )
                 (?:
                     # Perl pre 5.028
                     (?<ws_presig>   (?>(?&PerlOWS))                      )
-                        (?{ $Data::Checks::sub_container->{syn_ws_presig} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_ws_presig} = $^N; })
                     (?<sig>         (?> (?&PerlSignature)
                                     |   \( [^)]*+ \)                     # (
                                     |
                                     )
                     )
-                        (?{ $Data::Checks::sub_container->{syn_sig} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_sig} = $^N; })
                     (?<ws_prepostattrs>         (?>(?&PerlOWS))          )
-                        (?{ $Data::Checks::sub_container->{syn_ws_prepostattrs} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_ws_prepostattrs} = $^N; })
                     (?<postattrs>               (?>(?&PerlAttributes)) | )
-                        (?{ $Data::Checks::sub_container->{syn_postattrs} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_postattrs} = $^N; })
                 |
                     # Perl post 5.028
                     (?<ws_prepreattrs>          (?>(?&PerlOWS))          )
-                        (?{ $Data::Checks::sub_container->{syn_ws_prepreattrs} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_ws_prepreattrs} = $^N; })
                     (?<preattrs>                (?>(?&PerlAttributes)) | )
-                        (?{ $Data::Checks::sub_container->{syn_preattrs} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_preattrs} = $^N; })
                     (?<ws_presig>               (?>(?&PerlOWS))          )
-                        (?{ $Data::Checks::sub_container->{syn_ws_presig} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_ws_presig} = $^N; })
                     (?<sig>                     (?>(?&PerlSignature))  | )
-                        (?{ $Data::Checks::sub_container->{syn_sig} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_sig} = $^N; })
                 )
 
                     (?<ws_preblock>             (?>(?&PerlOWS))          )
-                        (?{ $Data::Checks::sub_container->{syn_ws_preblock} = $^N;
-                            $Data::Checks::sub_container->{syn_block_from}  = pos(); })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_ws_preblock} = $^N;
+                            $Data::Checks::Parser::sub_container->{syn_block_from}  = pos(); })
                     (?<block>                   (?> ; | (?&PerlBlock) )  )
-                        (?{ $Data::Checks::sub_container->{syn_block_len}
-                                = pos() - $Data::Checks::sub_container->{syn_block_from} ; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_block_len}
+                                = pos() - $Data::Checks::Parser::sub_container->{syn_block_from} ; })
 
                 # Save internal representation...
                 (?{
-                    $Data::Checks::sub_container->{len} = pos() - $Data::Checks::sub_container->{from};
-                    push @Data::Checks::source_decls, $Data::Checks::sub_container;
+                    $Data::Checks::Parser::sub_container->{len} = pos() - $Data::Checks::Parser::sub_container->{from};
+                    push @Data::Checks::Parser::source_decls, $Data::Checks::Parser::sub_container;
                 })
             )
 
             # Add :returns to anonymous sub declarations and extract internal checked vars...
             (?<PerlAnonymousSubroutine>
                 # Set up potential internal representation for this sub...
-                (?{ local $Data::Checks::sub_container
-                        = { from => pos(), container => $Data::Checks::sub_container };
+                (?{ local $Data::Checks::Parser::sub_container
+                        = { from => pos(), container => $Data::Checks::Parser::sub_container };
                 })
 
                 sub \b
@@ -1755,40 +1755,40 @@ state sub _FILTER {
                 (?:
                     # Perl pre 5.028
                     (?<ws_presig>   (?>(?&PerlOWS))                      )
-                        (?{ $Data::Checks::sub_container->{syn_presig} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_presig} = $^N; })
                     (?<sig>         (?> (?&PerlSignature)
                                     |   \( [^)]*+ \)                     # (
                                     |
                                     )
                     )
-                        (?{ $Data::Checks::sub_container->{syn_sig} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_sig} = $^N; })
                     (?<ws_prepostattrs>         (?>(?&PerlOWS))          )
-                        (?{ $Data::Checks::sub_container->{syn_ws_prepostattrs} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_ws_prepostattrs} = $^N; })
                     (?<postattrs>               (?>(?&PerlAttributes)) | )
-                        (?{ $Data::Checks::sub_container->{syn_postattrs} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_postattrs} = $^N; })
                 |
                     # Perl post 5.028
                     (?<ws_prepreattrs>          (?>(?&PerlOWS))          )
-                        (?{ $Data::Checks::sub_container->{syn_ws_prepreattrs} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_ws_prepreattrs} = $^N; })
                     (?<preattrs>                (?>(?&PerlAttributes)) | )
-                        (?{ $Data::Checks::sub_container->{syn_preattrs} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_preattrs} = $^N; })
                     (?<ws_presig>               (?>(?&PerlOWS))          )
-                        (?{ $Data::Checks::sub_container->{syn_presig} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_presig} = $^N; })
                     (?<sig>                     (?>(?&PerlSignature))  | )
-                        (?{ $Data::Checks::sub_container->{syn_sig} = $^N; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_sig} = $^N; })
                 )
 
                     (?<ws_preblock>             (?>(?&PerlOWS))          )
-                        (?{ $Data::Checks::sub_container->{syn_ws_preblock} = $^N;
-                            $Data::Checks::sub_container->{syn_block_from}  = pos(); })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_ws_preblock} = $^N;
+                            $Data::Checks::Parser::sub_container->{syn_block_from}  = pos(); })
                     (?<block>                   (?>(?&PerlBlock))        )
-                        (?{ $Data::Checks::sub_container->{syn_block_len}
-                                = pos() - $Data::Checks::sub_container->{syn_block_from} ; })
+                        (?{ $Data::Checks::Parser::sub_container->{syn_block_len}
+                                = pos() - $Data::Checks::Parser::sub_container->{syn_block_from} ; })
 
                 # Save internal representation...
                 (?{
-                    $Data::Checks::sub_container->{len} = pos() - $Data::Checks::sub_container->{from};
-                    push @Data::Checks::source_decls, $Data::Checks::sub_container;
+                    $Data::Checks::Parser::sub_container->{len} = pos() - $Data::Checks::Parser::sub_container->{from};
+                    push @Data::Checks::Parser::source_decls, $Data::Checks::Parser::sub_container;
                 })
             )
 
@@ -1799,11 +1799,11 @@ state sub _FILTER {
                 (?: (?&PerlQualifiedIdentifier)        (?&PerlOWS))?+
                 (?> (?<lvalue> (?&PerlLvalue) ) )   (?>(?&PerlOWS))
 
-                (?{ local $Data::Checks::var_decl = {
+                (?{ local $Data::Checks::Parser::var_decl = {
                                                         is_var => 1,
                                                         from => pos(),
                                                         lvalue => $+{lvalue},
-                                                        container => $Data::Checks::sub_container,
+                                                        container => $Data::Checks::Parser::sub_container,
                                                     };
                 })
                 (?:
@@ -1813,13 +1813,13 @@ state sub _FILTER {
                     # Especially if they're uninitialized...
                     (?>
                         (?! (?>(?&PerlOWS)) (?>(?&PerlAssignmentOperator)))
-                        (?{ $Data::Checks::var_decl->{uninit} = 1; })
+                        (?{ $Data::Checks::Parser::var_decl->{uninit} = 1; })
                     )?+
 
                     # Save internal representation...
                     (?{
-                        $Data::Checks::var_decl->{len} = pos() - $Data::Checks::var_decl->{from};
-                        push @Data::Checks::source_decls, $Data::Checks::var_decl;
+                        $Data::Checks::Parser::var_decl->{len} = pos() - $Data::Checks::Parser::var_decl->{from};
+                        push @Data::Checks::Parser::source_decls, $Data::Checks::Parser::var_decl;
                     })
                 )?+
             )
@@ -1829,7 +1829,7 @@ state sub _FILTER {
     }xms;
 
     # Prepare to collate subroutine declarations...
-    local @Data::Checks::source_decls;
+    local @Data::Checks::Parser::source_decls;
 
     # Parse through source code...
     if ($_ =~ $EXTENDED_PERL_GRAMMAR) {
@@ -1837,7 +1837,7 @@ state sub _FILTER {
         my @decls = sort    { $a->{container} && $a->{container} == $b ? -1
                             : $b->{container} && $b->{container} == $a ? +1
                             :                                             0 }
-                    reverse @Data::Checks::source_decls;
+                    reverse @Data::Checks::Parser::source_decls;
 
         # Rewrite each construct (if necessary) and adjust span of its container (if any)...
         DECL:
@@ -1845,7 +1845,7 @@ state sub _FILTER {
             # Rewrite use/no checks...
             if ($decl_ref->{is_checks}) {
                 my $rewritten_pragma
-                    = qq{$decl_ref->{useno} Data::Checks::CheckPragmaSim $decl_ref->{args} $decl_ref->{semi}};
+                    = qq{$decl_ref->{useno} Data::Checks::Parser::CheckPragmaSim $decl_ref->{args} $decl_ref->{semi}};
 
                 # Update container's information...
                 if ($decl_ref->{container}) {
@@ -1862,7 +1862,7 @@ state sub _FILTER {
 
             # Rewrite string evals...
             elsif ($decl_ref->{is_eval}) {
-                my $rewritten_eval = q{eval Data::Checks::_filter};
+                my $rewritten_eval = q{eval Data::Checks::Parser::_filter};
                 # Update container's information...
                 if ($decl_ref->{container}) {
                     my $delta_len = length($rewritten_eval) - $decl_ref->{len};
@@ -1953,7 +1953,7 @@ state sub _FILTER {
     }
 
     # Implement the default-to-warnings behaviour of -k...
-    $_ = q{BEGIN { $^H{'Data::Checks/mode'} = 'NONFATAL' }} . $_
+    $_ = q{BEGIN { $^H{'Data::Checks::Parser/mode'} = 'NONFATAL' }} . $_
         if $K_MODE eq '-k';
 }
 
@@ -1973,7 +1973,7 @@ FILTER {
     for my $arg (@_) {
         if ($arg =~ m{\A -[kK] \z}xms) {
             if ($loaded_at) {
-                return FAIL qq{Data::Checks was already loaded at $loaded_at.\n}
+                return FAIL qq{Data::Checks::Parser was already loaded at $loaded_at.\n}
                           . qq{Too late to specify '$arg' option};
             }
             if ($K_MODE && $K_MODE ne $arg) {
@@ -1982,7 +1982,7 @@ FILTER {
             $K_MODE = $arg;
         }
         else {
-            return FAIL qq{Invalid argument ("$arg") to "use Data::Checks"};
+            return FAIL qq{Invalid argument ("$arg") to "use Data::Checks::Parser"};
         }
     }
     $loaded_at //= "$file line $line";
@@ -1999,17 +1999,17 @@ __END__
 
 =head1 NAME
 
-Data::Checks - Declarative data validation for variables and subroutines
+Data::Checks::Parser - Declarative data validation for variables and subroutines
 
 
 =head1 VERSION
 
-This document describes Data::Checks version 0.002
+This document describes Data::Checks::Parser version 0.002
 
 
 =head1 SYNOPSIS
 
-    use Data::Checks;
+    use Data::Checks::Parser;
 
     state $count :of(UINT) = 0;
                  #########
@@ -4097,16 +4097,16 @@ without adding the appropriate pragma at the start of every separate file and mo
 Which is possible, but obviously not an ideal solution.
 
 So, to downgrade every check throughout your source so that it merely issus warnings,
-rather than throwing exceptions, you can load the Data::Checks module with the C<-k> flag:
+rather than throwing exceptions, you can load the Data::Checks::Parser module with the C<-k> flag:
 
     # Run a program with all checks issuing only warnings...
-    use Data::Checks '-k';
+    use Data::Checks::Parser '-k';
 
 And to completely disable every check throughout your entire source, so that check declarations
 are ignored and check tests never run, you would use the C<-K> flag:
 
     # Run a program without any checks at all...
-    use Data::Checks '-K';
+    use Data::Checks::Parser '-K';
 
 I<< (The mnemonic here is that these two flags both “weaB<k>en checB<k>s”,
 and that the larger letter (C<-K>) has the larger effect: the total removal of all checking.
@@ -4388,17 +4388,17 @@ The C<-k> and C<-K> options can only be specified when the module
 is loaded for the first time during compilation.
 
 These errors usually occur because you’re using some other module that
-also uses Data::Checks, and loading that module I<before>
-you use Data::Checks in your main program.
+also uses Data::Checks::Parser, and loading that module I<before>
+you use Data::Checks::Parser in your main program.
 
-Move the C<use Data::Checks -k> to the very start of your main code.
+Move the C<use Data::Checks::Parser -k> to the very start of your main code.
 
 =item C<< Can't specify both '-k' and '-K' options >>
 
 These two options are mutually exclusive.
 In any given program, there can be only one!
 
-=item C<< Invalid argument (<ARG>) to "use Data::Checks" >>
+=item C<< Invalid argument (<ARG>) to "use Data::Checks::Parser" >>
 
 The only arguments that the module can be loaded with are
 either a single C<-k> or else a single C<-K> option. You
@@ -4673,7 +4673,7 @@ change the check from C<:returns(WHATEVER)> to C<:returns(WHATEVER | VOID)>.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-Data::Checks requires no configuration files or environment variables.
+Data::Checks::Parser requires no configuration files or environment variables.
 
 
 =head1 DEPENDENCIES

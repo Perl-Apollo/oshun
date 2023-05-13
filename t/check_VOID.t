@@ -45,7 +45,7 @@ state sub state_ret_sub : returns(VOID)  ($param)  { return $param }
 
 # With values that should pass the VOID check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
 
     # Scalar context return fails...
     FAIL_ON_RETURN { scalar   old_ret_sub( $good_value ) }   "  old_ret_sub( $good_value_str )";

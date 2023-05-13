@@ -46,7 +46,7 @@ state sub state_ret_sub_bad_num : returns(LIST[2=>NUM])  ($param)  { return ('st
 
 # With values and subs that should pass the LIST[2=>NUM] check...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
 
     # List context return is okay...
     OKAY { () =     old_ret_sub_good( $good_value ) }   "  old_ret_sub_good( $good_value_str )";
@@ -70,7 +70,7 @@ for my $good_value (GOOD_VALUES) {
 
 # With values that should pass the LIST[2=>NUM] check, but subs that don't return the right length...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
 
     # List context fails...
     FAIL_ON_RETURN { () =     old_ret_sub_bad_len( $good_value ) } "  old_ret_sub_bad_len( $good_value_str )";
@@ -94,7 +94,7 @@ for my $good_value (GOOD_VALUES) {
 
 # With values that should pass the LIST[2=>NUM] check, but subs that don't return the right values...
 for my $good_value (GOOD_VALUES) {
-    my $good_value_str = Data::Checks::pp($good_value);
+    my $good_value_str = Data::Checks::Parser::pp($good_value);
 
     # List context fails...
     FAIL_ON_RETURN { () =     old_ret_sub_bad_num( $good_value ) } "  old_ret_sub_bad_num( $good_value_str )";
@@ -118,7 +118,7 @@ for my $good_value (GOOD_VALUES) {
 
 # With subs that should pass the LIST[2=>NUM] check, but values that don't...
 for my $bad_value (BAD_VALUES) {
-    my $bad_value_str = Data::Checks::pp($bad_value);
+    my $bad_value_str = Data::Checks::Parser::pp($bad_value);
 
     # List context return fails with these values...
     FAIL_ON_RETURN { () =     old_ret_sub_good( $bad_value ) }   "  old_ret_sub_good( $bad_value_str )";
