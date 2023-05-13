@@ -3,6 +3,7 @@ use warnings;
 use experimental qw< signatures lexical_subs >;
 
 use Test::More;
+use Data::Checks;
 
 use lib qw< tlib t/tlib >;
 use Data::Checks::TestUtils 'INT';
@@ -23,10 +24,6 @@ sub BAD_VALUES  {
     Class::Base->new(),
     Class::NoOverload->new(),
 }
-
-
-use Data::Checks;
-
 
 # Test assignment to arrays...
 
