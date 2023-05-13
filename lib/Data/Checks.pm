@@ -6,6 +6,20 @@ use experimental qw< lexical_subs signatures >;
 use Filter::Simple;
 use PPR::X;
 use Scalar::Util qw< looks_like_number blessed reftype isvstring openhandle >;
+use Import::Into;
+use Sub::Uplevel;
+use feature ();
+
+sub import ($class) {
+
+    my ($caller) = caller;
+
+    strict->import::into($caller);
+    warnings->import::into($caller);
+    feature->import::into( $caller, ':5.22' );
+    experimental->import::into( $caller, 'signatures' );
+
+}
 
 # These override global behaviours...
 my ($K_MODE, $loaded_at) = (q{}, undef);
