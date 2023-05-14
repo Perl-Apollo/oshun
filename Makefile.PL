@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use 5.022;
+
 
 use ExtUtils::MakeMaker;
 
@@ -13,10 +13,8 @@ my %WriteMakefileArgs = (
   },
   "DISTNAME" => "Data-Checks",
   "LICENSE" => "artistic_2",
-  "MIN_PERL_VERSION" => "5.022",
   "NAME" => "Data::Checks",
   "PREREQ_PM" => {
-    "Carp" => 0,
     "Data::Dump" => "0.25",
     "Filter::Simple" => 0,
     "Import::Into" => "1.002005",
@@ -26,22 +24,14 @@ my %WriteMakefileArgs = (
     "Sub::Uplevel" => "0.2800",
     "Variable::Magic" => "0.63",
     "attributes" => 0,
-    "experimental" => 0,
-    "feature" => 0,
-    "strict" => 0,
-    "warnings" => 0
+    "experimental" => 0
   },
   "TEST_REQUIRES" => {
-    "Data::Checks::TestUtils" => 0,
     "ExtUtils::MakeMaker" => 0,
     "File::Spec" => 0,
     "Test::More" => 0,
     "Test::Most" => 0,
-    "base" => 0,
-    "checks" => 0,
-    "experimentals" => 0,
-    "lib" => 0,
-    "overload" => 0
+    "experimentals" => 0
   },
   "VERSION" => "0.00001",
   "test" => {
@@ -51,8 +41,6 @@ my %WriteMakefileArgs = (
 
 
 my %FallbackPrereqs = (
-  "Carp" => 0,
-  "Data::Checks::TestUtils" => 0,
   "Data::Dump" => "0.25",
   "ExtUtils::MakeMaker" => 0,
   "File::Spec" => 0,
@@ -66,15 +54,8 @@ my %FallbackPrereqs = (
   "Test::Most" => 0,
   "Variable::Magic" => "0.63",
   "attributes" => 0,
-  "base" => 0,
-  "checks" => 0,
   "experimental" => 0,
-  "experimentals" => 0,
-  "feature" => 0,
-  "lib" => 0,
-  "overload" => 0,
-  "strict" => 0,
-  "warnings" => 0
+  "experimentals" => 0
 );
 
 
