@@ -1591,30 +1591,6 @@ sub _caller {
 
 # This extracts the new syntax from the old and replaces it with an implementation in standard Perl...
 state sub _FILTER {
-    {
-        my $caller_level = 0;
-        my $caller;
-        do {
-            $caller = caller($caller_level);
-            $caller_level++;
-            if ( $caller_level > 5 || !$caller )
-            {    # shouldn't be greater than 2 ...
-                die
-"PANIC: We could not determine calling package. Too many  levels of FILTER";
-            }
-          } while $caller =~ /\A (?:
-                Data::Checks::Parser     # Don't apply features to ourselves
-                | 
-                Filter::Simple   # or to our filter
-            ) /x;
-
-        # XXX Hijacking import didn't work, so we use this. Need to apply
-        # these directly here. Need to debug this later.
-        strict->import::into($caller);
-        warnings->import::into($caller);
-        feature->import::into( $caller, ':5.22' );
-        experimental->import::into( $caller, 'signatures' );
-    }
 
     # This PPR-based grammar does all the work...
     state $EXTENDED_PERL_GRAMMAR = qr{
