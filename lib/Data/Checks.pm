@@ -17,3 +17,7 @@ sub import {
 }
 
 1;
+
+__END__
+
+For now, see the docs for Data::Checks::Parser.
