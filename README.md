@@ -1,43 +1,27 @@
-package Data::Checks;
+# NAME
 
-# ABSTRACT: Declarative data validation for variables and subroutines
+Data::Checks - Declarative data validation for variables and subroutines
 
-use 5.022;
-use warnings;
-use experimental         ();
-use feature              ();
-use Data::Checks::Parser ();
+# VERSION
 
-our $VERSION = '0.00001';
+version 0.00001
 
-sub import {
-    my ( $class, @args ) = @_;
-    my $caller = caller;
-    strict->import::into($caller);
-    warnings->import::into($caller);
-    feature->import::into( $caller, ':5.22' );
-    experimental->import::into( $caller, 'signatures' );
-    Data::Checks::Parser->import::into( $caller, @args );
+# SYNOPSIS
+
+```perl
+use Data::Checks;
+
+my $count :of(INT) = 0;
+
+sub rand_arrayref : returns(ARRAY[INT]) ( $max_size : of(UINT) ) {
+    my @array = map { int( 1 + rand($max_size) ) } 0 .. $max_size - 1;
+    return \@array;
 }
 
-1;
+my $aref = rand_arrayref(4);
+```
 
-__END__
-
-=head1 SYNOPSIS
-
-    use Data::Checks;
-
-    my $count :of(INT) = 0;
-
-    sub rand_arrayref : returns(ARRAY[INT]) ( $max_size : of(UINT) ) {
-        my @array = map { int( 1 + rand($max_size) ) } 0 .. $max_size - 1;
-        return \@array;
-    }
-
-    my $aref = rand_arrayref(4);
-
-=head1 CEÇI N'EST PAS UN TYPE
+# CEÇI N'EST PAS UN TYPE
 
 This is NOT a type system for Perl.
 
@@ -59,18 +43,28 @@ passed to a parameter, or returned by a subroutine. This module provides a
 large number of built-in checks and will eventually offer a mechanism for
 specifying user-defined checks as well.
 
-=head1 SPECIFICATION
+# SPECIFICATION
 
-See L<Data::Checks::Parser> for the full specification.
+See [Data::Checks::Parser](https://metacpan.org/pod/Data%3A%3AChecks%3A%3AParser) for the full specification.
 
-=head1 DEPENDENCIES
+# DEPENDENCIES
 
 Requires Perl 5.22 or later.
 
-=head1 MAINTAINERS
+# MAINTAINERS
 
-=over 4
+- Curtis "Ovid" Poe <ovid@cpan.org>
 
-=item * Curtis "Ovid" Poe <ovid@cpan.org>
+# AUTHOR
 
-=back
+Damian Conway <damian@conway.org>
+
+# COPYRIGHT AND LICENSE
+
+This software is Copyright (c) 2023 by Damian Conway.
+
+This is free software, licensed under:
+
+```
+The Artistic License 2.0 (GPL Compatible)
+```
