@@ -1,7 +1,8 @@
 use Test::More tests => 1;
 
-BEGIN {
-use_ok( 'Data::Checks::Parser' );
-}
+use Data::Checks;
+use Data::Checks::Parser;
 
-diag( "Testing Data::Checks::Parser $Data::Checks::Parser::VERSION" );
+pass 'We successfully used our modules';
+
+diag("Testing Data::Checks::Parser $Data::Checks::Parser::VERSION");
