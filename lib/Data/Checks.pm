@@ -1,10 +1,14 @@
-package Data::Checks 0.000001;
+package Data::Checks;
+
+# ABSTRACT: Dynamic, optional data checks for Perl
 
 use 5.022;
 use warnings;
 use experimental         ();
 use feature              ();
 use Data::Checks::Parser ();
+
+our $VERSION = '0.00001';
 
 sub import {
     my ( $class, @args ) = @_;

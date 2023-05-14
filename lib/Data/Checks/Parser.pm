@@ -1,4 +1,6 @@
-package Data::Checks::Parser 0.000001;
+package Data::Checks::Parser;
+
+# ABSTRACT: Declarative data validation for variables and subroutines
 
 use 5.022;
 use warnings;
@@ -9,6 +11,8 @@ use Scalar::Util qw< looks_like_number blessed reftype isvstring openhandle >;
 use Import::Into;
 use Sub::Uplevel;
 use feature ();
+
+our $VERSION = '0.00001';
 
 # These override global behaviours...
 my ($K_MODE, $loaded_at) = (q{}, undef);
@@ -1972,11 +1976,6 @@ FILTER {
 __END__
 
 =encoding utf8
-
-=head1 NAME
-
-Data::Checks::Parser - Declarative data validation for variables and subroutines
-
 
 =head1 VERSION
 
