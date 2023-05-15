@@ -1,6 +1,10 @@
 package Data::Checks::Parser;
 
 # ABSTRACT: Declarative data validation for variables and subroutines
+#
+# Notes to maintainers:
+#
+# For the `// {}` on the `caller 0` checks, see t/cache-example.t
 
 use 5.022;
 use warnings;
@@ -1434,7 +1438,7 @@ sub _rewrite_sub ($decl_ref) {
                 BEGIN { \$Data::Checks::Parser::$NONE_TRACKER = (\$^H{'Data::Checks::Parser/mode'}//q{}) eq 'NONE'; }
                 UNITCHECK { if (*«name»{CODE} && \$Data::Checks::Parser::$NONE_TRACKER) { no warnings; *«name» = \\&__IMPL__; } }
 
-                if (((caller 0)[10]{'Data::Checks::Parser/mode'}//q{}) ne 'NONE') {$OF_CHECKS}
+                if ((((caller 0)[10] // {})->{'Data::Checks::Parser/mode'}//q{}) ne 'NONE') {$OF_CHECKS}
 
                 use if \$] >= 5.036, experimental => 'args_array_with_signatures';
 
@@ -1491,7 +1495,8 @@ attributes {
 
         # :of is a no-op if checks are deactivated...
         return if $K_MODE eq '-K';
-        my $hints = (caller 0)[10];
+
+        my $hints = ( (caller 0)[10] // {} );
         return if ($hints->{'Data::Checks::Parser/mode'}//q{}) eq 'NONE';
 
         # Unpack the components of the :of attribute...
