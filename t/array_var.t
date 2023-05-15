@@ -1,6 +1,6 @@
 use v5.22;
 use warnings;
-use experimental qw< signatures lexical_subs >;
+use experimental qw< lexical_subs >;
 
 use Test::More;
 use Data::Checks;
