@@ -745,8 +745,9 @@ my sub _gen_returns_checks_source ($check, $subname) {
               syn_void_check   => 1
             );
         }
-        else { # It's a "complex" check...
+        else {    # It's a "complex" check...
             my $check_code = Data::Checks::Parser::_gen_returns_check_code($check);
+#<<< START_NO_TIDY
             ( syn_list_check   => ($check_code =~ s{ «LIST»   }{ 1           }gxr
                                                =~ s{ «SCALAR» }{ \$scalar    }gxr
                                                =~ s{ «VOID»   }{ 0           }gxr
@@ -762,6 +763,7 @@ my sub _gen_returns_checks_source ($check, $subname) {
                                                =~ s{ «VOID»   }{ 1           }gxr
                                                =~ s{ §        }{ 0           }gxr
                                                =~ s{ ¤        }{ []          }gxr),
+#>>> END_NO_TIDY
             );
         }
     };
@@ -1814,10 +1816,12 @@ state sub _FILTER {
     # Parse through source code...
     if ($_ =~ $EXTENDED_PERL_GRAMMAR) {
         # Plan to process declarations depth-first end-to-start...
+#<<< START_NO_TIDY
         my @decls = sort    { $a->{container} && $a->{container} == $b ? -1
                             : $b->{container} && $b->{container} == $a ? +1
                             :                                             0 }
-                    reverse @Data::Checks::Parser::source_decls;
+#>>> END_NO_TIDY
+          reverse @Data::Checks::Parser::source_decls;
 
         # Rewrite each construct (if necessary) and adjust span of its container (if any)...
         DECL:
