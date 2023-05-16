@@ -47,8 +47,10 @@ __END__
     use Data::Checks;
 
     my $count :of(INT) = 0;
+    $count++;        # valid
+    undef $count;    # fatal: undef is not an integer
 
-    sub rand_arrayref : returns(ARRAY[INT]) ( $max_size : of(UINT) ) {
+    sub rand_arrayref :returns(ARRAY[INT]) ( $max_size :of(UINT) ) {
         my @array = map { int( 1 + rand($max_size) ) } 0 .. $max_size - 1;
         return \@array;
     }
