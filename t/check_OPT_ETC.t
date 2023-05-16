@@ -17,9 +17,8 @@ my @BAD_DECLS = (
 );
 
 for my $bad_decl (@BAD_DECLS) {
-    ok ! eval("$bad_decl; 1")  =>  $bad_decl;
-    ok $@ =~ m{\QCan't specify \E .*? \Q here (only in a TUPLE, SEQ, or DICT)\E }xms
-        => ' \__with correct exception:';
+    ok !eval("$bad_decl; 1")                                                         => $bad_decl;
+    ok $@ =~ m{\QCan't specify \E .*? \Q here (only in a TUPLE, SEQ, or DICT)\E }xms => ' \__with correct exception:';
 }
 
 done_testing();

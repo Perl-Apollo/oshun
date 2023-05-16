@@ -19,7 +19,7 @@ is $error, '', 'We should not have errors compiling a sub with a signature';
 ok my $aref = rand_arrayref(4),
   '... and we should have no errors when calling it as expected';
 is scalar $aref->@*, 4, '... and we should get the correct number of elements';
-my @terms = grep { /^\d+$/a } $aref->@*;
+my @terms = grep {/^\d+$/a} $aref->@*;
 is scalar @terms, 4, '... and all of them should be integers'
   or explain \@terms;
 

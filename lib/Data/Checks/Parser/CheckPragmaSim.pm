@@ -9,19 +9,18 @@ use warnings;
 our $VERSION = '0.00001';
 
 sub import {
+
     # Determine the mode being requested...
     my $mode;
-    for my $arg (@_[1..$#_]) {
-        if ($arg =~ m{\A (?:NON)? FATAL \Z}xms) {
-            if (defined $mode && $mode ne $arg) {
-                die qq{Can't specify both '$mode' and '$arg' in the same "use checks" at }
-                . join(' line ', (caller)[1,2]) . "\n";
+    for my $arg ( @_[ 1 .. $#_ ] ) {
+        if ( $arg =~ m{\A (?:NON)? FATAL \Z}xms ) {
+            if ( defined $mode && $mode ne $arg ) {
+                die qq{Can't specify both '$mode' and '$arg' in the same "use checks" at } . join( ' line ', (caller)[ 1, 2 ] ) . "\n";
             }
             $mode = $arg;
         }
         else {
-            die qq{Invalid argument ('$arg') passed to "use checks" at }
-            . join(' line ', (caller)[1,2]) . "\n";
+            die qq{Invalid argument ('$arg') passed to "use checks" at } . join( ' line ', (caller)[ 1, 2 ] ) . "\n";
         }
     }
 
@@ -30,14 +29,13 @@ sub import {
 }
 
 sub unimport {
-    if (@_ > 1) {
-        die q{The "no checks" pragma doesn't take arguments at } . join(' line ', (caller)[1,2]) . "\n";
+    if ( @_ > 1 ) {
+        die q{The "no checks" pragma doesn't take arguments at } . join( ' line ', (caller)[ 1, 2 ] ) . "\n";
     }
     $^H{'Data::Checks::Parser/mode'} = 'NONE';
 }
 
-
-1; # Magic true value required at end of module
+1;    # Magic true value required at end of module
 __END__
 
 
