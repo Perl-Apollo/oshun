@@ -1,21 +1,20 @@
-package   # Protect from CPAN indexer
-Data::Checks::TestUtils
-0.000001;
+package    # Protect from CPAN indexer
+  Data::Checks::TestUtils 0.000001;
 
 use 5.022;
 use warnings;
 use experimentals;
 
-sub import ($, $CHECKNAME) {
+sub import ( $, $CHECKNAME ) {
     no strict 'refs';
     use Test::More;
 
     my $PACKAGE = caller;
 
-    *{$PACKAGE.'::OKAY'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'OKAY ') .= "\t[line " . (caller)[2] . ']';
-        my $outcome = eval { $code->(); 1 };
+    *{ $PACKAGE . '::OKAY' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'OKAY ' ) .= "\t[line " . (caller)[2] . ']';
+        my $outcome   = eval { $code->(); 1 };
         my $exception = $@;
         ok $outcome => $msg;
         if ($exception) {
@@ -24,314 +23,315 @@ sub import ($, $CHECKNAME) {
         }
     };
 
-    *{$PACKAGE.'::FAIL_ON_LENGTH'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'FAIL_ON_LENGTH') .= "\t[line " . (caller)[2] . ']';
+    *{ $PACKAGE . '::FAIL_ON_LENGTH' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'FAIL_ON_LENGTH' ) .= "\t[line " . (caller)[2] . ']';
 
-        my $outcome   = eval { $code->(); 1 };
-        my $exception = $@;
-        my $line      = (caller)[2];
-        my $correct_msg = $exception =~ m{\QCan't \E(?:assign|push|pop|shift|unshift|splice|delete) .* \Qlength must be\E}xms;
+        my $outcome      = eval { $code->(); 1 };
+        my $exception    = $@;
+        my $line         = (caller)[2];
+        my $correct_msg  = $exception =~ m{\QCan't \E(?:assign|push|pop|shift|unshift|splice|delete) .* \Qlength must be\E}xms;
         my $correct_line = $exception =~ m{line \s* $line\b}xms;
 
         ok !$outcome     => $msg;
         ok $correct_msg  => '   ...threw correct exception';
         ok $correct_line => '   ...at correct location';
-        if (!$correct_msg || !$correct_line) {
+        if ( !$correct_msg || !$correct_line ) {
             note qq{   ...expected:  Can't assign ... length must be ... at line $line};
             note qq{   ...but threw: $exception};
         }
     };
 
-    *{$PACKAGE.'::FAIL_ON_LENGTH_OLD'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'FAIL_ON_LENGTH_OLD') .= "\t[line " . (caller)[2] . ']';
+    *{ $PACKAGE . '::FAIL_ON_LENGTH_OLD' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'FAIL_ON_LENGTH_OLD' ) .= "\t[line " . (caller)[2] . ']';
 
-        my $outcome   = eval { $code->(); 1 };
-        my $exception = $@;
+        my $outcome     = eval { $code->(); 1 };
+        my $exception   = $@;
         my $correct_msg = $exception =~ m{\QCan't assign\E .* \Qlength must be\E}xms;
 
-        ok !$outcome     => $msg;
-        ok $correct_msg  => '   ...threw correct exception';
-        if (!$correct_msg) {
+        ok !$outcome    => $msg;
+        ok $correct_msg => '   ...threw correct exception';
+        if ( !$correct_msg ) {
             note qq{   ...expected:  Can't assign ... length must be};
             note qq{   ...but threw: $exception};
         }
     };
 
-    *{$PACKAGE.'::FAIL_ON_LENGTH_INIT'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'FAIL_ON_LENGTH_INIT') .= "\t[line " . (caller)[2] . ']';
+    *{ $PACKAGE . '::FAIL_ON_LENGTH_INIT' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'FAIL_ON_LENGTH_INIT' ) .= "\t[line " . (caller)[2] . ']';
 
-        my $outcome   = eval { $code->(); 1 };
-        my $exception = $@;
+        my $outcome     = eval { $code->(); 1 };
+        my $exception   = $@;
         my $correct_msg = $exception =~ m{\QCan't initialize\E .* \Qlength must be\E}xms;
 
-        ok !$outcome     => $msg;
-        ok $correct_msg  => '   ...threw correct exception';
-        if (!$correct_msg) {
+        ok !$outcome    => $msg;
+        ok $correct_msg => '   ...threw correct exception';
+        if ( !$correct_msg ) {
             note qq{   ...expected:  Can't assign ... length must be ... };
             note qq{   ...but threw: $exception};
         }
     };
 
-    *{$PACKAGE.'::FAIL_ON_ASSIGN'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'FAIL_ON_ASSIGN') .= "\t[line " . (caller)[2] . ']';
+    *{ $PACKAGE . '::FAIL_ON_ASSIGN' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'FAIL_ON_ASSIGN' ) .= "\t[line " . (caller)[2] . ']';
 
-        my $outcome   = eval { $code->(); 1 };
-        my $exception = $@;
-        my $line      = (caller)[2];
-        my $correct_msg = $exception =~ m{\QCan't assign\E .* (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E}xms;
+        my $outcome      = eval { $code->(); 1 };
+        my $exception    = $@;
+        my $line         = (caller)[2];
+        my $correct_msg  = $exception =~ m{\QCan't assign\E .* (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E}xms;
         my $correct_line = $exception =~ m{line \s* $line\b}xms;
 
         ok !$outcome     => $msg;
         ok $correct_msg  => '   ...threw correct exception';
         ok $correct_line => '   ...at correct location';
-        if (!$correct_msg || !$correct_line) {
+        if ( !$correct_msg || !$correct_line ) {
             note qq{   ...expected:  Can't assign ... failed $CHECKNAME check ... at line $line};
             note qq{   ...but threw: $exception};
         }
     };
 
-    *{$PACKAGE.'::FAIL_ON_MODIFY'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'FAIL_ON_MODIFY') .= "\t[line " . (caller)[2] . ']';
+    *{ $PACKAGE . '::FAIL_ON_MODIFY' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'FAIL_ON_MODIFY' ) .= "\t[line " . (caller)[2] . ']';
 
-        my $outcome   = eval { $code->(); 1 };
-        my $exception = $@;
-        my $line      = (caller)[2];
-        my $correct_msg = $exception =~ m{\QCan't \E .* (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E}xms;
+        my $outcome      = eval { $code->(); 1 };
+        my $exception    = $@;
+        my $line         = (caller)[2];
+        my $correct_msg  = $exception =~ m{\QCan't \E .* (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E}xms;
         my $correct_line = $exception =~ m{line \s* $line\b}xms;
 
         ok !$outcome     => $msg;
         ok $correct_msg  => '   ...threw correct exception';
         ok $correct_line => '   ...at correct location';
-        if (!$correct_msg || !$correct_line) {
+        if ( !$correct_msg || !$correct_line ) {
             note qq{   ...expected:  Can't ... failed $CHECKNAME check ... at line $line};
             note qq{   ...but threw: $exception};
         }
     };
 
-    *{$PACKAGE.'::FAIL_ON_UNPACK'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'FAIL_ON_PARAM') .= "\t[line " . (caller)[2] . ']';
+    *{ $PACKAGE . '::FAIL_ON_UNPACK' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'FAIL_ON_PARAM' ) .= "\t[line " . (caller)[2] . ']';
 
-        my $outcome   = eval { $code->(); 1 };
-        my $exception = $@;
-        my $correct_msg  = $exception =~ m{(?:\QCan't initialize\E|\QCan't assign\E) .* (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E}xms;
+        my $outcome     = eval { $code->(); 1 };
+        my $exception   = $@;
+        my $correct_msg = $exception =~ m{(?:\QCan't initialize\E|\QCan't assign\E) .* (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E}xms;
 
-        ok !$outcome     => $msg;
-        ok $correct_msg  => '   ...threw correct exception';
-        if (!$correct_msg) {
+        ok !$outcome    => $msg;
+        ok $correct_msg => '   ...threw correct exception';
+        if ( !$correct_msg ) {
             note qq{   ...expected:  Can't assign|initialize ... failed $CHECKNAME check ... };
             note qq{   ...but threw: $exception};
         }
     };
 
-    *{$PACKAGE.'::FAIL_ON_PARAM'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'FAIL_ON_PARAM') .= "\t[line " . (caller)[2] . ']';
+    *{ $PACKAGE . '::FAIL_ON_PARAM' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'FAIL_ON_PARAM' ) .= "\t[line " . (caller)[2] . ']';
 
-        my $outcome   = eval { $code->(); 1 };
-        my $exception = $@;
-        my $line      = (caller)[2];
+        my $outcome      = eval { $code->(); 1 };
+        my $exception    = $@;
+        my $line         = (caller)[2];
         my $correct_msg  = $exception =~ m{\QCan't pass\E .* \Qfailed parameter's $CHECKNAME check\E}xms;
         my $correct_line = $exception =~ m{line \s* $line\b}xms;
 
         ok !$outcome     => $msg;
         ok $correct_msg  => '   ...threw correct exception';
         ok $correct_line => '   ...at correct location';
-        if (!$correct_msg || !$correct_line) {
+        if ( !$correct_msg || !$correct_line ) {
             note qq{   ...expected:  Can't pass ... failed parameter's $CHECKNAME check ... at line $line};
             note qq{   ...but threw: $exception};
         }
     };
 
-    *{$PACKAGE.'::FAIL_ON_RETURN'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'FAIL_ON_RETURN') .= qq{\t[line } . (caller)[2] . ']';
+    *{ $PACKAGE . '::FAIL_ON_RETURN' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'FAIL_ON_RETURN' ) .= qq{\t[line } . (caller)[2] . ']';
 
-        my $outcome   = eval { $code->(); 1 };
-        my $exception = $@;
-        my $line      = (caller)[2];
-        my $correct_msg = $exception =~ m{\Qfailed :returns($CHECKNAME) check\E}xms;
+        my $outcome      = eval { $code->(); 1 };
+        my $exception    = $@;
+        my $line         = (caller)[2];
+        my $correct_msg  = $exception =~ m{\Qfailed :returns($CHECKNAME) check\E}xms;
         my $correct_line = $exception =~ m{line \s* $line\b}xms;
 
         ok !$outcome     => $msg;
         ok $correct_msg  => '   ...threw correct exception';
         ok $correct_line => '   ...at correct location';
-        if (!$correct_msg || !$correct_line) {
+        if ( !$correct_msg || !$correct_line ) {
             note qq{   ...expected:  ... failed :returns($CHECKNAME) check ... at line $line};
             note qq{   ...but threw: $exception};
         }
     };
 
-    *{$PACKAGE.'::FAIL_ON_INIT'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'FAIL_ON_INIT') .= qq{\t[line } . (caller)[2] . ']';
+    *{ $PACKAGE . '::FAIL_ON_INIT' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'FAIL_ON_INIT' ) .= qq{\t[line } . (caller)[2] . ']';
 
-        my $outcome   = eval { $code->(); 1 };
-        my $exception = $@;
-        my $line      = (caller)[2];
-        my $correct_msg = $exception =~ m{(?:\QCan't initialize\E|\QCan't assign\E) .*? (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E | \QCan't declare \E [\@\$%].*? \Q:of\E .*? \Qthe default undef value would fail the $CHECKNAME check\E}xms;
+        my $outcome     = eval { $code->(); 1 };
+        my $exception   = $@;
+        my $line        = (caller)[2];
+        my $correct_msg = $exception
+          =~ m{(?:\QCan't initialize\E|\QCan't assign\E) .*? (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E | \QCan't declare \E [\@\$%].*? \Q:of\E .*? \Qthe default undef value would fail the $CHECKNAME check\E}xms;
         my $correct_line = $exception =~ m{line \s* $line\b}xms;
 
         ok !$outcome     => $msg;
         ok $correct_msg  => '   ...threw correct exception';
         ok $correct_line => '   ...at correct location';
-        if (!$correct_msg || !$correct_line) {
+        if ( !$correct_msg || !$correct_line ) {
             note qq{   ...expected:  Can't assign|initialize|specify :of... at line $line};
             note qq{   ...but threw: $exception};
         }
     };
 
-    *{$PACKAGE.'::WARN_ON_LENGTH'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'WARN_ON_LENGTH') .= "\t[line " . (caller)[2] . ']';
+    *{ $PACKAGE . '::WARN_ON_LENGTH' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'WARN_ON_LENGTH' ) .= "\t[line " . (caller)[2] . ']';
 
         # Catch warning message...
         my $warning = q{};
         local $SIG{__WARN__} = sub { $warning = shift };
 
-        my $outcome   = eval { $code->(); 1 } && !$warning;
-        my $exception = $@;
-        my $line      = (caller)[2];
-        my $correct_msg = $warning =~ m{\QCan't \E(?:assign|push|pop|shift|unshift|splice|delete) .* \Qlength must be\E}xms;
+        my $outcome      = eval { $code->(); 1 } && !$warning;
+        my $exception    = $@;
+        my $line         = (caller)[2];
+        my $correct_msg  = $warning =~ m{\QCan't \E(?:assign|push|pop|shift|unshift|splice|delete) .* \Qlength must be\E}xms;
         my $correct_line = $warning =~ m{line \s* $line\b}xms;
 
         ok !$outcome     => $msg;
         ok !$exception   => '   ...did not throw exception';
         ok $correct_msg  => '   ...raised correct warning';
         ok $correct_line => '   ...at correct location';
-        if (!$correct_msg || !$correct_line) {
+        if ( !$correct_msg || !$correct_line ) {
             note qq{   ...expected:  Can't assign ... length must be ... at line $line};
             note qq{   ...but got:   $warning};
         }
     };
 
-    *{$PACKAGE.'::WARN_ON_LENGTH_OLD'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'WARN_ON_LENGTH_OLD') .= "\t[line " . (caller)[2] . ']';
+    *{ $PACKAGE . '::WARN_ON_LENGTH_OLD' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'WARN_ON_LENGTH_OLD' ) .= "\t[line " . (caller)[2] . ']';
 
         # Catch warning message...
         my $warning = q{};
         local $SIG{__WARN__} = sub { $warning = shift };
 
-        my $outcome   = eval { $code->(); 1 } && !$warning;
-        my $exception = $@;
+        my $outcome     = eval { $code->(); 1 } && !$warning;
+        my $exception   = $@;
         my $correct_msg = $warning =~ m{\QCan't assign\E .* \Qlength must be\E}xms;
 
-        ok !$outcome     => $msg;
-        ok !$exception   => '   ...did not throw exception';
-        ok $correct_msg  => '   ...raised correct warning';
-        if (!$correct_msg) {
+        ok !$outcome    => $msg;
+        ok !$exception  => '   ...did not throw exception';
+        ok $correct_msg => '   ...raised correct warning';
+        if ( !$correct_msg ) {
             note qq{   ...expected:  Can't assign ... length must be ... };
             note qq{   ...but got:   $warning};
         }
     };
 
-    *{$PACKAGE.'::WARN_ON_LENGTH_INIT'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'WARN_ON_LENGTH_INIT') .= "\t[line " . (caller)[2] . ']';
+    *{ $PACKAGE . '::WARN_ON_LENGTH_INIT' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'WARN_ON_LENGTH_INIT' ) .= "\t[line " . (caller)[2] . ']';
 
         # Catch warning message...
         my $warning = q{};
         local $SIG{__WARN__} = sub { $warning = shift };
 
-        my $outcome   = eval { $code->(); 1 } && !$warning;
-        my $exception = $@;
+        my $outcome     = eval { $code->(); 1 } && !$warning;
+        my $exception   = $@;
         my $correct_msg = $warning =~ m{\QCan't initialize\E .* \Qlength must be\E}xms;
 
-        ok !$outcome     => $msg;
-        ok !$exception   => '   ...did not throw exception';
-        ok $correct_msg  => '   ...raised correct warning';
-        if (!$correct_msg) {
+        ok !$outcome    => $msg;
+        ok !$exception  => '   ...did not throw exception';
+        ok $correct_msg => '   ...raised correct warning';
+        if ( !$correct_msg ) {
             note qq{   ...expected:  Can't assign ... length must be ... };
             note qq{   ...but got:   $warning};
         }
     };
 
-    *{$PACKAGE.'::WARN_ON_ASSIGN'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'WARN_ON_ASSIGN') .= "\t[line " . (caller)[2] . ']';
+    *{ $PACKAGE . '::WARN_ON_ASSIGN' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'WARN_ON_ASSIGN' ) .= "\t[line " . (caller)[2] . ']';
 
         # Catch warning message...
         my $warning = q{};
         local $SIG{__WARN__} = sub { $warning = shift };
 
-        my $outcome   = eval { $code->(); 1 } && !$warning;
-        my $exception = $@;
-        my $line      = (caller)[2];
-        my $correct_msg = $warning =~ m{\QCan't assign\E .* (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E}xms;
+        my $outcome      = eval { $code->(); 1 } && !$warning;
+        my $exception    = $@;
+        my $line         = (caller)[2];
+        my $correct_msg  = $warning =~ m{\QCan't assign\E .* (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E}xms;
         my $correct_line = $warning =~ m{line \s* $line\b}xms;
 
         ok !$outcome     => $msg;
         ok !$exception   => '   ...did not throw exception';
         ok $correct_msg  => '   ...raised correct warning';
         ok $correct_line => '   ...at correct location';
-        if (!$correct_msg || !$correct_line) {
+        if ( !$correct_msg || !$correct_line ) {
             note qq{   ...expected:  Can't assign ... length must be ... at line $line};
             note qq{   ...but got:   $warning};
         }
     };
 
-    *{$PACKAGE.'::WARN_ON_MODIFY'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'WARN_ON_MODIFY') .= "\t[line " . (caller)[2] . ']';
+    *{ $PACKAGE . '::WARN_ON_MODIFY' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'WARN_ON_MODIFY' ) .= "\t[line " . (caller)[2] . ']';
 
         # Catch warning message...
         my $warning = q{};
         local $SIG{__WARN__} = sub { $warning = shift };
 
-        my $outcome   = eval { $code->(); 1 } && !$warning;
-        my $exception = $@;
-        my $line      = (caller)[2];
-        my $correct_msg = $warning =~ m{\QCan't \E .* (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E}xms;
+        my $outcome      = eval { $code->(); 1 } && !$warning;
+        my $exception    = $@;
+        my $line         = (caller)[2];
+        my $correct_msg  = $warning =~ m{\QCan't \E .* (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E}xms;
         my $correct_line = $warning =~ m{line \s* $line\b}xms;
 
         ok !$outcome     => $msg;
         ok !$exception   => '   ...did not throw exception';
         ok $correct_msg  => '   ...raised correct warning';
         ok $correct_line => '   ...at correct location';
-        if (!$correct_msg || !$correct_line) {
+        if ( !$correct_msg || !$correct_line ) {
             note qq{   ...expected:  Can't assign ... length must be ... at line $line};
             note qq{   ...but got:   $warning};
         }
     };
 
-    *{$PACKAGE.'::WARN_ON_UNPACK'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'WARN_ON_PARAM') .= "\t[line " . (caller)[2] . ']';
+    *{ $PACKAGE . '::WARN_ON_UNPACK' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'WARN_ON_PARAM' ) .= "\t[line " . (caller)[2] . ']';
 
         # Catch warning message...
         my $warning = q{};
         local $SIG{__WARN__} = sub { $warning = shift };
 
-        my $outcome   = eval { $code->(); 1 } && !$warning;
-        my $exception = $@;
-        my $correct_msg  = $warning =~ m{(?:\QCan't initialize\E|\QCan't assign\E) .* (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E}xms;
+        my $outcome     = eval { $code->(); 1 } && !$warning;
+        my $exception   = $@;
+        my $correct_msg = $warning =~ m{(?:\QCan't initialize\E|\QCan't assign\E) .* (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E}xms;
 
-        ok !$outcome     => $msg;
-        ok !$exception   => '   ...did not throw exception';
-        ok $correct_msg  => '   ...raised correct warning';
-        if (!$correct_msg) {
+        ok !$outcome    => $msg;
+        ok !$exception  => '   ...did not throw exception';
+        ok $correct_msg => '   ...raised correct warning';
+        if ( !$correct_msg ) {
             note qq{   ...expected:  Can't assign ... length must be ... };
             note qq{   ...but got:   $warning};
         }
     };
 
-    *{$PACKAGE.'::WARN_ON_PARAM'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'WARN_ON_PARAM') .= "\t[line " . (caller)[2] . ']';
+    *{ $PACKAGE . '::WARN_ON_PARAM' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'WARN_ON_PARAM' ) .= "\t[line " . (caller)[2] . ']';
 
         # Catch warning message...
         my $warning = q{};
         local $SIG{__WARN__} = sub { $warning = shift };
 
-        my $outcome   = eval { $code->(); 1 } && !$warning;
-        my $exception = $@;
-        my $line      = (caller)[2];
+        my $outcome      = eval { $code->(); 1 } && !$warning;
+        my $exception    = $@;
+        my $line         = (caller)[2];
         my $correct_msg  = $warning =~ m{\QCan't pass\E .* \Qfailed parameter's $CHECKNAME check\E}xms;
         my $correct_line = $warning =~ m{line \s* $line\b}xms;
 
@@ -339,55 +339,56 @@ sub import ($, $CHECKNAME) {
         ok !$exception   => '   ...did not throw exception';
         ok $correct_msg  => '   ...raised correct warning';
         ok $correct_line => '   ...at correct location';
-        if (!$correct_msg || !$correct_line) {
+        if ( !$correct_msg || !$correct_line ) {
             note qq{   ...expected:  Can't assign ... length must be ... at line $line};
             note qq{   ...but got:   $warning};
         }
     };
 
-    *{$PACKAGE.'::WARN_ON_RETURN'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'WARN_ON_RETURN') .= qq{\t[line } . (caller)[2] . ']';
+    *{ $PACKAGE . '::WARN_ON_RETURN' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'WARN_ON_RETURN' ) .= qq{\t[line } . (caller)[2] . ']';
 
         # Catch warning message...
         my $warning = q{};
         local $SIG{__WARN__} = sub { $warning = shift };
 
-        my $outcome   = eval { $code->(); 1 } && !$warning;
-        my $exception = $@;
-        my $line      = (caller)[2];
-        my $correct_msg = $warning =~ m{\Qfailed :returns($CHECKNAME) check\E}xms;
+        my $outcome      = eval { $code->(); 1 } && !$warning;
+        my $exception    = $@;
+        my $line         = (caller)[2];
+        my $correct_msg  = $warning =~ m{\Qfailed :returns($CHECKNAME) check\E}xms;
         my $correct_line = $warning =~ m{line \s* $line\b}xms;
 
         ok !$outcome     => $msg;
         ok !$exception   => '   ...did not throw exception';
         ok $correct_msg  => '   ...raised correct warning';
         ok $correct_line => '   ...at correct location';
-        if (!$correct_msg || !$correct_line) {
+        if ( !$correct_msg || !$correct_line ) {
             note qq{   ...expected:  Can't assign ... length must be ... at line $line};
             note qq{   ...but got:   $warning};
         }
     };
 
-    *{$PACKAGE.'::WARN_ON_INIT'} = sub :prototype(&$) {
-        my ($code, $msg) = @_;
-        ($msg //= 'WARN_ON_INIT') .= qq{\t[line } . (caller)[2] . ']';
+    *{ $PACKAGE . '::WARN_ON_INIT' } = sub : prototype(&$) {
+        my ( $code, $msg ) = @_;
+        ( $msg //= 'WARN_ON_INIT' ) .= qq{\t[line } . (caller)[2] . ']';
 
         # Catch warning message...
         my $warning = q{};
         local $SIG{__WARN__} = sub { $warning = shift };
 
-        my $outcome   = eval { $code->(); 1 } && !$warning;
-        my $exception = $@;
-        my $line      = (caller)[2];
-        my $correct_msg = $warning =~ m{(?:\QCan't initialize\E|\QCan't assign\E) .*? (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E | \QCan't declare \E [\@\$%].*? \Q:of\E .*? \Qthe default undef value would fail the $CHECKNAME check\E}xms;
+        my $outcome     = eval { $code->(); 1 } && !$warning;
+        my $exception   = $@;
+        my $line        = (caller)[2];
+        my $correct_msg = $warning
+          =~ m{(?:\QCan't initialize\E|\QCan't assign\E) .*? (?:\Qfailed \E|\Qwould fail \E) \Q$CHECKNAME check\E | \QCan't declare \E [\@\$%].*? \Q:of\E .*? \Qthe default undef value would fail the $CHECKNAME check\E}xms;
         my $correct_line = $warning =~ m{line \s* $line\b}xms;
 
         ok !$outcome     => $msg;
         ok !$exception   => '   ...did not throw exception';
         ok $correct_msg  => '   ...raised correct warning';
         ok $correct_line => '   ...at correct location';
-        if (!$correct_msg || !$correct_line) {
+        if ( !$correct_msg || !$correct_line ) {
             note qq{   ...expected:  Can't assign ... length must be ... at line $line};
             note qq{   ...but got:   $warning};
         }
@@ -400,28 +401,29 @@ package Class::Base {
 
 package Class::NoOverload {
     use base 'Class::Base';
-    sub report {}
+    sub report { }
 }
 
 package Class::WithOverload {
     use base 'Class::Base';
-    sub report {}
+    sub report { }
 
     use overload (
-        'bool' => sub { 1           },
-        '""'   => sub { 'string'    },
-        '0+'   => sub { 42          },
-        'qr'   => sub { qr/.../     },
+        'bool' => sub {1},
+        '""'   => sub {'string'},
+        '0+'   => sub {42},
+        'qr'   => sub {qr/.../},
         '${}'  => sub { my $x; \$x; },
-        '@{}'  => sub { []          },
-        '%{}'  => sub { {}          },
-        '&{}'  => sub { sub {}      },
-        '*{}'  => sub { *STDOUT     },
+        '@{}'  => sub { [] },
+        '%{}'  => sub { {} },
+        '&{}'  => sub {
+            sub { }
+        },
+        '*{}' => sub {*STDOUT},
 
         fallback => 1,
     );
 }
-
 
 package Class::NonHash::Base {
     sub new { bless [], shift }
@@ -429,30 +431,31 @@ package Class::NonHash::Base {
 
 package Class::NonHash::NoOverload {
     use base 'Class::NonHash::Base';
-    sub report {}
+    sub report { }
 }
 
 package Class::NonHash::WithOverload {
     use base 'Class::NonHash::Base';
-    sub report {}
+    sub report { }
 
     use overload (
-        'bool' => sub { 1           },
-        '""'   => sub { 'string'    },
-        '0+'   => sub { 42          },
-        'qr'   => sub { qr/.../     },
+        'bool' => sub {1},
+        '""'   => sub {'string'},
+        '0+'   => sub {42},
+        'qr'   => sub {qr/.../},
         '${}'  => sub { my $x; \$x; },
-        '@{}'  => sub { []          },
-        '%{}'  => sub { {}          },
-        '&{}'  => sub { sub {}      },
-        '*{}'  => sub { *STDOUT     },
+        '@{}'  => sub { [] },
+        '%{}'  => sub { {} },
+        '&{}'  => sub {
+            sub { }
+        },
+        '*{}' => sub {*STDOUT},
 
         fallback => 1,
     );
 }
 
-
-1; # Magic true value required at end of module
+1;    # Magic true value required at end of module
 __END__
 
 =head1 NAME

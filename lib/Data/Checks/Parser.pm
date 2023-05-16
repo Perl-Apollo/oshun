@@ -19,7 +19,7 @@ use feature ();
 our $VERSION = '0.00001';
 
 # These override global behaviours...
-my ($K_MODE, $loaded_at) = (q{}, undef);
+my ( $K_MODE, $loaded_at ) = ( q{}, undef );
 
 # Hide the built-in modules from croak calls...
 use Carp;
@@ -27,46 +27,49 @@ our @CARP_NOT = qw< attributes Filter::Simple >;
 
 # Modify Data::Dump to report objects less verbosely...
 use Data::Dump;
-sub pp { (reftype($_[0])//q{}) eq 'IO' ? 'IO object'
-       : blessed($_[0])                ? blessed($_[0]) . ' object'
-       :                                 &Data::Dump::pp
+
+sub pp {
+    ( reftype( $_[0] ) // q{} ) eq 'IO' ? 'IO object'
+      : blessed( $_[0] )                ? blessed( $_[0] ) . ' object'
+      :                                   &Data::Dump::pp;
 }
 
 # Source code templates that define built-in unparameterized checks...
 my %CHECK = (
-    ANY      => q(( 1 )),
-    LIST     => q(( do{BEGIN{die q{Can't use LIST check in an :of}}} )),
-    VOID     => q(( do{BEGIN{die q{Can't use VOID check in an :of}}} )),
-    UNDEF    => q(( !defined(§) && \§ != \$Data::Checks::Parser::VOID )),
-    DEF      => q(( defined(§) )),
-    HANDLE   => q(( «DEF» && Data::Checks::Parser::openhandle(§) )),
-    NONREF   => q(( «DEF» && !Data::Checks::Parser::reftype(§) )),
-    REF      => q(( Data::Checks::Parser::reftype(§) )),
-    GLOB     => q(( «NONREF» && Data::Checks::Parser::reftype(\§) eq 'GLOB' )),
-    BOOL     => q(( «NONREF» || overload::Method(§,'bool') )),
-    NUM      => q(( «NONREF» && Data::Checks::Parser::looks_like_number(§) && § !~ /inf|nan/i || «OBJ» && overload::Method(§,'0+') )),
-    INT      => q(( «NUM» && (0+§) !~ /\./ )),
-    UINT     => q(( «NUM» && (0+§) =~ /\A [+]? \d+ (?:E[+-]?\d+)? \z/ix )),
-    STR      => q(( defined(§) && (Data::Checks::Parser::reftype(\\(§)) eq 'SCALAR' || overload::Method(§,'""')) )),
-    VSTR     => q(( Data::Checks::Parser::isvstring(§) )),
-    CLASS    => q(( «STR» && length(§) > 0 && (§)->isa(§) )),
-    ROLE     => q(( Carp::croak "ROLE check failed (can't yet detect roles)" )),
-    SCALAR   => q(( (Data::Checks::Parser::reftype(§)//'') eq 'SCALAR' || overload::Method(§,'${}') )),
-    CODE     => q(( (Data::Checks::Parser::reftype(§)//'') eq 'CODE'   || overload::Method(§,'&{}') )),
-    ARRAY    => q(( (Data::Checks::Parser::reftype(§)//'') eq 'ARRAY'  || overload::Method(§,'@{}') )),
-    HASH     => q(( (Data::Checks::Parser::reftype(§)//'') eq 'HASH'   || overload::Method(§,'%{}') )),
+    ANY    => q(( 1 )),
+    LIST   => q(( do{BEGIN{die q{Can't use LIST check in an :of}}} )),
+    VOID   => q(( do{BEGIN{die q{Can't use VOID check in an :of}}} )),
+    UNDEF  => q(( !defined(§) && \§ != \$Data::Checks::Parser::VOID )),
+    DEF    => q(( defined(§) )),
+    HANDLE => q(( «DEF» && Data::Checks::Parser::openhandle(§) )),
+    NONREF => q(( «DEF» && !Data::Checks::Parser::reftype(§) )),
+    REF    => q(( Data::Checks::Parser::reftype(§) )),
+    GLOB   => q(( «NONREF» && Data::Checks::Parser::reftype(\§) eq 'GLOB' )),
+    BOOL   => q(( «NONREF» || overload::Method(§,'bool') )),
+    NUM    => q(( «NONREF» && Data::Checks::Parser::looks_like_number(§) && § !~ /inf|nan/i || «OBJ» && overload::Method(§,'0+') )),
+    INT    => q(( «NUM» && (0+§) !~ /\./ )),
+    UINT   => q(( «NUM» && (0+§) =~ /\A [+]? \d+ (?:E[+-]?\d+)? \z/ix )),
+    STR    => q(( defined(§) && (Data::Checks::Parser::reftype(\\(§)) eq 'SCALAR' || overload::Method(§,'""')) )),
+    VSTR   => q(( Data::Checks::Parser::isvstring(§) )),
+    CLASS  => q(( «STR» && length(§) > 0 && (§)->isa(§) )),
+    ROLE   => q(( Carp::croak "ROLE check failed (can't yet detect roles)" )),
+    SCALAR => q(( (Data::Checks::Parser::reftype(§)//'') eq 'SCALAR' || overload::Method(§,'${}') )),
+    CODE   => q(( (Data::Checks::Parser::reftype(§)//'') eq 'CODE'   || overload::Method(§,'&{}') )),
+    ARRAY  => q(( (Data::Checks::Parser::reftype(§)//'') eq 'ARRAY'  || overload::Method(§,'@{}') )),
+    HASH   => q(( (Data::Checks::Parser::reftype(§)//'') eq 'HASH'   || overload::Method(§,'%{}') )),
 
-    REGEXP   => q(( (Data::Checks::Parser::reftype(§)//'') eq 'REGEXP' || overload::Method(§,'qr') )),
-    OBJ      => q((  Data::Checks::Parser::blessed(§) && (Data::Checks::Parser::reftype(§)//'') ne 'REGEXP'  )),
-    CHECK    => q(( «STR» && length(§) > 0 && Data::Checks::Parser::_is_check(§) )),
+    REGEXP => q(( (Data::Checks::Parser::reftype(§)//'') eq 'REGEXP' || overload::Method(§,'qr') )),
+    OBJ    => q((  Data::Checks::Parser::blessed(§) && (Data::Checks::Parser::reftype(§)//'') ne 'REGEXP'  )),
+    CHECK  => q(( «STR» && length(§) > 0 && Data::Checks::Parser::_is_check(§) )),
 );
 
 # Cache information as it generated...
-my %CHECK_UNAVAILABLE;  # XXX Not used yet?
+my %CHECK_UNAVAILABLE;    # XXX Not used yet?
 my %CHECK_IMPL;
 
 # Normalize and instantiate built-in checks...
-for my $CHECK_NAME (keys %CHECK) {
+for my $CHECK_NAME ( keys %CHECK ) {
+
     # Expand nested checks...
     1 while $CHECK{$CHECK_NAME} =~ s{«([A-Z]+)»}{$CHECK{$1}}xmsg;
 
@@ -87,11 +90,11 @@ $RETURNS_CHECK{VOID} = q((«VOID»));
 
 # Is this a known check???
 sub _is_check ($check) {
-    if ((reftype($check)//q{}) eq 'CODE') {
+    if ( ( reftype($check) // q{} ) eq 'CODE' ) {
         return blessed($check) eq 'Data::Checks::Parser::CheckImpl';
     }
     else {
-        return exists $CHECK{$check // q{}};
+        return exists $CHECK{ $check // q{} };
     }
 }
 
@@ -199,23 +202,25 @@ my $CHECK_EXPR = qr{
 }xms;
 
 # General purpose failure handler (during parsing, it inserts a die into the code itself)...
-sub FAIL  (@msg) { _FAIL(0, @msg) }
-sub FAIL1 (@msg) { _FAIL(1, @msg) }  # XXX Unused?
+sub FAIL  (@msg) { _FAIL( 0, @msg ) }
+sub FAIL1 (@msg) { _FAIL( 1, @msg ) }    # XXX Unused?
 
-sub _FAIL ($uplevel, @msg) {
+sub _FAIL ( $uplevel, @msg ) {
+
     # Build the message...
     my $msg = join q{}, @msg;
 
     # While source-filtering, just build a fatal BEGIN and return it to be interpolated into the code...
-    if (${^GLOBAL_PHASE} eq 'START') {
-        return qq{ do{BEGIN{die q{$msg} }}}
+    if ( ${^GLOBAL_PHASE} eq 'START' ) {
+        return qq{ do{BEGIN{die q{$msg} }}};
     }
 
     # Find the external caller...
-    for my $level (0..1000000) {
+    for my $level ( 0 .. 1000000 ) {
+
         # If there is an external caller, it must be in some other file...
         my @caller = caller $level or last;
-        next if $caller[1] eq __FILE__ || substr($caller[1],0,6) eq '(eval ';
+        next if $caller[1] eq __FILE__ || substr( $caller[1], 0, 6 ) eq '(eval ';
 
         # Skip any extra levels that were requested...
         next if $uplevel--;
@@ -225,12 +230,11 @@ sub _FAIL ($uplevel, @msg) {
         return if $mode eq 'NONE';
 
         # Add in the location information, if it's needed...
-        $msg .= " at " . join(' line ', @caller[1..2]) . "\n"
-            if substr($msg,-1) ne "\n";
-
+        $msg .= " at " . join( ' line ', @caller[ 1 .. 2 ] ) . "\n"
+          if substr( $msg, -1 ) ne "\n";
 
         # Raise an exception or warning, as appropriate...
-        die  $msg if $mode eq 'FATAL';
+        die $msg if $mode eq 'FATAL';
         warn $msg;
 
         # And we're done...
@@ -243,8 +247,9 @@ sub _FAIL ($uplevel, @msg) {
 
 # Given a check specification, generate the appropriate code to test one or more variables...
 sub _gen_returns_check_code ($check) {
-    state %RETURNS_CHECK_CODE;  # CACHE CODE GENERATION FOR PERFORMANCE...
+    state %RETURNS_CHECK_CODE;    # CACHE CODE GENERATION FOR PERFORMANCE...
     return $RETURNS_CHECK_CODE{$check} //= '(' . do {
+
         # Replace algebraic components with standard Perl code...
         $check =~ s{
               (?<or>    \|   )
@@ -261,16 +266,18 @@ sub _gen_returns_check_code ($check) {
             : $+{params}           ? _gen_parameterized_returns_check_code($subcheck, $+{params})
             : $+{error}            ? Data::Checks::Parser::FAIL "Can't specify $+{error}"
             :                        $RETURNS_CHECK{ $subcheck } // Data::Checks::Parser::FAIL "Unknown check: $subcheck\n",
-        }grexmso; # XXX Is the 'o' switch still used?
-    } . ')';
+        }grexmso;    # XXX Is the 'o' switch still used?
+      }
+      . ')';
 }
 
 # Given a check specification, generate the appropriate code to test one or more variables...
-sub _gen_of_check_code ($check, @varnames) {
+sub _gen_of_check_code ( $check, @varnames ) {
     die "Call to _gen_of_check_code() in non-list context" if !wantarray;
 
-    state %CHECK_CODE;  # CACHE CODE GENERATION FOR PERFORMANCE...
+    state %CHECK_CODE;    # CACHE CODE GENERATION FOR PERFORMANCE...
     $CHECK_CODE{$check} //= '(' . do {
+
         # Replace algebraic components with standard Perl code...
         $check =~ s{
               (?<or>    \|   )
@@ -288,22 +295,24 @@ sub _gen_of_check_code ($check, @varnames) {
             : $+{error}            ? Data::Checks::Parser::FAIL "Can't specify $+{error}"
             :                        $CHECK{ $subcheck } // Data::Checks::Parser::FAIL "Unknown check: $subcheck\n",
         }grexmso;
-    } . ')';
+      }
+      . ')';
 
     # Insert the variables into the check code...
     return map { $CHECK_CODE{$check} =~ s{§}{$_}gr } @varnames;
 }
 
 # Generate (possibly recursive) parametric checks for enumerated types (INT and UINT)...
-sub _gen_ranged_check ($CHECKNAME, $VAL, $DESC) {
+sub _gen_ranged_check ( $CHECKNAME, $VAL, $DESC ) {
 
     # Only integer ranges can start at -infinity...
     my $MIN = $CHECKNAME eq 'INT' ? '(?<from_inf>   -inf )' : '(?!)';
 
     # Return the check specification and the subroutine implementing it...
-    $CHECKNAME => sub ($check, $params) {
+    $CHECKNAME => sub ( $check, $params ) {
+
         # Handy regex that matches a single parameter within a parametric check...
-        state $ELEM  = qr{ (?<range> (?<from> $VAL | $MIN ) \s*+
+        state $ELEM = qr{ (?<range> (?<from> $VAL | $MIN ) \s*+
                            \.\. \s*+ (?<to>   $VAL | (?<to_inf>   \+?inf ) ) )
                          | (?<value> $VAL        )
                          | (?<regex> $PERLREGEX  )
@@ -313,7 +322,7 @@ sub _gen_ranged_check ($CHECKNAME, $VAL, $DESC) {
 
         # Accumulate matching code for each parameter...
         my @matchers;
-        while ($params =~ m{\G \s*+ $ELEM \s*+ (?: , | \z) }gxms) {
+        while ( $params =~ m{\G \s*+ $ELEM \s*+ (?: , | \z) }gxms ) {
             my %match = %+;
 
             # Adjust range to standard Perl terms for infinity...
@@ -321,21 +330,21 @@ sub _gen_ranged_check ($CHECKNAME, $VAL, $DESC) {
             $match{to}   = q{'Inf'} if $match{to_inf};
 
             # Select the correct optimized code template...
-            if ($match{range} && ($match{from_inf} || $match{to_inf} || $match{from} <= $match{to})) {
+            if ( $match{range} && ( $match{from_inf} || $match{to_inf} || $match{from} <= $match{to} ) ) {
                 push @matchers, qq(( $match{from} <= § && § <= $match{to} ));
             }
-            elsif ($match{value}) {
+            elsif ( $match{value} ) {
                 push @matchers, qq(( $match{value} == § ));
             }
-            elsif ($match{regex}) {
+            elsif ( $match{regex} ) {
                 push @matchers, qq(( (0+§) =~ $match{regex} ));
             }
-            elsif ($match{check}) {
-                push @matchers, Data::Checks::Parser::_gen_of_check_code($match{check}, '§');
+            elsif ( $match{check} ) {
+                push @matchers, Data::Checks::Parser::_gen_of_check_code( $match{check}, '§' );
             }
-            else { # We have an error: report it...
-                if (${^GLOBAL_PHASE} eq 'START') {
-                    push @matchers, qq{ do{BEGIN{die "$CHECKNAME\[$params] is not a valid check\\n(because $match{error} is not a valid $DESC, $DESC range, regex, or check)" }}}
+            else {    # We have an error: report it...
+                if ( ${^GLOBAL_PHASE} eq 'START' ) {
+                    push @matchers, qq{ do{BEGIN{die "$CHECKNAME\[$params] is not a valid check\\n(because $match{error} is not a valid $DESC, $DESC range, regex, or check)" }}};
                 }
                 else {
                     Carp::croak "$CHECKNAME\[$params] is not a valid check\\n(because $match{error} is not a valid $DESC, $DESC range, regex, or check)";
@@ -344,14 +353,16 @@ sub _gen_ranged_check ($CHECKNAME, $VAL, $DESC) {
         }
 
         # Join all the components into a single check expression...
-        return qq{($CHECK{$CHECKNAME} && (} . join('||', @matchers) . q{))};
+        return qq{($CHECK{$CHECKNAME} && (} . join( '||', @matchers ) . q{))};
     }
 }
 
 # These are the subroutines that generate code for various built-in parametric checks...
 my %CHECK_GEN = (
+
     # Numbers...
-    NUM => sub ($check, $params) {
+    NUM => sub ( $check, $params ) {
+
         # Handy regexes...
         state $NUM   = qr{ [-+]?+ (?: \d++ \.? \d*+ | \. \d++ ) (?: [eE] [+-]?+ \d++)?+ }xms;
         state $RANGE = qr{(?<from>$NUM|-inf) \s*+ (?<ltfrom> \< )? \.\. (?<ltto> \< )? \s*+ (?<to>$NUM|inf) }ixms;
@@ -363,26 +374,30 @@ my %CHECK_GEN = (
 
         # Accumlate checking code for each parameter...
         my @matchers;
-        while ($params =~ m{\G \s*+ $ELEM \s*+ (?: , | \z) }gxms) {
+        while ( $params =~ m{\G \s*+ $ELEM \s*+ (?: , | \z) }gxms ) {
             my %match = %+;
+
             # Number must be in a range...
-            if ($match{range} && $match{from} < $match{to}) {
+            if ( $match{range} && $match{from} < $match{to} ) {
                 my $ltfrom = $+{ltfrom} // '<=';
-                my $ltto   = $+{ltto} // '<=';
+                my $ltto   = $+{ltto}   // '<=';
                 push @matchers, qq(( $match{from} $ltfrom § && § $ltto '$match{to}' ));
             }
+
             # Number must match a regex...
-            elsif ($match{regex}) {
+            elsif ( $match{regex} ) {
                 push @matchers, qq(( (0+§) =~ $match{regex} ));
             }
+
             # Number must match a nested check...
-            elsif ($match{check}) {
-                push @matchers, Data::Checks::Parser::_gen_of_check_code($match{check}, '§');
+            elsif ( $match{check} ) {
+                push @matchers, Data::Checks::Parser::_gen_of_check_code( $match{check}, '§' );
             }
+
             # Something illegal in the specification...
             else {
-                if (${^GLOBAL_PHASE} eq 'START') {
-                    push @matchers, qq{ do{BEGIN{die "NUM[$params] is not a valid check\\n(because $match{error} is not a valid numeric range, regex, or check)" }}}
+                if ( ${^GLOBAL_PHASE} eq 'START' ) {
+                    push @matchers, qq{ do{BEGIN{die "NUM[$params] is not a valid check\\n(because $match{error} is not a valid numeric range, regex, or check)" }}};
                 }
                 else {
                     Carp::croak "NUM[$params] is not a valid check\\n(because $match{error} is not a valid numeric range, regex, or check)";
@@ -391,17 +406,18 @@ my %CHECK_GEN = (
         }
 
         # Join them up into a single checking expression...
-        return qq{($CHECK{NUM} && (} . join('||', @matchers) . q{))};
+        return qq{($CHECK{NUM} && (} . join( '||', @matchers ) . q{))};
     },
 
     # Integers and unsigned integers use the same generator...
-    _gen_ranged_check(  INT => qr{ [-+]? \d++ (?: [eE] \+? \d++)?+ }xms, 'integer'),
-    _gen_ranged_check( UINT => qr{  \+?  \d++ (?: [eE] \+? \d++)?+ }xms, 'unsigned integer'),
+    _gen_ranged_check( INT  => qr{ [-+]? \d++ (?: [eE] \+? \d++)?+ }xms, 'integer' ),
+    _gen_ranged_check( UINT => qr{  \+?  \d++ (?: [eE] \+? \d++)?+ }xms, 'unsigned integer' ),
 
     # Strings are very similar but use string ops (eq, lt) instead of numeric ops (==, <)...
-    STR => sub ($check, $params) {
+    STR => sub ( $check, $params ) {
+
         # Handy patterns...
-        state $ELEM  = qr{ (?<range> (?<from> $PERLSTRING ) \s*+ \.\. \s*+ (?<to> $PERLSTRING ) )
+        state $ELEM = qr{ (?<range> (?<from> $PERLSTRING ) \s*+ \.\. \s*+ (?<to> $PERLSTRING ) )
                          | (?<value> $PERLSTRING )
                          | (?<regex> $PERLREGEX  )
                          |           $PARAMETERIZED_CHECK
@@ -410,29 +426,35 @@ my %CHECK_GEN = (
 
         # Accumlate checking code for each parameter...
         my @matchers;
-        while ($params =~ m{\G \s*+ $ELEM \s*+ (?: , | \z) }gxms) {
+        while ( $params =~ m{\G \s*+ $ELEM \s*+ (?: , | \z) }gxms ) {
             my %match = %+;
+
             # String must be in a range...
-            if ($match{range} && $match{from} le $match{to}) {
+            if ( $match{range} && $match{from} le $match{to} ) {
                 push @matchers, qq(( $match{from} le § && § le $match{to} ));
             }
+
             # Must be a specific string...
-            elsif ($match{value}) {
+            elsif ( $match{value} ) {
                 push @matchers, qq(( $match{value} eq § ));
             }
+
             # String must match a regex...
-            elsif ($match{regex}) {
+            elsif ( $match{regex} ) {
                 push @matchers, qq(( (§) =~ $match{regex} ));
             }
+
             # String must satisfy a parametric check...
-            elsif ($match{params}) {
+            elsif ( $match{params} ) {
                 push @matchers,
-                     Data::Checks::Parser::_gen_parameterized_of_check_code(@match{'check', 'params'});
+                  Data::Checks::Parser::_gen_parameterized_of_check_code( @match{ 'check', 'params' } );
             }
+
             # String must satisfy a non-parametric check...
-            elsif ($match{check}) {
-                push @matchers, Data::Checks::Parser::_gen_of_check_code($match{check}, '§');
+            elsif ( $match{check} ) {
+                push @matchers, Data::Checks::Parser::_gen_of_check_code( $match{check}, '§' );
             }
+
             # Something is rotten in the state of the specification...
             else {
                 push @matchers, qq{ do{BEGIN{die "STR[$params] is not a valid check\\n(because $match{error} is not a valid string, string range, regex, or check)"}} };
@@ -440,17 +462,18 @@ my %CHECK_GEN = (
         }
 
         # Join the individual components into a single checking expression...
-        return qq{($CHECK{STR} && (} . join('||', @matchers) . q{))};
+        return qq{($CHECK{STR} && (} . join( '||', @matchers ) . q{))};
     },
 
     # A reference check dereferences the value being tested and then checks it against the param...
-    REF => sub ($check, $param) {
-        my ($subcheck) = _gen_of_check_code($param, '${§}');
+    REF => sub ( $check, $param ) {
+        my ($subcheck) = _gen_of_check_code( $param, '${§}' );
         return qq(( $CHECK{REF} && eval { $subcheck } ));
     },
 
     # Array ref check...
-    ARRAY => sub ($check, $param) {
+    ARRAY => sub ( $check, $param ) {
+
         # Handy regexes...
         state $UINT     = qr{ \+? \d+ (?: E\+?\d+)? }ixms;
         state $RANGE    = qr{ (?<from> $UINT ) $PERLOWS \.\. (?> (?<to> $UINT ) | (?<toinf> inf ) ) }ixms;
@@ -458,23 +481,26 @@ my %CHECK_GEN = (
                               $PERLOWS (?: => | , ) $PERLOWS (?<check> .* ) }xms;
 
         # If the check also checks length, then there are several possible optimized tests...
-        if ($param =~ $LENCHECK) {
-            my ($subcheck) = _gen_of_check_code($+{check}, '$_');
-            my $lencheck = $+{toinf}  ? qq(( $+{from} <= \@{§} ))
-                         : $+{to}     ? qq(( $+{from} <= \@{§} && \@{§} <= $+{to} ))
-                         :              qq((  $+{len} == \@{§} ));
+        if ( $param =~ $LENCHECK ) {
+            my ($subcheck) = _gen_of_check_code( $+{check}, '$_' );
+            my $lencheck
+              = $+{toinf} ? qq(( $+{from} <= \@{§} ))
+              : $+{to}    ? qq(( $+{from} <= \@{§} && \@{§} <= $+{to} ))
+              :             qq((  $+{len} == \@{§} ));
 
             return qq(( $CHECK{ARRAY} && $lencheck && eval { !grep{ !$subcheck } \@{§} } ));
         }
+
         # Otherwise we just check the parametric subcheck against each element...
         else {
-            my ($subcheck) = _gen_of_check_code($param, '$_');
+            my ($subcheck) = _gen_of_check_code( $param, '$_' );
             return qq(( $CHECK{ARRAY} && eval { !grep{ !$subcheck } \@{§} } ));
         }
     },
 
     # Tuples where each element has its own check...
-    TUPLE => sub ($check, $param) {
+    TUPLE => sub ( $check, $param ) {
+
         # Handy regexes...
         state $CHECK_LIST = qr{ $CHECK_EXPR (?: $PERLOWS , $PERLOWS $CHECK_EXPR )*+ ($PERLOWS ,)?+ }xms;
         state $TUPLE_ARG  = qr{
@@ -494,53 +520,53 @@ my %CHECK_GEN = (
         my $check_source = q{};
 
         # Track progress as well as special statuses (like optionals and repeated subtuples)...
-        my ($index, $opt_from, $seen_etc, $seen_rep) = 0;
+        my ( $index, $opt_from, $seen_etc, $seen_rep ) = 0;
 
         # Process each subcheck in the tuple specification...
-        while ($param =~ m{ \G $TUPLE_ARG }gcxms) {
+        while ( $param =~ m{ \G $TUPLE_ARG }gcxms ) {
             my %match = %+;
 
             # ETC or REP must be last element of tuple specification...
-            if ($seen_etc)   { Carp::croak "Can't specify $& after ETC in check $check"; }
-            if ($seen_rep)   { Carp::croak "Can't specify $& after REP in check $check"; }
+            if ($seen_etc) { Carp::croak "Can't specify $& after ETC in check $check"; }
+            if ($seen_rep) { Carp::croak "Can't specify $& after REP in check $check"; }
 
             # Handle a final ETC...
-            if ($match{etc}) {
+            if ( $match{etc} ) {
                 $opt_from //= $index;
                 $seen_etc = q{'Inf'};
                 next;
             }
 
             # Handle a final REP...
-            if ($match{rep}) {
+            if ( $match{rep} ) {
                 $seen_rep = 1;
                 my $rep_checks_code = q{};
-                my $rep_count = 0;
+                my $rep_count       = 0;
 
                 # Loop through the REP's sub-subchecks and build the appropriate checking code...
-                while ($match{list} =~ m{ \G $PERLOWS (?<subcheck> $CHECK_EXPR ) $PERLOWS ,? }gxms) {
-                    my ($nextcheck) = _gen_of_check_code($+{subcheck}, qq{§->[\$n + $rep_count]});
+                while ( $match{list} =~ m{ \G $PERLOWS (?<subcheck> $CHECK_EXPR ) $PERLOWS ,? }gxms ) {
+                    my ($nextcheck) = _gen_of_check_code( $+{subcheck}, qq{§->[\$n + $rep_count]} );
                     $rep_checks_code .= qq{\$okay &&= $nextcheck or last;};
                     $rep_count++;
                 }
 
                 # Complete the rep checking code...
                 my $required_rep = $match{opt} ? q{} : qq{ (\@{§} - $index) > 0 && };
-                $check_source .= qq{ && ( $required_rep  (\@{§} - $index) % $rep_count == 0 && do { my \$okay = 1; for (my \$n = $index; \$n < \@{§}; \$n += $rep_count) { $rep_checks_code} \$okay; } ) };
+                $check_source
+                  .= qq{ && ( $required_rep  (\@{§} - $index) % $rep_count == 0 && do { my \$okay = 1; for (my \$n = $index; \$n < \@{§}; \$n += $rep_count) { $rep_checks_code} \$okay; } ) };
 
                 # Remember the tuple index we're optional from...
-                $opt_from //= $index + ($match{opt} ? 0 : $rep_count);
+                $opt_from //= $index + ( $match{opt} ? 0 : $rep_count );
                 $seen_etc = q{'Inf'};
 
                 next;
             }
 
-
             # Get the source for the element check...
-            my ($nextcheck) = _gen_of_check_code($+{check}, qq{§->[$index]});
+            my ($nextcheck) = _gen_of_check_code( $+{check}, qq{§->[$index]} );
 
             # Optional elements either don't exist or satisfy the corresponding check...
-            if ($match{opt}) {
+            if ( $match{opt} ) {
                 $opt_from //= $index;
                 $check_source .= qq{ && eval { \@{§} <= $index || $nextcheck } };
             }
@@ -548,7 +574,7 @@ my %CHECK_GEN = (
             # Required elements must exist, precede optional/slurpy elements, and satisfy the check...
             else {
                 Carp::croak "Can't specify non-optional $match{elem} after OPT or ETC in check $check"
-                    if defined($opt_from) || $seen_etc;
+                  if defined($opt_from) || $seen_etc;
                 $check_source .= qq{ && eval { \@{§} > $index && $nextcheck } };
             }
 
@@ -558,36 +584,40 @@ my %CHECK_GEN = (
 
         # Anything else in the config is an error...
         Carp::croak "Unexpected trailing '$&' in TUPLE specification"
-            if $param =~ m{ \G $PERLOWS \S.* }gxms;
+          if $param =~ m{ \G $PERLOWS \S.* }gxms;
 
         # Work out the length logic for verifying the tuple...
         my $mincount = $opt_from // $index;
         my $maxcount = $seen_etc // $index;
-        my $count_check = $mincount eq $maxcount ? qq{\@{§} == $mincount}
-                                                 : qq{\@{§} >= $mincount && \@{§} <= $maxcount};
+        my $count_check
+          = $mincount eq $maxcount
+          ? qq{\@{§} == $mincount}
+          : qq{\@{§} >= $mincount && \@{§} <= $maxcount};
 
         # Generate and return the final check (phew!)...
         return qq(( $CHECK{ARRAY} && $count_check  $check_source ));
     },
 
     # Hash checks, which may have both key and value subchecks...
-    HASH => sub ($check, $param) {
+    HASH => sub ( $check, $param ) {
+
         # If it has a key subcheck build both subchecks and return the checking code...
-        if ($param =~ m{\A \s*+ (?<key> $CHECK_EXPR ) \s*+ => \s* (?<val> $CHECK_EXPR) \s*+ \z}xms) {
-            my ($keycheck) = _gen_of_check_code($+{key}, '$_');
-            my ($valcheck) = _gen_of_check_code($+{val}, '$_');
+        if ( $param =~ m{\A \s*+ (?<key> $CHECK_EXPR ) \s*+ => \s* (?<val> $CHECK_EXPR) \s*+ \z}xms ) {
+            my ($keycheck) = _gen_of_check_code( $+{key}, '$_' );
+            my ($valcheck) = _gen_of_check_code( $+{val}, '$_' );
             return qq(( $CHECK{HASH} && eval { !grep{ !$keycheck } keys %{§} } && eval { !grep{ !$valcheck } values %{§} } ));
         }
 
         # Otherwise just build and return checking code for the values...
         else {
-            my ($subcheck) = _gen_of_check_code($param, '$_');
+            my ($subcheck) = _gen_of_check_code( $param, '$_' );
             return qq(( $CHECK{HASH} && eval { !grep{ !$subcheck } values %{§} } ));
         }
     },
 
     # A DICT is a HASH where individual keys are specified separately...
-    DICT => sub ($check, $param) {
+    DICT => sub ( $check, $param ) {
+
         # Handy regex...
         state $DICT_ARG = qr{
             $PERLOWS (?<elem> (?>  (?<etc> ETC )
@@ -617,12 +647,12 @@ my %CHECK_GEN = (
         my @keys;
 
         # Process each subcheck in the dict specification...
-        while ($param =~ m{ \G $DICT_ARG }gcxms) {
+        while ( $param =~ m{ \G $DICT_ARG }gcxms ) {
             my %match = %+;
 
             # ETC must be last element of dict specification...
-            if ($seen_etc)   { Carp::croak "Can't specify $match{elem} after ETC within a DICT check"; }
-            if ($match{etc}) {
+            if ($seen_etc) { Carp::croak "Can't specify $match{elem} after ETC within a DICT check"; }
+            if ( $match{etc} ) {
                 $seen_etc = 1;
                 next;
             }
@@ -631,18 +661,18 @@ my %CHECK_GEN = (
             push @keys, $match{key};
 
             # Get the source for the element check...
-            if (substr($match{check},0,4) eq 'OPT[') {
-                my $opt_value = substr($match{check},4,-1);
+            if ( substr( $match{check}, 0, 4 ) eq 'OPT[' ) {
+                my $opt_value = substr( $match{check}, 4, -1 );
                 Carp::croak "Invalid DICT item:      $match{key} => OPT[ $opt_value ]\n",
-                      "Perhaps you meant: OPT[ $match{key} => $opt_value ]\n",
-                      "or maybe you want:      $match{key} => $opt_value | UNDEF\n",
-                      "(Specifying a required key but an optional value doesn't make sense.\n",
-                      " If the key exists in the hash, then the value must be present too.)\n";
+                  "Perhaps you meant: OPT[ $match{key} => $opt_value ]\n",
+                  "or maybe you want:      $match{key} => $opt_value | UNDEF\n",
+                  "(Specifying a required key but an optional value doesn't make sense.\n",
+                  " If the key exists in the hash, then the value must be present too.)\n";
             }
-            my ($nextcheck) = _gen_of_check_code($match{check}, qq{(§)->{$match{key}}});
+            my ($nextcheck) = _gen_of_check_code( $match{check}, qq{(§)->{$match{key}}} );
 
             # Optional elements either don't exist or satisfy the corresponding check...
-            if ($match{opt}) {
+            if ( $match{opt} ) {
                 $check_source .= qq{ && eval { !exists §->{$match{key}} || $nextcheck } };
             }
 
@@ -654,11 +684,11 @@ my %CHECK_GEN = (
 
         # The target hash must have only keys specified in the dict.
         # (The trailing => in the eval ensures that bareword keys are also interpreted correctly)...
-        my $allowed_keys = join '|', map { '\\Q'. eval("$_ =>") . '\\E' } @keys;
+        my $allowed_keys = join '|', map { '\\Q' . eval("$_ =>") . '\\E' } @keys;
 
         # Anything else in the config is an error...
         Carp::croak "Unexpected trailing '$&' in DICT specification"
-              if $param =~ m{ \G $PERLOWS \S.* }gxms;
+          if $param =~ m{ \G $PERLOWS \S.* }gxms;
 
         # Work out the logic for verifying the dict...
         my $required_keys = $seen_etc ? q{} : qq{ && !grep({!/^(?:$allowed_keys)\$/} keys %{§}) };
@@ -666,47 +696,47 @@ my %CHECK_GEN = (
     },
 
     # OPT can't appear as a top-level check...
-    OPT => sub ($check, $param) {
-        Carp::croak "Can't specify OPT[$param], except as part of a TUPLE, SEQ, or DICT"
+    OPT => sub ( $check, $param ) {
+        Carp::croak "Can't specify OPT[$param], except as part of a TUPLE, SEQ, or DICT";
     },
 
     # A parametric classname is a string that also satisfies the isa check...
-    CLASS => sub ($check, $param) {
+    CLASS => sub ( $check, $param ) {
         return qq(( $CHECK{STR} && length(§) > 0 && (''.§)->isa(q{$param}) ));
     },
 
     # An parametric object is an object that also satisfies the isa check...
-    OBJ => sub ($check, $param) {
+    OBJ => sub ( $check, $param ) {
         return qq(( $CHECK{OBJ} && (§)->isa(q{$param}) ));
     },
 
     # Roles (and more specifically role introspection) aren't yet integrated to Perl...
-    ROLE => sub ($check, $param) {
+    ROLE => sub ( $check, $param ) {
         Carp::croak "ROLE[$param] check failed (can't yet detect roles)";
     },
 
     # Only objects can be checked for overloaded operators...
-    OP => sub ($check, $param) {
+    OP => sub ( $check, $param ) {
         return qq(( $CHECK{OBJ} && overload::Method(§,q{$param}) ));
     },
 
     # Both objects and classes can "isa" a classname...
-    ISA => sub ($check, $param) {
+    ISA => sub ( $check, $param ) {
         return qq(( ($CHECK{OBJ} || $CHECK{CLASS}) && (§)->isa(q{$param}) ));
     },
 
     # Both objects and classes can "DOES" a classname (or eventually a rolename)...
-    DOES => sub ($check, $param) {
+    DOES => sub ( $check, $param ) {
         return qq(( ($CHECK{OBJ} || $CHECK{CLASS}) && (§)->DOES(q{$param}) ));
     },
 
     # Both objects and classes can "can" a methodname...
-    CAN => sub ($check, $param) {
+    CAN => sub ( $check, $param ) {
         return qq(( ($CHECK{OBJ} || $CHECK{CLASS}) && (§)->can(q{$param}) ));
     },
 
-    LIST => sub ($check, $param) { return qq(do{BEGIN{die "Can't specify a LIST check in an :of"}}); },
-    SEQ  => sub ($check, $param) { return qq(do{BEGIN{die "Can't specify a SEQ check in an :of"}}); },
+    LIST => sub ( $check, $param ) { return qq(do{BEGIN{die "Can't specify a LIST check in an :of"}}); },
+    SEQ  => sub ( $check, $param ) { return qq(do{BEGIN{die "Can't specify a SEQ check in an :of"}}); },
 );
 
 my %RETURNS_CHECK_GEN = (
@@ -716,37 +746,35 @@ my %RETURNS_CHECK_GEN = (
 );
 
 # Find and call the appropriate generator for a parametric :of check...
-sub _gen_parameterized_of_check_code ($check, $params) {
-    my $generator = $CHECK_GEN{$check}
-            // return qq{(do{BEGIN{die 'Unknown check: $check\[$params]'}}};
-    return $generator->($check, $params)
+sub _gen_parameterized_of_check_code ( $check, $params ) {
+    my $generator = $CHECK_GEN{$check} // return qq{(do{BEGIN{die 'Unknown check: $check\[$params]'}}};
+    return $generator->( $check, $params );
 }
 
 # Find and call the appropriate generator for a parametric :returns check...
-sub _gen_parameterized_returns_check_code ($check, $params) {
-    my $generator = $RETURNS_CHECK_GEN{$check}
-        // return qq{(do{BEGIN{die 'Unknown check: $check\[$params]'}}};
-    return $generator->($check, $params)
-            =~ s{\A \(}{$check =~ /\A(?:LIST|SEQ)\z/ ? '(«LIST»&&' : '(«SCALAR»&&'}exmsr;
+sub _gen_parameterized_returns_check_code ( $check, $params ) {
+    my $generator = $RETURNS_CHECK_GEN{$check} // return qq{(do{BEGIN{die 'Unknown check: $check\[$params]'}}};
+    return $generator->( $check, $params ) =~ s{\A \(}{$check =~ /\A(?:LIST|SEQ)\z/ ? '(«LIST»&&' : '(«SCALAR»&&'}exmsr;
 }
 
 # Generate source code for a :returns check...
-my sub _gen_returns_checks_source ($check, $subname) {
+my sub _gen_returns_checks_source ( $check, $subname ) {
+
     # Do we know the name of the subroutine being modified???
     $subname = $subname ? "$subname()" : 'anonymous subroutine';
 
     # Some checks can be optimized...
     my %inlines = do {
-        if ($check eq 'ANY') {
-            ( syn_list_check => 1, syn_scalar_check => 1, syn_void_check  => 1 );
+        if ( $check eq 'ANY' ) {
+            ( syn_list_check => 1, syn_scalar_check => 1, syn_void_check => 1 );
         }
-        elsif ($check eq 'LIST') {
+        elsif ( $check eq 'LIST' ) {
             ( syn_list_check => 1, syn_scalar_check => 1, syn_void_check => 0 );
         }
-        elsif ($check eq 'VOID') {
-            ( syn_list_check   => 0,  list_msg   => qq{q{Can't call $subname in list context}},
-              syn_scalar_check => 0,  scalar_msg => qq{q{Can't call $subname in scalar context}},
-              syn_void_check   => 1
+        elsif ( $check eq 'VOID' ) {
+            (   syn_list_check   => 0, list_msg   => qq{q{Can't call $subname in list context}},
+                syn_scalar_check => 0, scalar_msg => qq{q{Can't call $subname in scalar context}},
+                syn_void_check   => 1
             );
         }
         else {    # It's a "complex" check...
@@ -773,31 +801,27 @@ my sub _gen_returns_checks_source ($check, $subname) {
     };
 
     # Install default messages (if needed)...
-    $inlines{syn_list_msg}
-        //= qq{'List return value ' . Data::Checks::Parser::pp(\@result) . qq{ failed :returns(\Q$check\E) check in call to $subname}};
-    $inlines{syn_scalar_msg}
-        //= qq{'Scalar return value ' . Data::Checks::Parser::pp(\$result) . qq{ failed :returns(\Q$check\E) check in call to $subname}};
-    $inlines{syn_void_msg}
-        //= qq{qq{Void return from call to $subname failed :returns(\Q$check\E) check\\n(No checkable return value in void context.)}};
+    $inlines{syn_list_msg}   //= qq{'List return value ' . Data::Checks::Parser::pp(\@result) . qq{ failed :returns(\Q$check\E) check in call to $subname}};
+    $inlines{syn_scalar_msg} //= qq{'Scalar return value ' . Data::Checks::Parser::pp(\$result) . qq{ failed :returns(\Q$check\E) check in call to $subname}};
+    $inlines{syn_void_msg}   //= qq{qq{Void return from call to $subname failed :returns(\Q$check\E) check\\n(No checkable return value in void context.)}};
 
     return %inlines;
 }
 
 # Build a class that implements a tieclass for a specific array with specific checks...
-sub _build_array_check_tieclass ($VAR_NAME, $CHECK_NAME, $uninitialized) {
+sub _build_array_check_tieclass ( $VAR_NAME, $CHECK_NAME, $uninitialized ) {
 
     # Handle the case where a length constraint is also specified...
     state $UINT     = qr{ \+? \d+ (?: E\+?\d+)? }ixms;
     state $RANGE    = qr{ (?<from> $UINT ) $PERLOWS \.\. (?> (?<to> $UINT ) | (?<toinf> inf ) ) }ixms;
     state $LENCHECK = qr{ (?<len> $RANGE | (?<exact> $UINT) ) $PERLOWS
                           (?: => | , ) $PERLOWS (?<check> .* ) }xms;
-    if ($CHECK_NAME =~ $LENCHECK) {
-        return _build_array_lencheck_tieclass($VAR_NAME, $+{check}, $uninitialized, {%+});
+    if ( $CHECK_NAME =~ $LENCHECK ) {
+        return _build_array_lencheck_tieclass( $VAR_NAME, $+{check}, $uninitialized, {%+} );
     }
 
     # Build the various optimized versions of the check for different tiemethods...
-    my ($CHECK_UNDERSCORE, $CHECK_2, $CHECK_UNDEF)
-        = Data::Checks::Parser::_gen_of_check_code($CHECK_NAME, '$_', '$_[2]', 'undef()');
+    my ( $CHECK_UNDERSCORE, $CHECK_2, $CHECK_UNDEF ) = Data::Checks::Parser::_gen_of_check_code( $CHECK_NAME, '$_', '$_[2]', 'undef()' );
 
     # Each variable gets it's own optimized tieclass...
     state $ARRAY_ID = 'A0000000000001';
@@ -929,24 +953,24 @@ sub _build_array_check_tieclass ($VAR_NAME, $CHECK_NAME, $uninitialized) {
     return $TIE_CLASS;
 }
 
-
 # It's more expensive to check array lengths, so use a separate tieclass (only when needed)...
-sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len_ref) {
+sub _build_array_lencheck_tieclass ( $VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len_ref ) {
+
     # Work out how to check lengths...
-    my $MIN_LEN = ($len_ref->{exact} // $len_ref->{from});
+    my $MIN_LEN        = ( $len_ref->{exact} // $len_ref->{from} );
     my $LEN_CHECK_SPEC = $len_ref->{len};
-    my $LEN_CHECK_CODE = $len_ref->{toinf}  ? qq(( $len_ref->{from} <= § ))
-                       : $len_ref->{to}     ? qq(( $len_ref->{from} <= § && § <= $len_ref->{to} ))
-                       :                      qq((  $len_ref->{len} == § ));
-    my ($LEN_CHECK_AT_UNDER1, $LEN_CHECK_1, $LEN_CHECK_1_PLUS_1, $LEN_CHECK_LAST,
-        $LEN_CHECK_NEWSIZE, $LEN_CHECK_PLUS_ATUNDER, $LEN_CHECK_MINUS_1, $LEN_CHECK_PLUS_1)
-            = map { $LEN_CHECK_CODE =~ s{§}{($_)}gr }
-                  q{@{$_[1]}}, q{$_[1]}, q{1+$_[1]}, q{$#{$_[0]}}, q{$newsize}, 
-                  q{@{$real_array_ref}+@_}, q{@{$real_array_ref} - 1}, q{@{$real_array_ref} - 1};
+    my $LEN_CHECK_CODE
+      = $len_ref->{toinf} ? qq(( $len_ref->{from} <= § ))
+      : $len_ref->{to}    ? qq(( $len_ref->{from} <= § && § <= $len_ref->{to} ))
+      :                     qq((  $len_ref->{len} == § ));
+    my ($LEN_CHECK_AT_UNDER1, $LEN_CHECK_1,            $LEN_CHECK_1_PLUS_1, $LEN_CHECK_LAST,
+        $LEN_CHECK_NEWSIZE,   $LEN_CHECK_PLUS_ATUNDER, $LEN_CHECK_MINUS_1,  $LEN_CHECK_PLUS_1
+      )
+      = map { $LEN_CHECK_CODE =~ s{§}{($_)}gr } q{@{$_[1]}}, q{$_[1]}, q{1+$_[1]}, q{$#{$_[0]}}, q{$newsize},
+      q{@{$real_array_ref}+@_}, q{@{$real_array_ref} - 1}, q{@{$real_array_ref} - 1};
 
     # Work out how to check values...
-    my ($CHECK_UNDERSCORE, $CHECK_2, $CHECK_UNDEF)
-        = Data::Checks::Parser::_gen_of_check_code($CHECK_NAME, '$_', '$_[2]', 'undef()');
+    my ( $CHECK_UNDERSCORE, $CHECK_2, $CHECK_UNDEF ) = Data::Checks::Parser::_gen_of_check_code( $CHECK_NAME, '$_', '$_[2]', 'undef()' );
 
     # These location lookups are used in multiple places, so make them string constants...
     my $LOC0 = q{' at ' . join(' line ', (caller  )[1,2]) . "\\n"};
@@ -955,8 +979,8 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
     my $QQ_VAR_NAME = $VAR_NAME =~ m{\A \W}xms ? "\\$VAR_NAME" : $VAR_NAME;
 
     # These are the default behaviours for length checks that allow a zero length...
-    my ($CLEAR_CHECK, $CLEAR_PENDING_VAR) = (q{},q{});
-    my $CLEAR_METHOD  =  q{ sub CLEAR  { @{$_[0]} = ()} };  # Just the standard ClEAR behaviour
+    my ( $CLEAR_CHECK, $CLEAR_PENDING_VAR ) = ( q{}, q{} );
+    my $CLEAR_METHOD  = q{ sub CLEAR  { @{$_[0]} = ()} };    # Just the standard ClEAR behaviour
     my $EXTEND_METHOD = qq{ sub EXTEND {
                                 # Can only extend if the new size satisfies the length check...
                                 unless ($LEN_CHECK_1) {
@@ -972,7 +996,8 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
 
     # If the min length > 0, things get a little bit more complicated
     # (because a CLEAR isn't allowed unless immediately followed by a suitanle EXTEND)...
-    if ($MIN_LEN > 0) {
+    if ( $MIN_LEN > 0 ) {
+
         # We have to track CLEAR ops and provide a suitable failure response to them...
         $CLEAR_PENDING_VAR = qq{ my \$clear_pending;  # Track CLEAR ops
 
@@ -987,18 +1012,18 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
                              };
 
         # All ops have to check that they weren't preceded by an invalid CLEAR...
-        $CLEAR_CHECK       = qq{ _fail_clear() if \$clear_pending; };
+        $CLEAR_CHECK = qq{ _fail_clear() if \$clear_pending; };
 
         # The CLEAR method has to track where it occurred
         # (it's only valid if an EXTEND occurs immediately, and on the same line)...
-        $CLEAR_METHOD      = qq{ sub CLEAR {
+        $CLEAR_METHOD = qq{ sub CLEAR {
                                     \@{\$_[0]} = ();
                                     \$clear_pending = ' at ' . join(' line ', (caller)[1,2]) . "\\n";
                                  }
                              };
 
         # EXTEND requests fail if not immediately after a CLEAR, or if they're of the wrong size...
-        $EXTEND_METHOD     = qq{ sub EXTEND {
+        $EXTEND_METHOD = qq{ sub EXTEND {
                                     _fail_clear() unless \$clear_pending eq $LOC0;
                                     _fail_clear(\$_[1]) unless $LEN_CHECK_1;
 
@@ -1241,27 +1266,26 @@ sub _build_array_lencheck_tieclass ($VAR_NAME, $CHECK_NAME, $UNINITIALIZED, $len
         }
 
         1; # Even here we need the stupid final true value! :-)
-    } // die $@; # Carp::croak $@ =~ s/ at .*|BEGIN failed--compilation aborted.*//rs;
+    } // die $@;    # Carp::croak $@ =~ s/ at .*|BEGIN failed--compilation aborted.*//rs;
 
     # Return the classname so something can be tied to it...
     return $TIE_CLASS;
 }
 
-
 # Constructs an optimized class for implementing checked hashes...
 
-sub _build_hash_check_tieclass ($VAR_NAME, $CHECK_NAME) {
+sub _build_hash_check_tieclass ( $VAR_NAME, $CHECK_NAME ) {
+
     # Extract the check(s) from the specification...
-    my ($keycheck, $valcheck)
-        = ($CHECK_NAME =~ m{\A \s*+ (?<key> $CHECK_EXPR ) \s*+ => \s* (?<val> $CHECK_EXPR) \s*+ \z}xms)
-            ? @+{'key','val'}
-            : (undef, $CHECK_NAME);
+    my ( $keycheck, $valcheck )
+      = ( $CHECK_NAME =~ m{\A \s*+ (?<key> $CHECK_EXPR ) \s*+ => \s* (?<val> $CHECK_EXPR) \s*+ \z}xms )
+      ? @+{ 'key', 'val' }
+      : ( undef, $CHECK_NAME );
 
     # Generate specific implementations for both key and value checks...
-    my ($CHECK_KEY, $CHECK_1)
-        = defined $keycheck ? Data::Checks::Parser::_gen_of_check_code($keycheck, '$key', '$_[1]') : (1,1);
-    my ($CHECK_VALUE, $CHECK_2)
-        = Data::Checks::Parser::_gen_of_check_code($valcheck, '$value', '$_[2]');
+    my ( $CHECK_KEY, $CHECK_1 )
+      = defined $keycheck ? Data::Checks::Parser::_gen_of_check_code( $keycheck, '$key', '$_[1]' ) : ( 1, 1 );
+    my ( $CHECK_VALUE, $CHECK_2 ) = Data::Checks::Parser::_gen_of_check_code( $valcheck, '$value', '$_[2]' );
 
     # Generate a unique classname for each tied hash...
     state $HASH_ID = 'H0000000000001';
@@ -1315,6 +1339,7 @@ sub _build_hash_check_tieclass ($VAR_NAME, $CHECK_NAME) {
 
 # Rewrite a subroutine declaration to install return-value checks...
 sub _rewrite_sub ($decl_ref) {
+
     # Some handy regexes...
     state $DECOLONIZE = qr{ \A $PERLOWS : $PERLOWS \Z }xms;
     state $EXTRACT_OF = qr{ (?<param> (?<sigil> [\$\@%] ) \w+)  $PERLOWS
@@ -1325,7 +1350,7 @@ sub _rewrite_sub ($decl_ref) {
                                 (?<round_contents>  (?: [^()]++ | \\. | \(  (?&round_contents)  \) )*+ )
                             )
                           }xms;
-    state $RETURNS    = qr{ \b returns \( (?<returns> (?&quotelike_contents) ) \)
+    state $RETURNS = qr{ \b returns \( (?<returns> (?&quotelike_contents) ) \)
                             (?(DEFINE)
                                 (?<quotelike_contents>
                                     (?: [^()\\]++
@@ -1338,52 +1363,52 @@ sub _rewrite_sub ($decl_ref) {
 
     # Extract the :returns specifier (if any)...
     my $returns_check;
-    if ($decl_ref->{syn_preattrs}) {
-        $decl_ref->{syn_preattrs}
-            =~ s{ $RETURNS }{ q{ } x length($&) }gexms;
+    if ( $decl_ref->{syn_preattrs} ) {
+        $decl_ref->{syn_preattrs} =~ s{ $RETURNS }{ q{ } x length($&) }gexms;
         $returns_check = $+{returns};
-        $decl_ref->{syn_preattrs}
-            =~ s{ $DECOLONIZE }{ q{ } x length($&) }gexmso;
+        $decl_ref->{syn_preattrs} =~ s{ $DECOLONIZE }{ q{ } x length($&) }gexmso;
     }
-    elsif ($decl_ref->{syn_postattrs}) {
-        $decl_ref->{syn_postattrs}
-            =~ s{ $RETURNS }{ q{ } x length($&) }gexms;
+    elsif ( $decl_ref->{syn_postattrs} ) {
+        $decl_ref->{syn_postattrs} =~ s{ $RETURNS }{ q{ } x length($&) }gexms;
         $returns_check = $+{returns};
-        $decl_ref->{syn_postattrs}
-            =~ s{ $DECOLONIZE }{ q{ } x length($&) }gexms;
+        $decl_ref->{syn_postattrs} =~ s{ $DECOLONIZE }{ q{ } x length($&) }gexms;
     }
 
     # Extract parameter :of specifiers (if any)...
     my $OF_CHECKS = q{};
-    if ($decl_ref->{syn_sig}) {
-        while ($decl_ref->{syn_sig} =~ s{ $EXTRACT_OF }{$+{param}}xms) {
+    if ( $decl_ref->{syn_sig} ) {
+        while ( $decl_ref->{syn_sig} =~ s{ $EXTRACT_OF }{$+{param}}xms ) {
+
             # Extract and normalize parameter's :of check...
             my %of = %+;
-            $of{check} = substr($of{check}, 1, -1);
+            $of{check} = substr( $of{check}, 1, -1 );
 
-            if ($of{sigil} eq '$') {
+            if ( $of{sigil} eq '$' ) {
+
                 # Generate and cache wizard for checking scalar parameter values...
-                Data::Checks::Parser::_build_scalar_wizard_for(@of{qw< check param >});
+                Data::Checks::Parser::_build_scalar_wizard_for( @of{qw< check param >} );
 
                 # Build inline check for initialization of parameter...
-                my ($pass_check) = Data::Checks::Parser::_gen_of_check_code(@of{qw< check param >});
+                my ($pass_check) = Data::Checks::Parser::_gen_of_check_code( @of{qw< check param >} );
 
                 # Install extra code at start of sub to check parameter...
-                $OF_CHECKS .= qq{Data::Checks::Parser::FAIL q{Can't pass } . Data::Checks::Parser::pp($of{param}) . q{ to parameter $of{param} in call to $decl_ref->{syn_name}\() at } . join(' line ', (caller)[1,2]) . qq{:\\nValue failed parameter's \Q$of{check}\E check.\\n} if !$pass_check; Variable::Magic::cast $of{param}, \$Data::Checks::Parser::SCALAR_WIZARD_FOR{q{$of{param}/$of{check}}}; };
+                $OF_CHECKS
+                  .= qq{Data::Checks::Parser::FAIL q{Can't pass } . Data::Checks::Parser::pp($of{param}) . q{ to parameter $of{param} in call to $decl_ref->{syn_name}\() at } . join(' line ', (caller)[1,2]) . qq{:\\nValue failed parameter's \Q$of{check}\E check.\\n} if !$pass_check; Variable::Magic::cast $of{param}, \$Data::Checks::Parser::SCALAR_WIZARD_FOR{q{$of{param}/$of{check}}}; };
             }
-            elsif ($of{sigil} eq '@') {
+            elsif ( $of{sigil} eq '@' ) {
+
                 # Generate tie class for checking array parameter values...
-                my $TIECLASS = Data::Checks::Parser::_build_array_check_tieclass(@of{qw< param check >}, 1);
+                my $TIECLASS = Data::Checks::Parser::_build_array_check_tieclass( @of{qw< param check >}, 1 );
 
                 # Install extra code at start of sub to check parameter...
-                $OF_CHECKS .= qq{tie $of{param}, '$TIECLASS', \\$of{param}; }
+                $OF_CHECKS .= qq{tie $of{param}, '$TIECLASS', \\$of{param}; };
             }
             else {
                 # Generate tie class for checking array parameter values...
-                my $TIECLASS = Data::Checks::Parser::_build_hash_check_tieclass(@of{qw< param check >});
+                my $TIECLASS = Data::Checks::Parser::_build_hash_check_tieclass( @of{qw< param check >} );
 
                 # Install extra code at start of sub to check parameter...
-                $OF_CHECKS .= qq{tie $of{param}, '$TIECLASS', \\$of{param}; }
+                $OF_CHECKS .= qq{tie $of{param}, '$TIECLASS', \\$of{param}; };
             }
         }
     }
@@ -1395,7 +1420,7 @@ sub _rewrite_sub ($decl_ref) {
     $returns_check //= 'ANY';
 
     # Update syntactic components with return-checking source code...
-    %{$decl_ref} = ( %{$decl_ref}, _gen_returns_checks_source($returns_check, $decl_ref->{syn_name}) );
+    %{$decl_ref} = ( %{$decl_ref}, _gen_returns_checks_source( $returns_check, $decl_ref->{syn_name} ) );
 
     # Create unique variables to check disabled sub checking...
     state $NONE_TRACKER = 'NONE0000000000';
@@ -1407,9 +1432,10 @@ sub _rewrite_sub ($decl_ref) {
 
     # Build source code for :returns check (if any)...
     return do {
-      $K_MODE eq '-K'
-        # Under -K we ignore (i.e. don't implement) parameter and returns checks
-        ? qq{
+        $K_MODE eq '-K'
+
+          # Under -K we ignore (i.e. don't implement) parameter and returns checks
+          ? qq{
             «lexical»
             «ws_presub»        sub
             «ws_prename»       «name»
@@ -1420,8 +1446,8 @@ sub _rewrite_sub ($decl_ref) {
             $FIX_SUB_ATTR_BUG
           }
 
-        # Otherwise, we implement all the checks...
-        : qq{
+          # Otherwise, we implement all the checks...
+          : qq{
             «lexical»
             «ws_presub»        sub
             «ws_prename»       «name»
@@ -1464,10 +1490,9 @@ sub _rewrite_sub ($decl_ref) {
                 }
             }$FIX_SUB_ATTR_BUG
         }
-    } =~ s/\n/ /gr =~ s{«([^»]+)»}{ $decl_ref->{"syn_$1"} // q{} }gre;  # Fill in the components
+      }
+      =~ s/\n/ /gr =~ s{«([^»]+)»}{ $decl_ref->{"syn_$1"} // q{} }gre;    # Fill in the components
 }
-
-
 
 # (Don't try this at home, kids!)
 # Add :of attribute processing (without polluting UNIVERSAL to do so)...
@@ -1476,8 +1501,8 @@ my %SOURCE_VARNAME;
 my %SOURCE_CHECK_SPEC;
 my %SOURCE_IS_INIT;
 
-package # Hide this from CPAN
-attributes {
+package    # Hide this from CPAN
+  attributes {
     use attributes;
     use Variable::Magic qw< wizard cast >;
 
@@ -1485,70 +1510,76 @@ attributes {
     our @CARP_NOT = qw< Data::Checks::Parser Filter::Simple >;
 
     # Cache the original attributes loader...
-    state $real_import; BEGIN { $real_import = *attributes::import{CODE}; }
+    state $real_import;
+    BEGIN { $real_import = *attributes::import{CODE}; }
 
     # Make a wrapper...
     no warnings 'redefine';
     *import = sub {
+
         # Pass anything else to the real mechanism...
         goto &{$real_import} if @_ < 4 || $_[3] !~ /\Adatachecksof\d+\z/;
 
         # :of is a no-op if checks are deactivated...
         return if $K_MODE eq '-K';
 
-        my $hints = ( (caller 0)[10] // {} );
-        return if ($hints->{'Data::Checks::Parser/mode'}//q{}) eq 'NONE';
+        my $hints = ( ( caller 0 )[10] // {} );
+        return if ( $hints->{'Data::Checks::Parser/mode'} // q{} ) eq 'NONE';
 
         # Unpack the components of the :of attribute...
         # XXX our import hack might work here, but this is csalled multiple
         # times per block of code, so it's not perfect.
-        my (undef, $package, $referent, $CHECK_NAME) = @_;
+        my ( undef, $package, $referent, $CHECK_NAME ) = @_;
         my $reftype = Data::Checks::Parser::reftype($referent);
 
         # Extract the actual check and variable info...
         my $uninitialized = $SOURCE_IS_INIT{$CHECK_NAME} ? 0 : 1;
         my $check_spec    = $SOURCE_CHECK_SPEC{$CHECK_NAME};
-        my $varname       = shift @{$SOURCE_VARNAME{$CHECK_NAME}};
-        push @{$SOURCE_VARNAME{$CHECK_NAME}}, $varname;
+        my $varname       = shift @{ $SOURCE_VARNAME{$CHECK_NAME} };
+        push @{ $SOURCE_VARNAME{$CHECK_NAME} }, $varname;
 
         # Some checks are illegal in an :of attribute...
-        if ($reftype ne 'code' && $check_spec =~ /\bVOID\b|\bLIST\b/) {
+        if ( $reftype ne 'code' && $check_spec =~ /\bVOID\b|\bLIST\b/ ) {
             die qq{Can't specify :of($check_spec) on a \L$reftype\E variable at },
-                 join(' line ', (caller)[1,2]), "\n",
-                qq{(The LIST and VOID checks are only valid in the :returns specifier of a subroutine)\n};
+              join( ' line ', (caller)[ 1, 2 ] ), "\n",
+              qq{(The LIST and VOID checks are only valid in the :returns specifier of a subroutine)\n};
         }
 
         # Handle the different kinds of declarations individually...
         # 1. Implement checked scalars via Variable::Magic (for performance)...
-        if ($reftype eq 'SCALAR') {
+        if ( $reftype eq 'SCALAR' ) {
+
             # Uninitialized scalars can only be declared with checks that also pass for an undef...
             if ($uninitialized) {
-                my ($check_undef) = Data::Checks::Parser::_gen_of_check_code($check_spec, 'undef()');
-                if (!eval $check_undef) {
+                my ($check_undef) = Data::Checks::Parser::_gen_of_check_code( $check_spec, 'undef()' );
+                if ( !eval $check_undef ) {
                     Data::Checks::Parser::FAIL
-                        qq{Can't declare $varname :of($check_spec) with no initial value:\n},
-                        qq{the default undef value would fail the $check_spec check};
+                      qq{Can't declare $varname :of($check_spec) with no initial value:\n},
+                      qq{the default undef value would fail the $check_spec check};
                 }
             }
 
             # Build the required variable magic and install it on the scalar...
-            cast ${$referent}, Data::Checks::Parser::_build_scalar_wizard_for($check_spec, $varname);
+            cast ${$referent}, Data::Checks::Parser::_build_scalar_wizard_for( $check_spec, $varname );
         }
+
         # 2. Implement checked arrays via a tie (for completeness)...
-        elsif ($reftype eq 'ARRAY') {
-            my $tie_name = Data::Checks::Parser::_build_array_check_tieclass($varname, $check_spec, $uninitialized);
+        elsif ( $reftype eq 'ARRAY' ) {
+            my $tie_name = Data::Checks::Parser::_build_array_check_tieclass( $varname, $check_spec, $uninitialized );
             tie @{$referent}, $tie_name, $referent;
         }
+
         # 3. Implement checked hashes via a tie (for convenience)...
-        elsif ($reftype eq 'HASH') {
-            my $tie_name = Data::Checks::Parser::_build_hash_check_tieclass($varname, $check_spec);
+        elsif ( $reftype eq 'HASH' ) {
+            my $tie_name = Data::Checks::Parser::_build_hash_check_tieclass( $varname, $check_spec );
             tie %{$referent}, $tie_name, $referent;
         }
+
         # 4. Can't put an :of on a sub...
-        elsif ($reftype eq 'CODE') {
-            die qq{Can't specify an :of attribute on a subroutine at } . join(' line ', (caller)[1,2])
-              . qq{\n(did you mean :returns($check_spec)?)};
+        elsif ( $reftype eq 'CODE' ) {
+            die qq{Can't specify an :of attribute on a subroutine at } . join( ' line ', (caller)[ 1, 2 ] ) . qq{\n(did you mean :returns($check_spec)?)};
         }
+
         # 5. ...or on anything else...
         else {
             Data::Checks::Parser::FAIL qq{ Can't apply a check to $reftype referent};
@@ -1558,18 +1589,21 @@ attributes {
 
 # This generates an optimized implementation of a checked scalar...
 use Variable::Magic qw< wizard cast >;
-sub _build_scalar_wizard_for ($CHECK_NAME, $VARNAME) {
+
+sub _build_scalar_wizard_for ( $CHECK_NAME, $VARNAME ) {
+
     # We can cache these to optimize performance...
     our %SCALAR_WIZARD_FOR;
 
     # Generate, cache, and return the implementation...
-    return $SCALAR_WIZARD_FOR{$VARNAME . '/' . $CHECK_NAME} //= do {
+    return $SCALAR_WIZARD_FOR{ $VARNAME . '/' . $CHECK_NAME } //= do {
+
         # Exception objects need a personalized classname...
         # XXX $EXCEPTION_CLASS is unused?
         my $EXCEPTION_CLASS = $CHECK_NAME =~ /\A[a-zA-Z]+\z/ ? $CHECK_NAME : 'EXPR';
 
         # Build the code that performs the check...
-        my ($CHECK_EXPR) = Data::Checks::Parser::_gen_of_check_code($CHECK_NAME, '${$_[0]}');
+        my ($CHECK_EXPR) = Data::Checks::Parser::_gen_of_check_code( $CHECK_NAME, '${$_[0]}' );
 
         # Build the handler...
         wizard set => eval qq{
@@ -1587,17 +1621,16 @@ sub _build_scalar_wizard_for ($CHECK_NAME, $VARNAME) {
     }
 }
 
-
 # Utilities used by rewritten subs...
 
 # This is used to initialize uninitialized declarations...
 # XXX Except it appears to be unused
-sub _init_var_decl { return }
+sub _init_var_decl {return}
 
 # This replaces the CORE::caller() in the implementation of a subroutine with a return check...
 sub _caller {
-    my @caller = CORE::caller(($_[0]//0)+2);
-    !wantarray ? $caller[0] : @_ ? @caller : @caller[0..2];
+    my @caller = CORE::caller( ( $_[0] // 0 ) + 2 );
+    !wantarray ? $caller[0] : @_ ? @caller : @caller[ 0 .. 2 ];
 }
 
 # This extracts the new syntax from the old and replaces it with an implementation in standard Perl...
@@ -1819,7 +1852,8 @@ state sub _FILTER {
     local @Data::Checks::Parser::source_decls;
 
     # Parse through source code...
-    if ($_ =~ $EXTENDED_PERL_GRAMMAR) {
+    if ( $_ =~ $EXTENDED_PERL_GRAMMAR ) {
+
         # Plan to process declarations depth-first end-to-start...
 #<<< START_NO_TIDY
         my @decls = sort    { $a->{container} && $a->{container} == $b ? -1
@@ -1831,41 +1865,42 @@ state sub _FILTER {
         # Rewrite each construct (if necessary) and adjust span of its container (if any)...
         DECL:
         for my $decl_ref (@decls) {
+
             # Rewrite use/no checks...
-            if ($decl_ref->{is_checks}) {
-                my $rewritten_pragma
-                    = qq{$decl_ref->{useno} Data::Checks::Parser::CheckPragmaSim $decl_ref->{args} $decl_ref->{semi}};
+            if ( $decl_ref->{is_checks} ) {
+                my $rewritten_pragma = qq{$decl_ref->{useno} Data::Checks::Parser::CheckPragmaSim $decl_ref->{args} $decl_ref->{semi}};
 
                 # Update container's information...
-                if ($decl_ref->{container}) {
+                if ( $decl_ref->{container} ) {
                     my $delta_len = length($rewritten_pragma) - $decl_ref->{len};
                     $decl_ref->{container}{len}           += $delta_len;
                     $decl_ref->{container}{syn_block_len} += $delta_len;
                 }
 
                 # Install rewritten eval code...
-                substr($_, $decl_ref->{from}, $decl_ref->{len}, $rewritten_pragma);
+                substr( $_, $decl_ref->{from}, $decl_ref->{len}, $rewritten_pragma );
                 next DECL;
             }
 
-
             # Rewrite string evals...
-            elsif ($decl_ref->{is_eval}) {
+            elsif ( $decl_ref->{is_eval} ) {
                 my $rewritten_eval = q{eval Data::Checks::Parser::_filter};
+
                 # Update container's information...
-                if ($decl_ref->{container}) {
+                if ( $decl_ref->{container} ) {
                     my $delta_len = length($rewritten_eval) - $decl_ref->{len};
                     $decl_ref->{container}{len}           += $delta_len;
                     $decl_ref->{container}{syn_block_len} += $delta_len;
                 }
 
                 # Install rewritten eval code...
-                substr($_, $decl_ref->{from}, $decl_ref->{len}, $rewritten_eval);
+                substr( $_, $decl_ref->{from}, $decl_ref->{len}, $rewritten_eval );
                 next DECL;
             }
 
             # Rewrite and record uninitialized scalar var decls...
-            if ($decl_ref->{is_var}) {
+            if ( $decl_ref->{is_var} ) {
+
                 # Use this to extract the :of attrs...
                 state $ATTR_PARTS = qr{
                       :
@@ -1882,7 +1917,7 @@ state sub _FILTER {
                 state $ATTR_ID = 'datachecksof00000000000000';
 
                 # Extract the attr source code...
-                my $attrs_decl = substr($_, $decl_ref->{from}, $decl_ref->{len});
+                my $attrs_decl = substr( $_, $decl_ref->{from}, $decl_ref->{len} );
 
                 # Replace the :of attrs with unique IDs...
                 $attrs_decl =~ s{ $ATTR_PARTS }{
@@ -1905,10 +1940,10 @@ state sub _FILTER {
                 }gexms;
 
                 # Install those unique IDs...
-                substr($_, $decl_ref->{from}, $decl_ref->{len}, $attrs_decl);
+                substr( $_, $decl_ref->{from}, $decl_ref->{len}, $attrs_decl );
 
                 # Update container's information...
-                if ($decl_ref->{container}) {
+                if ( $decl_ref->{container} ) {
                     my $delta_len = length($attrs_decl) - $decl_ref->{len};
                     $decl_ref->{container}{len}           += $delta_len;
                     $decl_ref->{container}{syn_block_len} += $delta_len;
@@ -1920,21 +1955,21 @@ state sub _FILTER {
             # Otherwise rewrite sub decls...
 
             # Extract current block source (may already have been rewritten from original source)...
-            $decl_ref->{syn_block} = substr($_, $decl_ref->{syn_block_from}, $decl_ref->{syn_block_len});
+            $decl_ref->{syn_block} = substr( $_, $decl_ref->{syn_block_from}, $decl_ref->{syn_block_len} );
 
             # Rewrite subroutine...
             my $rewritten_sub = eval { _rewrite_sub($decl_ref) } // qq{ BEGIN { die q{$@} } }
-                or next;
+              or next;
 
             # Update container's information...
-            if ($decl_ref->{container}) {
+            if ( $decl_ref->{container} ) {
                 my $delta_len = length($rewritten_sub) - $decl_ref->{len};
-                $decl_ref->{container}{len}       += $delta_len;
+                $decl_ref->{container}{len}           += $delta_len;
                 $decl_ref->{container}{syn_block_len} += $delta_len;
             }
 
             # Install rewritten sub code...
-            substr($_, $decl_ref->{from}, $decl_ref->{len}, $rewritten_sub);
+            substr( $_, $decl_ref->{from}, $decl_ref->{len}, $rewritten_sub );
         }
     }
     else {
@@ -1943,11 +1978,11 @@ state sub _FILTER {
 
     # Implement the default-to-warnings behaviour of -k...
     $_ = q{BEGIN { $^H{'Data::Checks::Parser/mode'} = 'NONFATAL' }} . $_
-        if $K_MODE eq '-k';
+      if $K_MODE eq '-k';
 }
 
 # This sub provides recursive filtering for string evals (once they're rewritten)...
-sub _filter :prototype($) {
+sub _filter : prototype($) {
     local $_ = shift;
     _FILTER();
     return $_;
@@ -1956,16 +1991,15 @@ sub _filter :prototype($) {
 # Apply the filter to any code in which this module is called...
 FILTER {
     shift @_;
-    my ($file, $line) = (caller 1)[1,2];
-    $line--;  # ...to make the error messages work correctly
+    my ( $file, $line ) = ( caller 1 )[ 1, 2 ];
+    $line--;    # ...to make the error messages work correctly
     my sub FAIL ($msg) { $_ = qq{\n#line $line\nBEGIN{die q{$msg} }} }
     for my $arg (@_) {
-        if ($arg =~ m{\A -[kK] \z}xms) {
+        if ( $arg =~ m{\A -[kK] \z}xms ) {
             if ($loaded_at) {
-                return FAIL qq{Data::Checks::Parser was already loaded at $loaded_at.\n}
-                          . qq{Too late to specify '$arg' option};
+                return FAIL qq{Data::Checks::Parser was already loaded at $loaded_at.\n} . qq{Too late to specify '$arg' option};
             }
-            if ($K_MODE && $K_MODE ne $arg) {
+            if ( $K_MODE && $K_MODE ne $arg ) {
                 return FAIL qq{Can't specify both '$K_MODE' and '$arg' options};
             }
             $K_MODE = $arg;
@@ -1980,7 +2014,7 @@ FILTER {
     _FILTER();
 };
 
-1; # Magic true value required at end of module
+1;    # Magic true value required at end of module
 
 __END__
 
