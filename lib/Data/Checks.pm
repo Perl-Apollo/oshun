@@ -40,6 +40,8 @@ sub unimport {
 
 __END__
 
+=encoding utf8
+
 =head1 SYNOPSIS
 
     use Data::Checks;
@@ -75,9 +77,161 @@ passed to a parameter, or returned by a subroutine. This module provides a
 large number of built-in checks and will eventually offer a mechanism for
 specifying user-defined checks as well.
 
-=head1 SPECIFICATION
+=head1 USE DATA::CHECKS
 
-See L<Data::Checks::Parser> for the full specification.
+The statement C<use Data::Checks> is equivalent to:
+
+    use strict;
+    use warnings;
+    use v5.22;
+    use experimental 'signatures';
+    use Data::Checks::Parser;    # this is the magic
+
+=head1 CORE CHECKS
+
+To have an MVP (minimum viable product), the first pass of Data::Checks is
+designed to be as minimal as possible. As such, we currently only support
+I<core> types of Perl, along with a few restrictive types such as C<TUPLE> and
+C<DICT>.
+
+These come in two forms:
+
+=over 4
+
+=item * C<:of(...)>
+
+This is how you attach a check to a variable:
+
+    my @array :of(HASH[INT]);
+
+You can only assign hashrefs of integers to the individual elements of the array.
+
+=item * C<:returns(...)>
+
+This is attached to subroutines to express what they are allowed to return:
+
+    sub fibonacci :returns(UINT) ($nth: of(UINT) {
+        ...
+    }
+
+Like C<:of(...)> declarations, the can be complex data structures, but also include multiple
+values:
+
+   sub foo :returns(INT, STR, LIST[INT]) { ... }
+
+The above is guaranteed to return two or more elements: a integer, a string, and zero or
+more integers after the string.
+
+=back
+
+=head2 Builtin Checks
+
+For the below description of checks, we also check to see if the thing in
+question is overloaded. So an object with overloaded stringification should
+satify a C<STR> check.
+
+=over 4
+
+=item * C<ANY>
+
+Matches anything
+
+=item * C<LIST>
+
+A list values. Can only be used with C<:returns> checks, not C<:of> checks.
+
+=item * C<VOID>
+
+Allows a void return. Can only be used with C<:returns> checks, not C<:of> checks.
+
+Almost all C<:return> checks will fail in void context because there is no
+return value for the check to test. If you want to allow a checked return
+value to be discarded without complaint in void context, change the check
+from C<:returns(WHATEVER)> to C<:returns(WHATEVER | VOID)>.
+
+=item * C<UNDEF>
+
+The value must be undefined.
+
+=item * C<DEF>
+
+The value must be defined.
+
+=item * C<HANDLE>
+
+Must be an open filehandle.
+
+=item * C<NONREF>
+
+Must not be a reference.
+
+=item * C<REF>
+
+Must be a reference.
+
+=item * C<GLOB>
+
+Must be a typeglob.
+
+=item * C<BOOL>
+
+Must be able to evaluate as a boolean (overloaded boolean is fine).
+
+=item * C<NUM>
+
+Must be a number.
+
+=item * C<INT>
+
+Must be an integer.
+
+=item * C<UINT>
+
+Must be an unsigned integer.
+
+=item * C<STR>
+
+Must be a string.
+
+=item * C<VSTR>
+
+Must be a v-string.
+
+=item * C<CLASS>
+
+Must be a string. If parameterized (e.g., C<< my $animal :of(CLASS[Dog]; >>),
+the inner value is a string, assumed to be a classname, and any assigned value
+must pass an C<isa> check.
+
+=item * C<ROLE>
+
+Similar to C<CLASS>, but for roles. This is not yet implemented.
+
+=item * C<SCALAR>
+
+Must be a scalar references.
+
+=item * C<CODE>
+
+Must be a code reference.
+
+=item * C<ARRAY>
+
+Must be an array reference.
+
+=item * C<HASH>
+
+Must be a hash reference.
+
+=item * C<REGEXP>
+
+Must be a regular expression reference.
+
+=item * C<OBJ>
+
+Must be a blessed reference. Like C<CLASS>, you may parameterize this with the name of a class.
+
+=back
 
 =head1 DEPENDENCIES
 
