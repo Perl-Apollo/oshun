@@ -28,18 +28,18 @@ use Data::Checks;
 
 # Test assignment to arrays...
 
-my @my_array : of(7 => INT) = 1 .. 7;
-our @our_array : of(7 => INT) = 0 .. 6;
+my @my_array :of(7 => INT) = 1 .. 7;
+our @our_array :of(7 => INT) = 0 .. 6;
 
 # Variables have to be initialized with something that passes the 7=>INT check...
 for my $good_value (GOOD_VALUES) {
     my $good_value_str = Data::Checks::Parser::pp($good_value);
-    OKAY { my @var : of(7 => INT) = ($good_value) x 7 } "   my array = $good_value_str x 5";
-    OKAY { our @var : of(7 => INT) = ($good_value) x 7 } "  our array = $good_value_str x 5";
+    OKAY { my @var :of(7 => INT) = ($good_value) x 7 } "   my array = $good_value_str x 5";
+    OKAY { our @var :of(7 => INT) = ($good_value) x 7 } "  our array = $good_value_str x 5";
 }
 
 # Implicit empty list fails the 7=>INT check (doesn't have at leats 2 elems)...
-FAIL_ON_LENGTH_INIT { my @uninitialized : of(7=>INT); } 'uninitialized my array';
+FAIL_ON_LENGTH_INIT { my @uninitialized :of(7=>INT); } 'uninitialized my array';
 
 # List assignments must be of the right size...
 for my $good_value (GOOD_VALUES) {
@@ -116,10 +116,10 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(INT) { my @x : of(7=>INT) = @_; return $x[0] }
-sub new_sub : returns(INT) ( @param : of(7=>INT) ) { return $param[0] }
-my sub my_sub : returns(INT) ( @param : of(7=>INT) ) { return $param[0] }
-state sub state_sub : returns(INT) ( @param : of(7=>INT) ) { return $param[0] }
+sub old_sub :returns(INT) { my @x :of(7=>INT) = @_; return $x[0] }
+sub new_sub :returns(INT) ( @param :of(7=>INT) ) { return $param[0] }
+my sub my_sub :returns(INT) ( @param :of(7=>INT) ) { return $param[0] }
+state sub state_sub :returns(INT) ( @param :of(7=>INT) ) { return $param[0] }
 
 # With values that should pass the INT check...
 for my $good_value (GOOD_VALUES) {

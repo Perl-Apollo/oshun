@@ -30,9 +30,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(UINT) = 0;
-our $our_scalar : of(UINT) = 0;
-state $state_scalar : of(UINT) = 0;
+my $my_scalar :of(UINT) = 0;
+our $our_scalar :of(UINT) = 0;
+state $state_scalar :of(UINT) = 0;
 
 # Variables have to be initialized with something that passes the UINT check...
 for my $good_value (GOOD_VALUES) {
@@ -44,15 +44,15 @@ for my $good_value (GOOD_VALUES) {
 
 # Implicit undef DOESN'T pass the UINT check...
 # (Note: can't check uninitialized our variable because that fails at compile-time)
-FAIL_ON_INIT { my $uninitialized : of(UINT) } 'uninitialized my scalar';
-FAIL_ON_INIT { state $uninitialized : of(UINT) } 'uninitialized state scalar';
+FAIL_ON_INIT { my $uninitialized :of(UINT) } 'uninitialized my scalar';
+FAIL_ON_INIT { state $uninitialized :of(UINT) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the UINT check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(UINT)    = $bad_value } "my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(UINT)   = $bad_value } "our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(UINT) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(UINT)    = $bad_value } "my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(UINT)   = $bad_value } "our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(UINT) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the UINT check...
@@ -70,15 +70,15 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(UINT) { my $x : of(UINT) = shift; return $x }
-sub new_sub : returns(UINT) ( $param : of(UINT) ) { return $param }
-my sub my_sub : returns(UINT) ( $param : of(UINT) ) { return $param }
-state sub state_sub : returns(UINT) ( $param : of(UINT) ) { return $param }
+sub old_sub :returns(UINT) { my $x :of(UINT) = shift; return $x }
+sub new_sub :returns(UINT) ( $param :of(UINT) ) { return $param }
+my sub my_sub :returns(UINT) ( $param :of(UINT) ) { return $param }
+state sub state_sub :returns(UINT) ( $param :of(UINT) ) { return $param }
 
-sub old_ret_sub : returns(UINT) { return shift }
-sub new_ret_sub : returns(UINT) ($param) { return $param }
-my sub my_ret_sub : returns(UINT) ($param) { return $param }
-state sub state_ret_sub : returns(UINT) ($param) { return $param }
+sub old_ret_sub :returns(UINT) { return shift }
+sub new_ret_sub :returns(UINT) ($param) { return $param }
+my sub my_ret_sub :returns(UINT) ($param) { return $param }
+state sub state_ret_sub :returns(UINT) ($param) { return $param }
 
 # With values that should pass the UINT check...
 for my $good_value (GOOD_VALUES) {

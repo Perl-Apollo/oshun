@@ -35,9 +35,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(CAN[new]) = bless {}, 'Class::Base';
-our $our_scalar : of(CAN[new]) = bless {}, 'Class::Base';
-state $state_scalar : of(CAN[new]) = bless {}, 'Class::Base';
+my $my_scalar :of(CAN[new]) = bless {}, 'Class::Base';
+our $our_scalar :of(CAN[new]) = bless {}, 'Class::Base';
+state $state_scalar :of(CAN[new]) = bless {}, 'Class::Base';
 
 # Variables have to be initialized with something that passes the CAN[new] check...
 for my $good_value (GOOD_VALUES) {
@@ -49,15 +49,15 @@ for my $good_value (GOOD_VALUES) {
 
 # Implicit undef CAN[new]CAN[new] check...
 # (Note: can't check uninitialized our variable because that fails at compile-time)
-FAIL_ON_INIT { my $uninitialized : of(CAN[new]) } 'uninitialized my scalar';
-FAIL_ON_INIT { state $uninitialized : of(CAN[new]) } 'uninitialized state scalar';
+FAIL_ON_INIT { my $uninitialized :of(CAN[new]) } 'uninitialized my scalar';
+FAIL_ON_INIT { state $uninitialized :of(CAN[new]) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the CAN[new] check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(CAN[new])    = $bad_value } "   my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(CAN[new])   = $bad_value } "  our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(CAN[new]) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(CAN[new])    = $bad_value } "   my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(CAN[new])   = $bad_value } "  our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(CAN[new]) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the CAN[new] check...
@@ -77,15 +77,15 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(CAN[new]) { my $x : of(CAN[new]) = shift; return $x }
-sub new_sub : returns(CAN[new]) ( $param : of(CAN[new]) ) { return $param }
-my sub my_sub : returns(CAN[new]) ( $param : of(CAN[new]) ) { return $param }
-state sub state_sub : returns(CAN[new]) ( $param : of(CAN[new]) ) { return $param }
+sub old_sub :returns(CAN[new]) { my $x :of(CAN[new]) = shift; return $x }
+sub new_sub :returns(CAN[new]) ( $param :of(CAN[new]) ) { return $param }
+my sub my_sub :returns(CAN[new]) ( $param :of(CAN[new]) ) { return $param }
+state sub state_sub :returns(CAN[new]) ( $param :of(CAN[new]) ) { return $param }
 
-sub old_ret_sub : returns(CAN[new]) { return shift }
-sub new_ret_sub : returns(CAN[new]) ($param) { return $param }
-my sub my_ret_sub : returns(CAN[new]) ($param) { return $param }
-state sub state_ret_sub : returns(CAN[new]) ($param) { return $param }
+sub old_ret_sub :returns(CAN[new]) { return shift }
+sub new_ret_sub :returns(CAN[new]) ($param) { return $param }
+my sub my_ret_sub :returns(CAN[new]) ($param) { return $param }
+state sub state_ret_sub :returns(CAN[new]) ($param) { return $param }
 
 # With values that should pass the CAN[new] check...
 for my $good_value (GOOD_VALUES) {

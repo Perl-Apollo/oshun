@@ -1982,7 +1982,7 @@ state sub _FILTER {
 }
 
 # This sub provides recursive filtering for string evals (once they're rewritten)...
-sub _filter : prototype($) {
+sub _filter :prototype($) {
     local $_ = shift;
     _FILTER();
     return $_;
@@ -2018,12 +2018,6 @@ FILTER {
 
 __END__
 
-=encoding utf8
-
-=head1 VERSION
-
-This document describes Data::Checks::Parser version 0.002
-
 
 =head1 SYNOPSIS
 
@@ -2056,9 +2050,9 @@ This document describes Data::Checks::Parser version 0.002
 This is very early alpha code, designed to prototype an idea that might one
 day be a core feature of Perl.
 
-Every aspect of this module is subject to sudden and radical change,
-from the check syntax itself, to the names of the various checks,
-to their essential behaviours, features, and limitations.
+Every aspect of this module is subject to sudden and radical change, from the
+check syntax itself, to the names of the various checks, to their essential
+behaviours, features, and limitations.
 
 B<DO I<NOT> USE THIS MODULE IN PRODUCTION CODE.>
 
@@ -2071,26 +2065,27 @@ The fundamental problem with type systems is that every individual programmer
 knows exactly what they mean by – and want in – and need from – a I<“type system”>
 ...but no two programmers can ever agree precisely what that is.
 
-What most Perl users actually need is a practical way to ensure that, when a value
-that is assigned to a variable, or passed to a parameter, or returned from a
-subroutine, that value conforms to the designer’s original expectations and
-assumptions I<(e.g. did their subroutine get passed a positive integer and a
-filehandle, and did it return a reference to a hash of strings?)>
+What most Perl users actually need is a practical way to ensure that, when a
+value that is assigned to a variable, or passed to a parameter, or returned
+from a subroutine, that value conforms to the designer’s original expectations
+and assumptions I<(e.g. did their subroutine get passed a positive integer
+and a filehandle, and did it return a reference to a hash of strings?)>
 
-So this is not a compile-time type-system for Perl.
-It’s a runtime data-checking system for Perl.
-A system of I<“checks”>.
+So this is not a compile-time type-system for Perl.  It’s a runtime
+data-checking system for Perl.  A system of I<“checks”>.
 
 =head2 Checks
 
-A I<check> is an assertion about the value(s) that can be assigned to a variable,
-passed to a parameter, or returned by a subroutine. This module provides
-a large number of L<built-in checks|/"Built-in checks"> and will eventually also
-offer a mechanism for specifying L<user-defined checks|/"User-defined checks">.
+A I<check> is an assertion about the value(s) that can be assigned to a
+variable, passed to a parameter, or returned by a subroutine. This module
+provides a large number of L<built-in checks|/"Built-in checks"> and will
+eventually also offer a mechanism for specifying L<user-defined
+checks|/"User-defined checks">.
 
-Built-in checks are all named in I<UPPERCASE>: C<INT>, C<STR>, C<HASH>, C<ARRAY>, I<etc.>
-User-defined checks must be named in I<MixedCase>: C<Account>, C<ClientName>, C<PosNum>, I<etc.>
-For more details on this carefully considered design decision see: L<"Why built-in checks are LOUD">.
+Built-in checks are all named in I<UPPERCASE>: C<INT>, C<STR>, C<HASH>,
+C<ARRAY>, I<etc.> User-defined checks must be named in I<MixedCase>:
+C<Account>, C<ClientName>, C<PosNum>, I<etc.> For more details on this
+carefully considered design decision see: L<"Why built-in checks are LOUD">.
 
 
 =head2 An important note about the nature of checks

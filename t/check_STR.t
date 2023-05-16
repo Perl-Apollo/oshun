@@ -29,9 +29,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(STR) = 0;
-our $our_scalar : of(STR) = 0;
-state $state_scalar : of(STR) = 0;
+my $my_scalar :of(STR) = 0;
+our $our_scalar :of(STR) = 0;
+state $state_scalar :of(STR) = 0;
 
 # Variables have to be initialized with something that passes the STR check...
 for my $good_value (GOOD_VALUES) {
@@ -43,15 +43,15 @@ for my $good_value (GOOD_VALUES) {
 
 # Implicit undef DOESN'T pass the STR check...
 # (Note: can't check uninitialized our variable because that fails at compile-time)
-FAIL_ON_INIT { my $uninitialized : of(STR) } 'uninitialized my scalar';
-FAIL_ON_INIT { state $uninitialized : of(STR) } 'uninitialized state scalar';
+FAIL_ON_INIT { my $uninitialized :of(STR) } 'uninitialized my scalar';
+FAIL_ON_INIT { state $uninitialized :of(STR) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the STR check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(STR)    = $bad_value } "   my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(STR)   = $bad_value } "  our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(STR) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(STR)    = $bad_value } "   my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(STR)   = $bad_value } "  our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(STR) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the STR check...
@@ -71,15 +71,15 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(STR) { my $x : of(STR) = shift; return $x }
-sub new_sub : returns(STR) ( $param : of(STR) ) { return $param }
-my sub my_sub : returns(STR) ( $param : of(STR) ) { return $param }
-state sub state_sub : returns(STR) ( $param : of(STR) ) { return $param }
+sub old_sub :returns(STR) { my $x :of(STR) = shift; return $x }
+sub new_sub :returns(STR) ( $param :of(STR) ) { return $param }
+my sub my_sub :returns(STR) ( $param :of(STR) ) { return $param }
+state sub state_sub :returns(STR) ( $param :of(STR) ) { return $param }
 
-sub old_ret_sub : returns(STR) { return shift }
-sub new_ret_sub : returns(STR) ($param) { return $param }
-my sub my_ret_sub : returns(STR) ($param) { return $param }
-state sub state_ret_sub : returns(STR) ($param) { return $param }
+sub old_ret_sub :returns(STR) { return shift }
+sub new_ret_sub :returns(STR) ($param) { return $param }
+my sub my_ret_sub :returns(STR) ($param) { return $param }
+state sub state_ret_sub :returns(STR) ($param) { return $param }
 
 # With values that should pass the STR check...
 for my $good_value (GOOD_VALUES) {

@@ -37,10 +37,10 @@ ok $@ =~ /\QCan't specify :of(!LIST|INT) on a scalar variable\E/      => '  \___
 
 # Test subroutines...
 
-sub old_ret_sub : returns(LIST|INT) { return shift }
-sub new_ret_sub : returns(LIST|INT) ($param) { return () }
-my sub my_ret_sub : returns(LIST|INT) ($param) { return ( $param, $param ) }
-state sub state_ret_sub : returns(LIST|INT) ($param) { return ( $param, $param, $param ) }
+sub old_ret_sub :returns(LIST|INT) { return shift }
+sub new_ret_sub :returns(LIST|INT) ($param) { return () }
+my sub my_ret_sub :returns(LIST|INT) ($param) { return ( $param, $param ) }
+state sub state_ret_sub :returns(LIST|INT) ($param) { return ( $param, $param, $param ) }
 
 # With values that should pass the LIST|INT check...
 for my $good_value (GOOD_VALUES) {

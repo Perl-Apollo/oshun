@@ -28,25 +28,25 @@ use Data::Checks;
 
 # Test assignment to arrays...
 
-my @my_array : of(0..10 => INT);
-our @our_array : of(0..10 => INT) = 0 .. 9;
+my @my_array :of(0..10 => INT);
+our @our_array :of(0..10 => INT) = 0 .. 9;
 
 # Variables have to be initialized with something that passes the 0..10=>INT check...
 for my $good_value (GOOD_VALUES) {
     my $good_value_str = Data::Checks::Parser::pp($good_value);
-    OKAY { my @var : of(0..10 => INT) = $good_value } "   my array = $good_value_str";
-    OKAY { our @var : of(0..10 => INT) = $good_value } "  our array = $good_value_str";
+    OKAY { my @var :of(0..10 => INT) = $good_value } "   my array = $good_value_str";
+    OKAY { our @var :of(0..10 => INT) = $good_value } "  our array = $good_value_str";
 }
 
 # Implicit empty list passes the 0..10=>INT check (every element – all zero of them – is an integer)...
-OKAY { my @uninitialized : of(INT) } 'uninitialized my array';
-OKAY { our @uninitialized : of(INT) } 'uninitialized our array';
+OKAY { my @uninitialized :of(INT) } 'uninitialized my array';
+OKAY { our @uninitialized :of(INT) } 'uninitialized our array';
 
 # Other explicit initializer values also don't pass the INT check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my @var : of(INT) = $bad_value } "   my array = $bad_value_str";
-    FAIL_ON_INIT { our @var : of(INT) = $bad_value } "  our array = $bad_value_str";
+    FAIL_ON_INIT { my @var :of(INT) = $bad_value } "   my array = $bad_value_str";
+    FAIL_ON_INIT { our @var :of(INT) = $bad_value } "  our array = $bad_value_str";
 }
 
 # List assignments must be of the right size...
@@ -125,10 +125,10 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(INT) { my @x : of(0..10=>INT) = @_; return $x[0] }
-sub new_sub : returns(INT) ( @param : of(0..10=>INT) ) { return $param[0] }
-my sub my_sub : returns(INT) ( @param : of(0..10=>INT) ) { return $param[0] }
-state sub state_sub : returns(INT) ( @param : of(0..10=>INT) ) { return $param[0] }
+sub old_sub :returns(INT) { my @x :of(0..10=>INT) = @_; return $x[0] }
+sub new_sub :returns(INT) ( @param :of(0..10=>INT) ) { return $param[0] }
+my sub my_sub :returns(INT) ( @param :of(0..10=>INT) ) { return $param[0] }
+state sub state_sub :returns(INT) ( @param :of(0..10=>INT) ) { return $param[0] }
 
 # With values that should pass the INT check...
 for my $good_value (GOOD_VALUES) {

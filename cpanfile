@@ -14,6 +14,7 @@ requires "experimental" => "0";
 on 'test' => sub {
   requires "ExtUtils::MakeMaker" => "0";
   requires "File::Spec" => "0";
+  requires "Hash::Ordered" => "0";
   requires "Test::More" => "0";
   requires "Test::Most" => "0";
   requires "experimentals" => "0";

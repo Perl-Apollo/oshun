@@ -29,9 +29,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(ANY);
-our $our_scalar : of(ANY);
-state $state_scalar : of(ANY);
+my $my_scalar :of(ANY);
+our $our_scalar :of(ANY);
+state $state_scalar :of(ANY);
 
 # Variables have to be initialized with something that passes the ANY check...
 for my $good_value (GOOD_VALUES) {
@@ -42,16 +42,16 @@ for my $good_value (GOOD_VALUES) {
 }
 
 # Implicit undef passes the ANY check...
-OKAY { my $uninitialized : of(ANY) } 'uninitialized my scalar';
-OKAY { our $uninitialized : of(ANY) } 'uninitialized our scalar';
-OKAY { state $uninitialized : of(ANY) } 'uninitialized state scalar';
+OKAY { my $uninitialized :of(ANY) } 'uninitialized my scalar';
+OKAY { our $uninitialized :of(ANY) } 'uninitialized our scalar';
+OKAY { state $uninitialized :of(ANY) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the ANY check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(ANY)    = $bad_value } "my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(ANY)   = $bad_value } "our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(ANY) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(ANY)    = $bad_value } "my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(ANY)   = $bad_value } "our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(ANY) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the ANY check...
@@ -71,15 +71,15 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(ANY) { my $x : of(ANY) = shift; return $x }
-sub new_sub : returns(ANY) ( $param : of(ANY) ) { return $param }
-my sub my_sub : returns(ANY) ( $param : of(ANY) ) { return $param }
-state sub state_sub : returns(ANY) ( $param : of(ANY) ) { return $param }
+sub old_sub :returns(ANY) { my $x :of(ANY) = shift; return $x }
+sub new_sub :returns(ANY) ( $param :of(ANY) ) { return $param }
+my sub my_sub :returns(ANY) ( $param :of(ANY) ) { return $param }
+state sub state_sub :returns(ANY) ( $param :of(ANY) ) { return $param }
 
-sub old_ret_sub : returns(ANY) { return shift }
-sub new_ret_sub : returns(ANY) ($param) { return $param }
-my sub my_ret_sub : returns(ANY) ($param) { return $param }
-state sub state_ret_sub : returns(ANY) ($param) { return $param }
+sub old_ret_sub :returns(ANY) { return shift }
+sub new_ret_sub :returns(ANY) ($param) { return $param }
+my sub my_ret_sub :returns(ANY) ($param) { return $param }
+state sub state_ret_sub :returns(ANY) ($param) { return $param }
 
 # With values that should pass the ANY check...
 for my $good_value (GOOD_VALUES) {

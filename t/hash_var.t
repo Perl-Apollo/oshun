@@ -29,25 +29,25 @@ use Data::Checks;
 
 # Test assignment to hashs...
 
-my %my_hash : of(REF);
-our %our_hash : of(REF);
+my %my_hash :of(REF);
+our %our_hash :of(REF);
 
 # Variables have to be initialized with something that passes the REF check...
 for my $good_value (GOOD_VALUES) {
     my $good_value_str = Data::Checks::Parser::pp($good_value);
-    OKAY { my %var : of(REF) = ( goodkey => $good_value ) } "   my hash = goodkey => $good_value_str";
-    OKAY { our %var : of(REF) = ( goodkey => $good_value ) } "  our hash = goodkey => $good_value_str";
+    OKAY { my %var :of(REF) = ( goodkey => $good_value ) } "   my hash = goodkey => $good_value_str";
+    OKAY { our %var :of(REF) = ( goodkey => $good_value ) } "  our hash = goodkey => $good_value_str";
 }
 
 # Implicit empty list passes the REF check (every element – all zero of them – is an integer)...
-OKAY { my %uninitialized : of(REF) } 'uninitialized my hash';
-OKAY { our %uninitialized : of(REF) } 'uninitialized our hash';
+OKAY { my %uninitialized :of(REF) } 'uninitialized my hash';
+OKAY { our %uninitialized :of(REF) } 'uninitialized our hash';
 
 # Other explicit initializer values also don't pass the REF check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my %var : of(REF) = ( badkey => $bad_value ) } "   my hash = badkey => $bad_value_str";
-    FAIL_ON_INIT { our %var : of(REF) = ( badkey => $bad_value ) } "  our hash = badkey => $bad_value_str";
+    FAIL_ON_INIT { my %var :of(REF) = ( badkey => $bad_value ) } "   my hash = badkey => $bad_value_str";
+    FAIL_ON_INIT { our %var :of(REF) = ( badkey => $bad_value ) } "  our hash = badkey => $bad_value_str";
 }
 
 # List assignments must likewise pass the REF check...
@@ -93,10 +93,10 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(REF) { my %x : of(REF) = @_; return $x{key} }
-sub new_sub : returns(REF) ( %param : of(REF) ) { return $param{key} }
-my sub my_sub : returns(REF) ( %param : of(REF) ) { return $param{key} }
-state sub state_sub : returns(REF) ( %param : of(REF) ) { return $param{key} }
+sub old_sub :returns(REF) { my %x :of(REF) = @_; return $x{key} }
+sub new_sub :returns(REF) ( %param :of(REF) ) { return $param{key} }
+my sub my_sub :returns(REF) ( %param :of(REF) ) { return $param{key} }
+state sub state_sub :returns(REF) ( %param :of(REF) ) { return $param{key} }
 
 # With values that should pass the REF check...
 for my $good_value (GOOD_VALUES) {

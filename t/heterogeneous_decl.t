@@ -25,7 +25,7 @@ sub BAD_VALUES {
 
 use Data::Checks;
 
-my ( $scalar, @array, %hash ) : of(INT) = 0;
+my ( $scalar, @array, %hash ) :of(INT) = 0;
 
 # Assignments must pass the INT check...
 for my $good_value (GOOD_VALUES) {

@@ -29,25 +29,25 @@ use Data::Checks;
 
 # Test assignment to hashs...
 
-my %my_hash : of(STR[/^[a-z]\d+$/] => REF);
-our %our_hash : of(STR[/^[a-z]\d+$/] => REF);
+my %my_hash :of(STR[/^[a-z]\d+$/] => REF);
+our %our_hash :of(STR[/^[a-z]\d+$/] => REF);
 
 # Variables have to be initialized with something that passes the STR[/^[a-z]\d+$/] => REF check...
 for my $good_value (GOOD_VALUES) {
     my $good_value_str = Data::Checks::Parser::pp($good_value);
-    OKAY { my %var : of(STR[/^[a-z]\d+$/] => REF) = ( g006431 => $good_value ) } "   my hash = g006431 => $good_value_str";
-    OKAY { our %var : of(STR[/^[a-z]\d+$/] => REF) = ( g006431 => $good_value ) } "  our hash = g006431 => $good_value_str";
+    OKAY { my %var :of(STR[/^[a-z]\d+$/] => REF) = ( g006431 => $good_value ) } "   my hash = g006431 => $good_value_str";
+    OKAY { our %var :of(STR[/^[a-z]\d+$/] => REF) = ( g006431 => $good_value ) } "  our hash = g006431 => $good_value_str";
 }
 
 # Implicit empty list passes the STR[/^[a-z]\d+$/] => REF check (every element – all zero of them – is an integer)...
-OKAY { my %uninitialized : of(STR[/^[a-z]\d+$/] => REF) } 'uninitialized my hash';
-OKAY { our %uninitialized : of(STR[/^[a-z]\d+$/] => REF) } 'uninitialized our hash';
+OKAY { my %uninitialized :of(STR[/^[a-z]\d+$/] => REF) } 'uninitialized my hash';
+OKAY { our %uninitialized :of(STR[/^[a-z]\d+$/] => REF) } 'uninitialized our hash';
 
 # Other explicit initializer values also don't pass the STR[/^[a-z]\d+$/] => REF check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my %var : of(STR[/^[a-z]\d+$/] => REF) = ( badkey => $bad_value ) } "   my hash = badkey => $bad_value_str";
-    FAIL_ON_INIT { our %var : of(STR[/^[a-z]\d+$/] => REF) = ( badkey => $bad_value ) } "  our hash = badkey => $bad_value_str";
+    FAIL_ON_INIT { my %var :of(STR[/^[a-z]\d+$/] => REF) = ( badkey => $bad_value ) } "   my hash = badkey => $bad_value_str";
+    FAIL_ON_INIT { our %var :of(STR[/^[a-z]\d+$/] => REF) = ( badkey => $bad_value ) } "  our hash = badkey => $bad_value_str";
 }
 
 # List assignments must likewise pass the STR[/^[a-z]\d+$/] => REF check...
@@ -100,10 +100,10 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(REF) { my %x : of(STR[/^[a-z]\d+$/] => REF) = @_; return $x{'g006'} }
-sub new_sub : returns(REF) ( %param : of(STR[/^[a-z]\d+$/] => REF) ) { return $param{'g006'} }
-my sub my_sub : returns(REF) ( %param : of(STR[/^[a-z]\d+$/] => REF) ) { return $param{'g006'} }
-state sub state_sub : returns(REF) ( %param : of(STR[/^[a-z]\d+$/] => REF) ) { return $param{'g006'} }
+sub old_sub :returns(REF) { my %x :of(STR[/^[a-z]\d+$/] => REF) = @_; return $x{'g006'} }
+sub new_sub :returns(REF) ( %param :of(STR[/^[a-z]\d+$/] => REF) ) { return $param{'g006'} }
+my sub my_sub :returns(REF) ( %param :of(STR[/^[a-z]\d+$/] => REF) ) { return $param{'g006'} }
+state sub state_sub :returns(REF) ( %param :of(STR[/^[a-z]\d+$/] => REF) ) { return $param{'g006'} }
 
 # With values that should pass the STR[/^[a-z]\d+$/] => REF check...
 for my $good_value (GOOD_VALUES) {

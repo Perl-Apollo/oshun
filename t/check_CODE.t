@@ -30,9 +30,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(CODE) = sub { };
-our $our_scalar : of(CODE) = sub { };
-state $state_scalar : of(CODE) = sub { };
+my $my_scalar :of(CODE) = sub { };
+our $our_scalar :of(CODE) = sub { };
+state $state_scalar :of(CODE) = sub { };
 
 # Variables have to be initialized with something that passes the CODE check...
 for my $good_value (GOOD_VALUES) {
@@ -44,15 +44,15 @@ for my $good_value (GOOD_VALUES) {
 
 # Implicit undef DOESN'T pass the CODE check...
 # (Note: can't check uninitialized our variable because that fails at compile-time)
-FAIL_ON_INIT { my $uninitialized : of(CODE) } 'uninitialized my scalar';
-FAIL_ON_INIT { state $uninitialized : of(CODE) } 'uninitialized state scalar';
+FAIL_ON_INIT { my $uninitialized :of(CODE) } 'uninitialized my scalar';
+FAIL_ON_INIT { state $uninitialized :of(CODE) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the CODE check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(CODE)    = $bad_value } "   my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(CODE)   = $bad_value } "  our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(CODE) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(CODE)    = $bad_value } "   my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(CODE)   = $bad_value } "  our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(CODE) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the CODE check...
@@ -72,15 +72,15 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(CODE) { my $x : of(CODE) = shift; return $x }
-sub new_sub : returns(CODE) ( $param : of(CODE) ) { return $param }
-my sub my_sub : returns(CODE) ( $param : of(CODE) ) { return $param }
-state sub state_sub : returns(CODE) ( $param : of(CODE) ) { return $param }
+sub old_sub :returns(CODE) { my $x :of(CODE) = shift; return $x }
+sub new_sub :returns(CODE) ( $param :of(CODE) ) { return $param }
+my sub my_sub :returns(CODE) ( $param :of(CODE) ) { return $param }
+state sub state_sub :returns(CODE) ( $param :of(CODE) ) { return $param }
 
-sub old_ret_sub : returns(CODE) { return shift }
-sub new_ret_sub : returns(CODE) ($param) { return $param }
-my sub my_ret_sub : returns(CODE) ($param) { return $param }
-state sub state_ret_sub : returns(CODE) ($param) { return $param }
+sub old_ret_sub :returns(CODE) { return shift }
+sub new_ret_sub :returns(CODE) ($param) { return $param }
+my sub my_ret_sub :returns(CODE) ($param) { return $param }
+state sub state_ret_sub :returns(CODE) ($param) { return $param }
 
 # With values that should pass the CODE check...
 for my $good_value (GOOD_VALUES) {

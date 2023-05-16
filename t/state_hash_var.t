@@ -35,7 +35,7 @@ use Data::Checks;
 
 # Test assignment to hashes...
 
-state %state_hash : of(INT);
+state %state_hash :of(INT);
 
 # Variables have to be initialized with something that passes the INT check...
 for my $good_value (GOOD_VALUES) {
@@ -44,12 +44,12 @@ for my $good_value (GOOD_VALUES) {
 }
 
 # Implicit empty list passes the INT check (every element – all zero of them – is an integer)...
-OKAY { state %uninitialized : of(INT) } 'uninitialized state hash';
+OKAY { state %uninitialized :of(INT) } 'uninitialized state hash';
 
 # Other explicit initializer values also don't pass the INT check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { state %var : of(INT) = ( key => $bad_value ) } "state hash = key => $bad_value_str";
+    FAIL_ON_INIT { state %var :of(INT) = ( key => $bad_value ) } "state hash = key => $bad_value_str";
 }
 
 # List assignments must likewise pass the INT check...

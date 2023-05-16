@@ -35,9 +35,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(DOES[Class::Base]) = bless {}, 'Class::Base';
-our $our_scalar : of(DOES[Class::Base]) = bless {}, 'Class::Base';
-state $state_scalar : of(DOES[Class::Base]) = bless {}, 'Class::Base';
+my $my_scalar :of(DOES[Class::Base]) = bless {}, 'Class::Base';
+our $our_scalar :of(DOES[Class::Base]) = bless {}, 'Class::Base';
+state $state_scalar :of(DOES[Class::Base]) = bless {}, 'Class::Base';
 
 # Variables have to be initialized with something that passes the DOES[Class::Base] check...
 for my $good_value (GOOD_VALUES) {
@@ -49,15 +49,15 @@ for my $good_value (GOOD_VALUES) {
 
 # Implicit undef DOESN'T pass the DOES[Class::Base] check...
 # (Note: can't check uninitialized our variable because that fails at compile-time)
-FAIL_ON_INIT { my $uninitialized : of(DOES[Class::Base]) } 'uninitialized my scalar';
-FAIL_ON_INIT { state $uninitialized : of(DOES[Class::Base]) } 'uninitialized state scalar';
+FAIL_ON_INIT { my $uninitialized :of(DOES[Class::Base]) } 'uninitialized my scalar';
+FAIL_ON_INIT { state $uninitialized :of(DOES[Class::Base]) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the DOES[Class::Base] check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(DOES[Class::Base])    = $bad_value } "   my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(DOES[Class::Base])   = $bad_value } "  our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(DOES[Class::Base]) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(DOES[Class::Base])    = $bad_value } "   my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(DOES[Class::Base])   = $bad_value } "  our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(DOES[Class::Base]) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the DOES[Class::Base] check...
@@ -77,15 +77,15 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(DOES[Class::Base]) { my $x : of(DOES[Class::Base]) = shift; return $x }
-sub new_sub : returns(DOES[Class::Base]) ( $param : of(DOES[Class::Base]) ) { return $param }
-my sub my_sub : returns(DOES[Class::Base]) ( $param : of(DOES[Class::Base]) ) { return $param }
-state sub state_sub : returns(DOES[Class::Base]) ( $param : of(DOES[Class::Base]) ) { return $param }
+sub old_sub :returns(DOES[Class::Base]) { my $x :of(DOES[Class::Base]) = shift; return $x }
+sub new_sub :returns(DOES[Class::Base]) ( $param :of(DOES[Class::Base]) ) { return $param }
+my sub my_sub :returns(DOES[Class::Base]) ( $param :of(DOES[Class::Base]) ) { return $param }
+state sub state_sub :returns(DOES[Class::Base]) ( $param :of(DOES[Class::Base]) ) { return $param }
 
-sub old_ret_sub : returns(DOES[Class::Base]) { return shift }
-sub new_ret_sub : returns(DOES[Class::Base]) ($param) { return $param }
-my sub my_ret_sub : returns(DOES[Class::Base]) ($param) { return $param }
-state sub state_ret_sub : returns(DOES[Class::Base]) ($param) { return $param }
+sub old_ret_sub :returns(DOES[Class::Base]) { return shift }
+sub new_ret_sub :returns(DOES[Class::Base]) ($param) { return $param }
+my sub my_ret_sub :returns(DOES[Class::Base]) ($param) { return $param }
+state sub state_ret_sub :returns(DOES[Class::Base]) ($param) { return $param }
 
 # With values that should pass the DOES[Class::Base] check...
 for my $good_value (GOOD_VALUES) {

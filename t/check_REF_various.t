@@ -32,9 +32,9 @@ package REF_ANY {
 
     # Test assignment to scalars...
 
-    my $my_scalar : of(REF[ANY]) = \0;
-    our $our_scalar : of(REF[ANY]) = \0;
-    state $state_scalar : of(REF[ANY]) = \0;
+    my $my_scalar :of(REF[ANY]) = \0;
+    our $our_scalar :of(REF[ANY]) = \0;
+    state $state_scalar :of(REF[ANY]) = \0;
 
     # Variables have to be initialized with something that passes the REF[ANY] check...
     for my $good_value (GOOD_VALUES) {
@@ -46,15 +46,15 @@ package REF_ANY {
 
     # Implicit undef DOESN'T pass the REF[ANY] check...
     # (Note: can't check uninitialized our variable because that fails at compile-time)
-    FAIL_ON_INIT { my $uninitialized : of(REF[ANY]) } 'uninitialized my scalar';
-    FAIL_ON_INIT { state $uninitialized : of(REF[ANY]) } 'uninitialized state scalar';
+    FAIL_ON_INIT { my $uninitialized :of(REF[ANY]) } 'uninitialized my scalar';
+    FAIL_ON_INIT { state $uninitialized :of(REF[ANY]) } 'uninitialized state scalar';
 
     # Other explicit initializer values also don't pass the REF[ANY] check...
     for my $bad_value (BAD_VALUES) {
         my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-        FAIL_ON_INIT { my $uninitialized : of(REF[ANY])    = $bad_value } "   my scalar = $bad_value_str";
-        FAIL_ON_INIT { our $uninitialized : of(REF[ANY])   = $bad_value } "  our scalar = $bad_value_str";
-        FAIL_ON_INIT { state $uninitialized : of(REF[ANY]) = $bad_value } "state scalar = $bad_value_str";
+        FAIL_ON_INIT { my $uninitialized :of(REF[ANY])    = $bad_value } "   my scalar = $bad_value_str";
+        FAIL_ON_INIT { our $uninitialized :of(REF[ANY])   = $bad_value } "  our scalar = $bad_value_str";
+        FAIL_ON_INIT { state $uninitialized :of(REF[ANY]) = $bad_value } "state scalar = $bad_value_str";
     }
 
     # Assignments must likewise pass the REF[ANY] check...
@@ -74,15 +74,15 @@ package REF_ANY {
 
     # Test subroutines: parameters, internal variables, return values...
 
-    sub old_sub : returns(REF[ANY]) { my $x : of(REF[ANY]) = shift; return $x }
-    sub new_sub : returns(REF[ANY]) ( $param : of(REF[ANY]) ) { return $param }
-    my sub my_sub : returns(REF[ANY]) ( $param : of(REF[ANY]) ) { return $param }
-    state sub state_sub : returns(REF[ANY]) ( $param : of(REF[ANY]) ) { return $param }
+    sub old_sub :returns(REF[ANY]) { my $x :of(REF[ANY]) = shift; return $x }
+    sub new_sub :returns(REF[ANY]) ( $param :of(REF[ANY]) ) { return $param }
+    my sub my_sub :returns(REF[ANY]) ( $param :of(REF[ANY]) ) { return $param }
+    state sub state_sub :returns(REF[ANY]) ( $param :of(REF[ANY]) ) { return $param }
 
-    sub old_ret_sub : returns(REF[ANY]) { return shift }
-    sub new_ret_sub : returns(REF[ANY]) ($param) { return $param }
-    my sub my_ret_sub : returns(REF[ANY]) ($param) { return $param }
-    state sub state_ret_sub : returns(REF[ANY]) ($param) { return $param }
+    sub old_ret_sub :returns(REF[ANY]) { return shift }
+    sub new_ret_sub :returns(REF[ANY]) ($param) { return $param }
+    my sub my_ret_sub :returns(REF[ANY]) ($param) { return $param }
+    state sub state_ret_sub :returns(REF[ANY]) ($param) { return $param }
 
     # With values that should pass the REF[ANY] check...
     for my $good_value (GOOD_VALUES) {
@@ -160,9 +160,9 @@ package REF_INT {
 
     # Test assignment to scalars...
 
-    my $my_scalar : of(REF[INT]) = \0;
-    our $our_scalar : of(REF[INT]) = \0;
-    state $state_scalar : of(REF[INT]) = \0;
+    my $my_scalar :of(REF[INT]) = \0;
+    our $our_scalar :of(REF[INT]) = \0;
+    state $state_scalar :of(REF[INT]) = \0;
 
     # Variables have to be initialized with something that passes the REF[INT] check...
     for my $good_value (GOOD_VALUES) {
@@ -174,15 +174,15 @@ package REF_INT {
 
     # Implicit undef DOESN'T pass the REF[INT] check...
     # (Note: can't check uninitialized our variable because that fails at compile-time)
-    FAIL_ON_INIT { my $uninitialized : of(REF[INT]) } 'uninitialized my scalar';
-    FAIL_ON_INIT { state $uninitialized : of(REF[INT]) } 'uninitialized state scalar';
+    FAIL_ON_INIT { my $uninitialized :of(REF[INT]) } 'uninitialized my scalar';
+    FAIL_ON_INIT { state $uninitialized :of(REF[INT]) } 'uninitialized state scalar';
 
     # Other explicit initializer values also don't pass the REF[INT] check...
     for my $bad_value (BAD_VALUES) {
         my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-        FAIL_ON_INIT { my $uninitialized : of(REF[INT])    = $bad_value } "   my scalar = $bad_value_str";
-        FAIL_ON_INIT { our $uninitialized : of(REF[INT])   = $bad_value } "  our scalar = $bad_value_str";
-        FAIL_ON_INIT { state $uninitialized : of(REF[INT]) = $bad_value } "state scalar = $bad_value_str";
+        FAIL_ON_INIT { my $uninitialized :of(REF[INT])    = $bad_value } "   my scalar = $bad_value_str";
+        FAIL_ON_INIT { our $uninitialized :of(REF[INT])   = $bad_value } "  our scalar = $bad_value_str";
+        FAIL_ON_INIT { state $uninitialized :of(REF[INT]) = $bad_value } "state scalar = $bad_value_str";
     }
 
     # Assignments must likewise pass the REF[INT] check...
@@ -202,15 +202,15 @@ package REF_INT {
 
     # Test subroutines: parameters, internal variables, return values...
 
-    sub old_sub : returns(REF[INT]) { my $x : of(REF[INT]) = shift; return $x }
-    sub new_sub : returns(REF[INT]) ( $param : of(REF[INT]) ) { return $param }
-    my sub my_sub : returns(REF[INT]) ( $param : of(REF[INT]) ) { return $param }
-    state sub state_sub : returns(REF[INT]) ( $param : of(REF[INT]) ) { return $param }
+    sub old_sub :returns(REF[INT]) { my $x :of(REF[INT]) = shift; return $x }
+    sub new_sub :returns(REF[INT]) ( $param :of(REF[INT]) ) { return $param }
+    my sub my_sub :returns(REF[INT]) ( $param :of(REF[INT]) ) { return $param }
+    state sub state_sub :returns(REF[INT]) ( $param :of(REF[INT]) ) { return $param }
 
-    sub old_ret_sub : returns(REF[INT]) { return shift }
-    sub new_ret_sub : returns(REF[INT]) ($param) { return $param }
-    my sub my_ret_sub : returns(REF[INT]) ($param) { return $param }
-    state sub state_ret_sub : returns(REF[INT]) ($param) { return $param }
+    sub old_ret_sub :returns(REF[INT]) { return shift }
+    sub new_ret_sub :returns(REF[INT]) ($param) { return $param }
+    my sub my_ret_sub :returns(REF[INT]) ($param) { return $param }
+    state sub state_ret_sub :returns(REF[INT]) ($param) { return $param }
 
     # With values that should pass the REF[INT] check...
     for my $good_value (GOOD_VALUES) {
@@ -295,9 +295,9 @@ package REF_HASH {
 
     # Test assignment to scalars...
 
-    my $my_scalar : of(REF[HASH]) = \{};
-    our $our_scalar : of(REF[HASH]) = \{};
-    state $state_scalar : of(REF[HASH]) = \{};
+    my $my_scalar :of(REF[HASH]) = \{};
+    our $our_scalar :of(REF[HASH]) = \{};
+    state $state_scalar :of(REF[HASH]) = \{};
 
     # Variables have to be initialized with something that passes the REF[HASH] check...
     for my $good_value (GOOD_VALUES) {
@@ -309,15 +309,15 @@ package REF_HASH {
 
     # Implicit undef DOESN'T pass the REF[HASH] check...
     # (Note: can't check uninitialized our variable because that fails at compile-time)
-    FAIL_ON_INIT { my $uninitialized : of(REF[HASH]) } 'uninitialized my scalar';
-    FAIL_ON_INIT { state $uninitialized : of(REF[HASH]) } 'uninitialized state scalar';
+    FAIL_ON_INIT { my $uninitialized :of(REF[HASH]) } 'uninitialized my scalar';
+    FAIL_ON_INIT { state $uninitialized :of(REF[HASH]) } 'uninitialized state scalar';
 
     # Other explicit initializer values also don't pass the REF[HASH] check...
     for my $bad_value (BAD_VALUES) {
         my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-        FAIL_ON_INIT { my $uninitialized : of(REF[HASH])    = $bad_value } "   my scalar = $bad_value_str";
-        FAIL_ON_INIT { our $uninitialized : of(REF[HASH])   = $bad_value } "  our scalar = $bad_value_str";
-        FAIL_ON_INIT { state $uninitialized : of(REF[HASH]) = $bad_value } "state scalar = $bad_value_str";
+        FAIL_ON_INIT { my $uninitialized :of(REF[HASH])    = $bad_value } "   my scalar = $bad_value_str";
+        FAIL_ON_INIT { our $uninitialized :of(REF[HASH])   = $bad_value } "  our scalar = $bad_value_str";
+        FAIL_ON_INIT { state $uninitialized :of(REF[HASH]) = $bad_value } "state scalar = $bad_value_str";
     }
 
     # Assignments must likewise pass the REF[HASH] check...
@@ -337,15 +337,15 @@ package REF_HASH {
 
     # Test subroutines: parameters, internal variables, return values...
 
-    sub old_sub : returns(REF[HASH]) { my $x : of(REF[HASH]) = shift; return $x }
-    sub new_sub : returns(REF[HASH]) ( $param : of(REF[HASH]) ) { return $param }
-    my sub my_sub : returns(REF[HASH]) ( $param : of(REF[HASH]) ) { return $param }
-    state sub state_sub : returns(REF[HASH]) ( $param : of(REF[HASH]) ) { return $param }
+    sub old_sub :returns(REF[HASH]) { my $x :of(REF[HASH]) = shift; return $x }
+    sub new_sub :returns(REF[HASH]) ( $param :of(REF[HASH]) ) { return $param }
+    my sub my_sub :returns(REF[HASH]) ( $param :of(REF[HASH]) ) { return $param }
+    state sub state_sub :returns(REF[HASH]) ( $param :of(REF[HASH]) ) { return $param }
 
-    sub old_ret_sub : returns(REF[HASH]) { return shift }
-    sub new_ret_sub : returns(REF[HASH]) ($param) { return $param }
-    my sub my_ret_sub : returns(REF[HASH]) ($param) { return $param }
-    state sub state_ret_sub : returns(REF[HASH]) ($param) { return $param }
+    sub old_ret_sub :returns(REF[HASH]) { return shift }
+    sub new_ret_sub :returns(REF[HASH]) ($param) { return $param }
+    my sub my_ret_sub :returns(REF[HASH]) ($param) { return $param }
+    state sub state_ret_sub :returns(REF[HASH]) ($param) { return $param }
 
     # With values that should pass the REF[HASH] check...
     for my $good_value (GOOD_VALUES) {
@@ -434,9 +434,9 @@ package REF_REF_CODE_INT {
 
     # Test assignment to scalars...
 
-    my $my_scalar : of(REF[REF[CODE|INT]]) = \\sub { };
-    our $our_scalar : of(REF[REF[CODE|INT]]) = \\sub { };
-    state $state_scalar : of(REF[REF[CODE|INT]]) = \\sub { };
+    my $my_scalar :of(REF[REF[CODE|INT]]) = \\sub { };
+    our $our_scalar :of(REF[REF[CODE|INT]]) = \\sub { };
+    state $state_scalar :of(REF[REF[CODE|INT]]) = \\sub { };
 
     # Variables have to be initialized with something that passes the REF[REF[CODE|INT]] check...
     for my $good_value (GOOD_VALUES) {
@@ -448,15 +448,15 @@ package REF_REF_CODE_INT {
 
     # Implicit undef DOESN'T pass the REF[REF[CODE|INT]] check...
     # (Note: can't check uninitialized our variable because that fails at compile-time)
-    FAIL_ON_INIT { my $uninitialized : of(REF[REF[CODE|INT]]) } 'uninitialized my scalar';
-    FAIL_ON_INIT { state $uninitialized : of(REF[REF[CODE|INT]]) } 'uninitialized state scalar';
+    FAIL_ON_INIT { my $uninitialized :of(REF[REF[CODE|INT]]) } 'uninitialized my scalar';
+    FAIL_ON_INIT { state $uninitialized :of(REF[REF[CODE|INT]]) } 'uninitialized state scalar';
 
     # Other explicit initializer values also don't pass the REF[REF[CODE|INT]] check...
     for my $bad_value (BAD_VALUES) {
         my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-        FAIL_ON_INIT { my $uninitialized : of(REF[REF[CODE|INT]])    = $bad_value } "   my scalar = $bad_value_str";
-        FAIL_ON_INIT { our $uninitialized : of(REF[REF[CODE|INT]])   = $bad_value } "  our scalar = $bad_value_str";
-        FAIL_ON_INIT { state $uninitialized : of(REF[REF[CODE|INT]]) = $bad_value } "state scalar = $bad_value_str";
+        FAIL_ON_INIT { my $uninitialized :of(REF[REF[CODE|INT]])    = $bad_value } "   my scalar = $bad_value_str";
+        FAIL_ON_INIT { our $uninitialized :of(REF[REF[CODE|INT]])   = $bad_value } "  our scalar = $bad_value_str";
+        FAIL_ON_INIT { state $uninitialized :of(REF[REF[CODE|INT]]) = $bad_value } "state scalar = $bad_value_str";
     }
 
     # Assignments must likewise pass the REF[REF[CODE|INT]] check...
@@ -476,15 +476,15 @@ package REF_REF_CODE_INT {
 
     # Test subroutines: parameters, internal variables, return values...
 
-    sub old_sub : returns(REF[REF[CODE|INT]]) { my $x : of(REF[REF[CODE|INT]]) = shift; return $x }
-    sub new_sub : returns(REF[REF[CODE|INT]]) ( $param : of(REF[REF[CODE|INT]]) ) { return $param }
-    my sub my_sub : returns(REF[REF[CODE|INT]]) ( $param : of(REF[REF[CODE|INT]]) ) { return $param }
-    state sub state_sub : returns(REF[REF[CODE|INT]]) ( $param : of(REF[REF[CODE|INT]]) ) { return $param }
+    sub old_sub :returns(REF[REF[CODE|INT]]) { my $x :of(REF[REF[CODE|INT]]) = shift; return $x }
+    sub new_sub :returns(REF[REF[CODE|INT]]) ( $param :of(REF[REF[CODE|INT]]) ) { return $param }
+    my sub my_sub :returns(REF[REF[CODE|INT]]) ( $param :of(REF[REF[CODE|INT]]) ) { return $param }
+    state sub state_sub :returns(REF[REF[CODE|INT]]) ( $param :of(REF[REF[CODE|INT]]) ) { return $param }
 
-    sub old_ret_sub : returns(REF[REF[CODE|INT]]) { return shift }
-    sub new_ret_sub : returns(REF[REF[CODE|INT]]) ($param) { return $param }
-    my sub my_ret_sub : returns(REF[REF[CODE|INT]]) ($param) { return $param }
-    state sub state_ret_sub : returns(REF[REF[CODE|INT]]) ($param) { return $param }
+    sub old_ret_sub :returns(REF[REF[CODE|INT]]) { return shift }
+    sub new_ret_sub :returns(REF[REF[CODE|INT]]) ($param) { return $param }
+    my sub my_ret_sub :returns(REF[REF[CODE|INT]]) ($param) { return $param }
+    state sub state_ret_sub :returns(REF[REF[CODE|INT]]) ($param) { return $param }
 
     # With values that should pass the REF[REF[CODE|INT]] check...
     for my $good_value (GOOD_VALUES) {
