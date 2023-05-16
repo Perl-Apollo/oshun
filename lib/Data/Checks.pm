@@ -12,12 +12,28 @@ our $VERSION = '0.00001';
 
 sub import {
     my ( $class, @args ) = @_;
+
     my $caller = caller;
+
     strict->import::into($caller);
     warnings->import::into($caller);
     feature->import::into( $caller, ':5.22' );
     experimental->import::into( $caller, 'signatures' );
     Data::Checks::Parser->import::into( $caller, @args );
+}
+
+sub unimport {
+    my ( $class, $level ) = @_;
+
+    my $caller = caller;
+
+    strict->unimport::out_of($caller);
+    warnings->unimport::out_of($caller);
+    feature->unimport::out_of($caller);
+
+    # don't unimport experimental signatures because
+    # they have to have those to parse their signatures
+    Data::Checks::Parser->unimport::out_of($caller);
 }
 
 1;
