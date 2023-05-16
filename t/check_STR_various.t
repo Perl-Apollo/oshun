@@ -43,9 +43,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) = 0;
-our $our_scalar : of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) = 0;
-state $state_scalar : of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) = 0;
+my $my_scalar :of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) = 0;
+our $our_scalar :of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) = 0;
+state $state_scalar :of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) = 0;
 
 # Variables have to be initialized with something that passes the
 # STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT] check...
@@ -59,15 +59,15 @@ for my $good_value (GOOD_VALUES) {
 # Implicit undef DOESN'T pass the
 # STR['cat', qq{dog}, "y"..q!z!, /fo+/, INTSTR['cat', qq{dog}, "y"..q!z!, /fo+/, INT] check...
 # (Note: can't check uninitialized our variable because that fails at compile-time)
-FAIL_ON_INIT { my $uninitialized : of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) } 'uninitialized my scalar';
-FAIL_ON_INIT { state $uninitialized : of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) } 'uninitialized state scalar';
+FAIL_ON_INIT { my $uninitialized :of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) } 'uninitialized my scalar';
+FAIL_ON_INIT { state $uninitialized :of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT] check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT])    = $bad_value } "   my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT])   = $bad_value } "  our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT])    = $bad_value } "   my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT])   = $bad_value } "  our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT] check...
@@ -87,15 +87,15 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) { my $x : of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) = shift; return $x }
-sub new_sub : returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ( $param : of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ) { return $param }
-my sub my_sub : returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ( $param : of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ) { return $param }
-state sub state_sub : returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ( $param : of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ) { return $param }
+sub old_sub :returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) { my $x :of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) = shift; return $x }
+sub new_sub :returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ( $param :of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ) { return $param }
+my sub my_sub :returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ( $param :of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ) { return $param }
+state sub state_sub :returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ( $param :of(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ) { return $param }
 
-sub old_ret_sub : returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) { return shift }
-sub new_ret_sub : returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ($param) { return $param }
-my sub my_ret_sub : returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ($param) { return $param }
-state sub state_ret_sub : returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ($param) { return $param }
+sub old_ret_sub :returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) { return shift }
+sub new_ret_sub :returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ($param) { return $param }
+my sub my_ret_sub :returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ($param) { return $param }
+state sub state_ret_sub :returns(STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT]) ($param) { return $param }
 
 # With values that should pass the STR['cat', qq{dog}, "y"..q!z!, /fo+/, INT] check...
 for my $good_value (GOOD_VALUES) {

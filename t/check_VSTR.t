@@ -29,9 +29,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(VSTR) = v0;
-our $our_scalar : of(VSTR) = v0.0;
-state $state_scalar : of(VSTR) = v0.0.0;
+my $my_scalar :of(VSTR) = v0;
+our $our_scalar :of(VSTR) = v0.0;
+state $state_scalar :of(VSTR) = v0.0.0;
 
 # Variables have to be initialized with something that passes the VSTR check...
 for my $good_value (GOOD_VALUES) {
@@ -43,15 +43,15 @@ for my $good_value (GOOD_VALUES) {
 
 # Implicit undef DOESN'T pass the VSTR check...
 # (Note: can't check uninitialized our variable because that fails at compile-time)
-FAIL_ON_INIT { my $uninitialized : of(VSTR) } 'uninitialized my scalar';
-FAIL_ON_INIT { state $uninitialized : of(VSTR) } 'uninitialized state scalar';
+FAIL_ON_INIT { my $uninitialized :of(VSTR) } 'uninitialized my scalar';
+FAIL_ON_INIT { state $uninitialized :of(VSTR) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the VSTR check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(VSTR)    = $bad_value } "   my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(VSTR)   = $bad_value } "  our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(VSTR) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(VSTR)    = $bad_value } "   my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(VSTR)   = $bad_value } "  our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(VSTR) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the VSTR check...
@@ -71,15 +71,15 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(VSTR) { my $x : of(VSTR) = shift; return $x }
-sub new_sub : returns(VSTR) ( $param : of(VSTR) ) { return $param }
-my sub my_sub : returns(VSTR) ( $param : of(VSTR) ) { return $param }
-state sub state_sub : returns(VSTR) ( $param : of(VSTR) ) { return $param }
+sub old_sub :returns(VSTR) { my $x :of(VSTR) = shift; return $x }
+sub new_sub :returns(VSTR) ( $param :of(VSTR) ) { return $param }
+my sub my_sub :returns(VSTR) ( $param :of(VSTR) ) { return $param }
+state sub state_sub :returns(VSTR) ( $param :of(VSTR) ) { return $param }
 
-sub old_ret_sub : returns(VSTR) { return shift }
-sub new_ret_sub : returns(VSTR) ($param) { return $param }
-my sub my_ret_sub : returns(VSTR) ($param) { return $param }
-state sub state_ret_sub : returns(VSTR) ($param) { return $param }
+sub old_ret_sub :returns(VSTR) { return shift }
+sub new_ret_sub :returns(VSTR) ($param) { return $param }
+my sub my_ret_sub :returns(VSTR) ($param) { return $param }
+state sub state_ret_sub :returns(VSTR) ($param) { return $param }
 
 # With values that should pass the VSTR check...
 for my $good_value (GOOD_VALUES) {

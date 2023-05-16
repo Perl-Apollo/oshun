@@ -29,9 +29,9 @@ sub BAD_VALUES {
     use Data::Checks '-k';
 
     # Test assignment to scalars...
-    my $my_scalar : of(DEF) = 0;
-    our $our_scalar : of(DEF) = 0;
-    state $state_scalar : of(DEF) = 0;
+    my $my_scalar :of(DEF) = 0;
+    our $our_scalar :of(DEF) = 0;
+    state $state_scalar :of(DEF) = 0;
 
     # Variables have to be initialized with something that passes the DEF check...
     for my $good_value (GOOD_VALUES) {
@@ -43,15 +43,15 @@ sub BAD_VALUES {
 
     # Implicit undef DOESN'T pass the DEF check...
     # (Note: can't check uninitialized our variable because that fails at compile-time)
-    WARN_ON_INIT { my $uninitialized : of(DEF) } 'uninitialized my scalar';
-    WARN_ON_INIT { state $uninitialized : of(DEF) } 'uninitialized state scalar';
+    WARN_ON_INIT { my $uninitialized :of(DEF) } 'uninitialized my scalar';
+    WARN_ON_INIT { state $uninitialized :of(DEF) } 'uninitialized state scalar';
 
     # Other explicit initializer values also don't pass the DEF check...
     for my $bad_value (BAD_VALUES) {
         my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-        WARN_ON_INIT { my $uninitialized : of(DEF)    = $bad_value } "   my scalar = $bad_value_str";
-        WARN_ON_INIT { our $uninitialized : of(DEF)   = $bad_value } "  our scalar = $bad_value_str";
-        WARN_ON_INIT { state $uninitialized : of(DEF) = $bad_value } "state scalar = $bad_value_str";
+        WARN_ON_INIT { my $uninitialized :of(DEF)    = $bad_value } "   my scalar = $bad_value_str";
+        WARN_ON_INIT { our $uninitialized :of(DEF)   = $bad_value } "  our scalar = $bad_value_str";
+        WARN_ON_INIT { state $uninitialized :of(DEF) = $bad_value } "state scalar = $bad_value_str";
     }
 
     # Assignments must likewise pass the DEF check...
@@ -71,15 +71,15 @@ sub BAD_VALUES {
 
     # Test subroutines: parameters, internal variables, return values...
 
-    sub old_sub : returns(DEF) { my $x : of(DEF) = shift; return $x }
-    sub new_sub : returns(DEF) ( $param : of(DEF) ) { return $param }
-    my sub my_sub : returns(DEF) ( $param : of(DEF) ) { return $param }
-    state sub state_sub : returns(DEF) ( $param : of(DEF) ) { return $param }
+    sub old_sub :returns(DEF) { my $x :of(DEF) = shift; return $x }
+    sub new_sub :returns(DEF) ( $param :of(DEF) ) { return $param }
+    my sub my_sub :returns(DEF) ( $param :of(DEF) ) { return $param }
+    state sub state_sub :returns(DEF) ( $param :of(DEF) ) { return $param }
 
-    sub old_ret_sub : returns(DEF) { return shift }
-    sub new_ret_sub : returns(DEF) ($param) { return $param }
-    my sub my_ret_sub : returns(DEF) ($param) { return $param }
-    state sub state_ret_sub : returns(DEF) ($param) { return $param }
+    sub old_ret_sub :returns(DEF) { return shift }
+    sub new_ret_sub :returns(DEF) ($param) { return $param }
+    my sub my_ret_sub :returns(DEF) ($param) { return $param }
+    state sub state_ret_sub :returns(DEF) ($param) { return $param }
 
     # With values that should pass the DEF check...
     for my $good_value (GOOD_VALUES) {
@@ -132,9 +132,9 @@ sub BAD_VALUES {
 {
     use Data::Checks;
 
-    my $var : of(DEF) = 1;
+    my $var :of(DEF) = 1;
 
-    WARN_ON_INIT { my $var2 : of(DEF) } 'uninitialized :of(DEF) var';
+    WARN_ON_INIT { my $var2 :of(DEF) } 'uninitialized :of(DEF) var';
     WARN_ON_ASSIGN { $var = undef } '$var = undef';
 
     WARN_ON_RETURN { ; old_ret_sub(undef) } "  old_sub( undef )";
@@ -143,7 +143,7 @@ sub BAD_VALUES {
     # Can still request explicit fatality...
     use checks 'FATAL';
 
-    FAIL_ON_INIT { my $var2 : of(DEF) } 'uninitialized :of(DEF) var';
+    FAIL_ON_INIT { my $var2 :of(DEF) } 'uninitialized :of(DEF) var';
     FAIL_ON_ASSIGN { $var = undef } '$var = undef';
 
     FAIL_ON_RETURN { ; old_ret_sub(undef) } "  old_sub( undef )";

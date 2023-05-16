@@ -28,10 +28,10 @@ use Data::Checks;
 
 # Test assignment to arrays...
 
-state @state_array : of(INT);
+state @state_array :of(INT);
 
 # Implicit empty list passes the INT check (every element – all zero of them – is an integer)...
-OKAY { state @uninitialized : of(INT) } 'uninitialized state array';
+OKAY { state @uninitialized :of(INT) } 'uninitialized state array';
 
 # List assignments must likewise pass the INT check...
 for my $good_value (GOOD_VALUES) {

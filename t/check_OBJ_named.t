@@ -34,9 +34,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(OBJ[Class::Base]) = bless {}, 'Class::Base';
-our $our_scalar : of(OBJ[Class::Base]) = bless {}, 'Class::Base';
-state $state_scalar : of(OBJ[Class::Base]) = bless {}, 'Class::Base';
+my $my_scalar :of(OBJ[Class::Base]) = bless {}, 'Class::Base';
+our $our_scalar :of(OBJ[Class::Base]) = bless {}, 'Class::Base';
+state $state_scalar :of(OBJ[Class::Base]) = bless {}, 'Class::Base';
 
 # Variables have to be initialized with something that passes the OBJ[Class::Base] check...
 for my $good_value (GOOD_VALUES) {
@@ -48,15 +48,15 @@ for my $good_value (GOOD_VALUES) {
 
 # Implicit undef DOESN'T pass the OBJ[Class::Base] check...
 # (Note: can't check uninitialized our variable because that fails at compile-time)
-FAIL_ON_INIT { my $uninitialized : of(OBJ[Class::Base]) } 'uninitialized my scalar';
-FAIL_ON_INIT { state $uninitialized : of(OBJ[Class::Base]) } 'uninitialized state scalar';
+FAIL_ON_INIT { my $uninitialized :of(OBJ[Class::Base]) } 'uninitialized my scalar';
+FAIL_ON_INIT { state $uninitialized :of(OBJ[Class::Base]) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the OBJ[Class::Base] check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(OBJ[Class::Base])    = $bad_value } "   my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(OBJ[Class::Base])   = $bad_value } "  our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(OBJ[Class::Base]) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(OBJ[Class::Base])    = $bad_value } "   my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(OBJ[Class::Base])   = $bad_value } "  our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(OBJ[Class::Base]) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the OBJ[Class::Base] check...
@@ -76,15 +76,15 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(OBJ[Class::Base]) { my $x : of(OBJ[Class::Base]) = shift; return $x }
-sub new_sub : returns(OBJ[Class::Base]) ( $param : of(OBJ[Class::Base]) ) { return $param }
-my sub my_sub : returns(OBJ[Class::Base]) ( $param : of(OBJ[Class::Base]) ) { return $param }
-state sub state_sub : returns(OBJ[Class::Base]) ( $param : of(OBJ[Class::Base]) ) { return $param }
+sub old_sub :returns(OBJ[Class::Base]) { my $x :of(OBJ[Class::Base]) = shift; return $x }
+sub new_sub :returns(OBJ[Class::Base]) ( $param :of(OBJ[Class::Base]) ) { return $param }
+my sub my_sub :returns(OBJ[Class::Base]) ( $param :of(OBJ[Class::Base]) ) { return $param }
+state sub state_sub :returns(OBJ[Class::Base]) ( $param :of(OBJ[Class::Base]) ) { return $param }
 
-sub old_ret_sub : returns(OBJ[Class::Base]) { return shift }
-sub new_ret_sub : returns(OBJ[Class::Base]) ($param) { return $param }
-my sub my_ret_sub : returns(OBJ[Class::Base]) ($param) { return $param }
-state sub state_ret_sub : returns(OBJ[Class::Base]) ($param) { return $param }
+sub old_ret_sub :returns(OBJ[Class::Base]) { return shift }
+sub new_ret_sub :returns(OBJ[Class::Base]) ($param) { return $param }
+my sub my_ret_sub :returns(OBJ[Class::Base]) ($param) { return $param }
+state sub state_ret_sub :returns(OBJ[Class::Base]) ($param) { return $param }
 
 # With values that should pass the OBJ[Class::Base] check...
 for my $good_value (GOOD_VALUES) {

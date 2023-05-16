@@ -41,9 +41,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(HASH[NUM[0..99] => UINT]) = do { my %x; \%x };
-our $our_scalar : of(HASH[NUM[0..99] => UINT]) = do { my %x; \%x };
-state $state_scalar : of(HASH[NUM[0..99] => UINT]) = do { my %x; \%x };
+my $my_scalar :of(HASH[NUM[0..99] => UINT]) = do { my %x; \%x };
+our $our_scalar :of(HASH[NUM[0..99] => UINT]) = do { my %x; \%x };
+state $state_scalar :of(HASH[NUM[0..99] => UINT]) = do { my %x; \%x };
 
 # Variables have to be initialized with something that passes the HASH[NUM[0..99] => UINT] check...
 for my $good_value (GOOD_VALUES) {
@@ -55,15 +55,15 @@ for my $good_value (GOOD_VALUES) {
 
 # Implicit undef DOESN'T pass the HASH[NUM[0..99] => UINT] check...
 # (Note: can't check uninitialized our variable because that fails at compile-time)
-FAIL_ON_INIT { my $uninitialized : of(HASH[NUM[0..99] => UINT]) } 'uninitialized my scalar';
-FAIL_ON_INIT { state $uninitialized : of(HASH[NUM[0..99] => UINT]) } 'uninitialized state scalar';
+FAIL_ON_INIT { my $uninitialized :of(HASH[NUM[0..99] => UINT]) } 'uninitialized my scalar';
+FAIL_ON_INIT { state $uninitialized :of(HASH[NUM[0..99] => UINT]) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the HASH[NUM[0..99] => UINT] check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(HASH[NUM[0..99] => UINT])    = $bad_value } "   my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(HASH[NUM[0..99] => UINT])   = $bad_value } "  our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(HASH[NUM[0..99] => UINT]) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(HASH[NUM[0..99] => UINT])    = $bad_value } "   my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(HASH[NUM[0..99] => UINT])   = $bad_value } "  our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(HASH[NUM[0..99] => UINT]) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the HASH[NUM[0..99] => UINT] check...
@@ -83,15 +83,15 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(HASH[NUM[0..99] => UINT]) { my $x : of(HASH[NUM[0..99] => UINT]) = shift; return $x }
-sub new_sub : returns(HASH[NUM[0..99] => UINT]) ( $param : of(HASH[NUM[0..99] => UINT]) ) { return $param }
-my sub my_sub : returns(HASH[NUM[0..99] => UINT]) ( $param : of(HASH[NUM[0..99] => UINT]) ) { return $param }
-state sub state_sub : returns(HASH[NUM[0..99] => UINT]) ( $param : of(HASH[NUM[0..99] => UINT]) ) { return $param }
+sub old_sub :returns(HASH[NUM[0..99] => UINT]) { my $x :of(HASH[NUM[0..99] => UINT]) = shift; return $x }
+sub new_sub :returns(HASH[NUM[0..99] => UINT]) ( $param :of(HASH[NUM[0..99] => UINT]) ) { return $param }
+my sub my_sub :returns(HASH[NUM[0..99] => UINT]) ( $param :of(HASH[NUM[0..99] => UINT]) ) { return $param }
+state sub state_sub :returns(HASH[NUM[0..99] => UINT]) ( $param :of(HASH[NUM[0..99] => UINT]) ) { return $param }
 
-sub old_ret_sub : returns(HASH[NUM[0..99] => UINT]) { return shift }
-sub new_ret_sub : returns(HASH[NUM[0..99] => UINT]) ($param) { return $param }
-my sub my_ret_sub : returns(HASH[NUM[0..99] => UINT]) ($param) { return $param }
-state sub state_ret_sub : returns(HASH[NUM[0..99] => UINT]) ($param) { return $param }
+sub old_ret_sub :returns(HASH[NUM[0..99] => UINT]) { return shift }
+sub new_ret_sub :returns(HASH[NUM[0..99] => UINT]) ($param) { return $param }
+my sub my_ret_sub :returns(HASH[NUM[0..99] => UINT]) ($param) { return $param }
+state sub state_ret_sub :returns(HASH[NUM[0..99] => UINT]) ($param) { return $param }
 
 # With values that should pass the HASH[NUM[0..99] => UINT] check...
 for my $good_value (GOOD_VALUES) {

@@ -7,7 +7,7 @@ package Cache::LRU {
     use Hash::Ordered;
     use lib 'lib';
 
-    sub new ( $class, $max_size : of(UINT) ) {
+    sub new ( $class, $max_size :of(UINT) ) {
         return bless {
             cache    => Hash::Ordered->new,
             max_size => $max_size // 20,
@@ -18,11 +18,11 @@ package Cache::LRU {
     sub max_size ($self) { $self->{max_size} }
     sub items    ($self) { scalar $self->_cache->keys }
 
-    sub exists : returns(BOOL) ( $self, $key : of(STR) ) {
+    sub exists :returns(BOOL) ( $self, $key :of(STR) ) {
         return $self->_cache->exists($key);
     }
 
-    sub set ( $self, $key : of(STR), $value : of(DEF) ) {
+    sub set ( $self, $key :of(STR), $value :of(DEF) ) {
         $self->_cache->unshift( $key, $value );
         if ( $self->_cache->keys > $self->max_size ) {
             $self->_cache->pop;
@@ -33,7 +33,7 @@ package Cache::LRU {
     # Returns ANY instead of DEF because we might have a cache miss
     # The !VOID means we can't be called in void context, eliminating
     # a source of obscure bugs
-    sub get : returns(ANY & !VOID) ( $self, $key : of(STR) ) {
+    sub get :returns(ANY & !VOID) ( $self, $key :of(STR) ) {
         return unless $self->_cache->exists($key);
         my $value = $self->_cache->get($key);
         $self->set( $key, $value );

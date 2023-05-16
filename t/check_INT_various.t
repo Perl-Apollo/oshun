@@ -32,9 +32,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) = 0;
-our $our_scalar : of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) = 0;
-state $state_scalar : of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) = 0;
+my $my_scalar :of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) = 0;
+our $our_scalar :of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) = 0;
+state $state_scalar :of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) = 0;
 
 # Variables have to be initialized with something that passes the INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf] check...
 for my $good_value (GOOD_VALUES) {
@@ -46,15 +46,15 @@ for my $good_value (GOOD_VALUES) {
 
 # Implicit undef DOESN'T pass the INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf] check...
 # (Note: can't check uninitialized our variable because that fails at compile-time)
-FAIL_ON_INIT { my $uninitialized : of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) } 'uninitialized my scalar';
-FAIL_ON_INIT { state $uninitialized : of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) } 'uninitialized state scalar';
+FAIL_ON_INIT { my $uninitialized :of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) } 'uninitialized my scalar';
+FAIL_ON_INIT { state $uninitialized :of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf] check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf])    = $bad_value } "   my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf])   = $bad_value } "  our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf])    = $bad_value } "   my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf])   = $bad_value } "  our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf] check...
@@ -74,19 +74,17 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub :
-  returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) { my $x : of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) = shift; return $x }
-sub new_sub :
-  returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ( $param : of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ) { return $param }
+sub old_sub :returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) { my $x :of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) = shift; return $x }
+sub new_sub :returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ( $param :of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ) { return $param }
 my sub my_sub :
-  returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ( $param : of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ) { return $param }
+  returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ( $param :of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ) { return $param }
 state sub state_sub :
-  returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ( $param : of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ) { return $param }
+  returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ( $param :of(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ) { return $param }
 
-sub old_ret_sub : returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) { return shift }
-sub new_ret_sub : returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ($param) { return $param }
-my sub my_ret_sub : returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ($param) { return $param }
-state sub state_ret_sub : returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ($param) { return $param }
+sub old_ret_sub :returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) { return shift }
+sub new_ret_sub :returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ($param) { return $param }
+my sub my_ret_sub :returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ($param) { return $param }
+state sub state_ret_sub :returns(INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf]) ($param) { return $param }
 
 # With values that should pass the INT[-100, -9..9, 100, m/7$|42/, UINT[99]|UINT[88], 999..inf] check...
 for my $good_value (GOOD_VALUES) {

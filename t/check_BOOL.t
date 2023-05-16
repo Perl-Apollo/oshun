@@ -30,9 +30,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(BOOL) = 0;
-our $our_scalar : of(BOOL) = 0;
-state $state_scalar : of(BOOL) = 0;
+my $my_scalar :of(BOOL) = 0;
+our $our_scalar :of(BOOL) = 0;
+state $state_scalar :of(BOOL) = 0;
 
 # Variables have to be initialized with something that passes the BOOL check...
 for my $good_value (GOOD_VALUES) {
@@ -44,15 +44,15 @@ for my $good_value (GOOD_VALUES) {
 
 # Implicit undef DOESN'T pass the BOOL check...
 # (Note: can't check uninitialized our variable because that fails at compile-time)
-FAIL_ON_INIT { my $uninitialized : of(BOOL) } 'uninitialized my scalar';
-FAIL_ON_INIT { state $uninitialized : of(BOOL) } 'uninitialized state scalar';
+FAIL_ON_INIT { my $uninitialized :of(BOOL) } 'uninitialized my scalar';
+FAIL_ON_INIT { state $uninitialized :of(BOOL) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the BOOL check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(BOOL)    = $bad_value } "   my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(BOOL)   = $bad_value } "  our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(BOOL) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(BOOL)    = $bad_value } "   my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(BOOL)   = $bad_value } "  our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(BOOL) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the BOOL check...
@@ -72,15 +72,15 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(BOOL) { my $x : of(BOOL) = shift; return $x }
-sub new_sub : returns(BOOL) ( $param : of(BOOL) ) { return $param }
-my sub my_sub : returns(BOOL) ( $param : of(BOOL) ) { return $param }
-state sub state_sub : returns(BOOL) ( $param : of(BOOL) ) { return $param }
+sub old_sub :returns(BOOL) { my $x :of(BOOL) = shift; return $x }
+sub new_sub :returns(BOOL) ( $param :of(BOOL) ) { return $param }
+my sub my_sub :returns(BOOL) ( $param :of(BOOL) ) { return $param }
+state sub state_sub :returns(BOOL) ( $param :of(BOOL) ) { return $param }
 
-sub old_ret_sub : returns(BOOL) { return shift }
-sub new_ret_sub : returns(BOOL) ($param) { return $param }
-my sub my_ret_sub : returns(BOOL) ($param) { return $param }
-state sub state_ret_sub : returns(BOOL) ($param) { return $param }
+sub old_ret_sub :returns(BOOL) { return shift }
+sub new_ret_sub :returns(BOOL) ($param) { return $param }
+my sub my_ret_sub :returns(BOOL) ($param) { return $param }
+state sub state_ret_sub :returns(BOOL) ($param) { return $param }
 
 # With values that should pass the BOOL check...
 for my $good_value (GOOD_VALUES) {

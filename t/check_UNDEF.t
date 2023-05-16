@@ -26,9 +26,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(UNDEF);
-our $our_scalar : of(UNDEF);
-state $state_scalar : of(UNDEF);
+my $my_scalar :of(UNDEF);
+our $our_scalar :of(UNDEF);
+state $state_scalar :of(UNDEF);
 
 # Variables have to be initialized with something that passes the UNDEF check...
 for my $good_value (GOOD_VALUES) {
@@ -39,16 +39,16 @@ for my $good_value (GOOD_VALUES) {
 }
 
 # Implicit undef also passes the UNDEF check...
-OKAY { my $uninitialized : of(UNDEF) } 'uninitialized my scalar';
-OKAY { our $uninitialized : of(UNDEF) } 'uninitialized our scalar';
-OKAY { state $uninitialized : of(UNDEF) } 'uninitialized state scalar';
+OKAY { my $uninitialized :of(UNDEF) } 'uninitialized my scalar';
+OKAY { our $uninitialized :of(UNDEF) } 'uninitialized our scalar';
+OKAY { state $uninitialized :of(UNDEF) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the UNDEF check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(UNDEF)    = $bad_value } "   my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(UNDEF)   = $bad_value } "  our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(UNDEF) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(UNDEF)    = $bad_value } "   my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(UNDEF)   = $bad_value } "  our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(UNDEF) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the UNDEF check...
@@ -68,15 +68,15 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(UNDEF) { my $x : of(UNDEF) = shift; return $x }
-sub new_sub : returns(UNDEF) ( $param : of(UNDEF) ) { return $param }
-my sub my_sub : returns(UNDEF) ( $param : of(UNDEF) ) { return $param }
-state sub state_sub : returns(UNDEF) ( $param : of(UNDEF) ) { return $param }
+sub old_sub :returns(UNDEF) { my $x :of(UNDEF) = shift; return $x }
+sub new_sub :returns(UNDEF) ( $param :of(UNDEF) ) { return $param }
+my sub my_sub :returns(UNDEF) ( $param :of(UNDEF) ) { return $param }
+state sub state_sub :returns(UNDEF) ( $param :of(UNDEF) ) { return $param }
 
-sub old_ret_sub : returns(UNDEF) { return shift }
-sub new_ret_sub : returns(UNDEF) ($param) { return $param }
-my sub my_ret_sub : returns(UNDEF) ($param) { return $param }
-state sub state_ret_sub : returns(UNDEF) ($param) { return $param }
+sub old_ret_sub :returns(UNDEF) { return shift }
+sub new_ret_sub :returns(UNDEF) ($param) { return $param }
+my sub my_ret_sub :returns(UNDEF) ($param) { return $param }
+state sub state_ret_sub :returns(UNDEF) ($param) { return $param }
 
 # With values that should pass the UNDEF check...
 for my $good_value (GOOD_VALUES) {

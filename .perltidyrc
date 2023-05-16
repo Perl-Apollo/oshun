@@ -26,5 +26,8 @@
 # break before all operators
 --want-break-before="% + - * / x != == >= <= =~ < > | & >= < = **= += *= &= <<= &&= -= /= |= >>= ||= .= %= ^= x="
 
+# this stops `:of(INT)` from becoming `: of(INT)`
+--no-want-right-space='A'
+
 # run at least twice to improve stability
 --iterations=2

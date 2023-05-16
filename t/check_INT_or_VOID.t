@@ -36,10 +36,10 @@ ok $@ =~ /\QThe LIST and VOID checks are only valid in the :returns specifier of
 
 # Test subroutines...
 
-sub old_ret_sub : returns(INT|VOID) { return shift }
-sub new_ret_sub : returns(INT|VOID) ($param) { return ($param) }
-my sub my_ret_sub : returns(INT|VOID) ($param) { return ( $param, $param ) }
-state sub state_ret_sub : returns(INT|VOID) ($param) { return ( $param, $param, $param ) }
+sub old_ret_sub :returns(INT|VOID) { return shift }
+sub new_ret_sub :returns(INT|VOID) ($param) { return ($param) }
+my sub my_ret_sub :returns(INT|VOID) ($param) { return ( $param, $param ) }
+state sub state_ret_sub :returns(INT|VOID) ($param) { return ( $param, $param, $param ) }
 
 # With values that should pass the INT half of the INT|VOID check...
 for my $good_value (GOOD_VALUES) {

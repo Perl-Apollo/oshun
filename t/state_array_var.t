@@ -35,7 +35,7 @@ use Data::Checks;
 
 # Test assignment to arrays...
 
-state @state_array : of(INT);
+state @state_array :of(INT);
 
 # Variables have to be initialized with something that passes the INT check...
 for my $good_value (GOOD_VALUES) {
@@ -44,12 +44,12 @@ for my $good_value (GOOD_VALUES) {
 }
 
 # Implicit empty list passes the INT check (every element – all zero of them – is an integer)...
-OKAY { state @uninitialized : of(INT) } 'uninitialized state array';
+OKAY { state @uninitialized :of(INT) } 'uninitialized state array';
 
 # Other explicit initializer values also don't pass the INT check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { state @var : of(INT) = $bad_value } "state array = $bad_value_str";
+    FAIL_ON_INIT { state @var :of(INT) = $bad_value } "state array = $bad_value_str";
 }
 
 # List assignments must likewise pass the INT check...

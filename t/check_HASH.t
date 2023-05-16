@@ -33,9 +33,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(HASH) = do { my %x; \%x };
-our $our_scalar : of(HASH) = { a => 1, b => 2 };
-state $state_scalar : of(HASH) = do { my %x; \%x };
+my $my_scalar :of(HASH) = do { my %x; \%x };
+our $our_scalar :of(HASH) = { a => 1, b => 2 };
+state $state_scalar :of(HASH) = do { my %x; \%x };
 
 # Variables have to be initialized with something that passes the HASH check...
 for my $good_value (GOOD_VALUES) {
@@ -47,15 +47,15 @@ for my $good_value (GOOD_VALUES) {
 
 # Implicit undef DOESN'T pass the HASH check...
 # (Note: can't check uninitialized our variable because that fails at compile-time)
-FAIL_ON_INIT { my $uninitialized : of(HASH) } 'uninitialized my scalar';
-FAIL_ON_INIT { state $uninitialized : of(HASH) } 'uninitialized state scalar';
+FAIL_ON_INIT { my $uninitialized :of(HASH) } 'uninitialized my scalar';
+FAIL_ON_INIT { state $uninitialized :of(HASH) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the HASH check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(HASH)    = $bad_value } "   my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(HASH)   = $bad_value } "  our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(HASH) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(HASH)    = $bad_value } "   my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(HASH)   = $bad_value } "  our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(HASH) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the HASH check...
@@ -75,15 +75,15 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(HASH) { my $x : of(HASH) = shift; return $x }
-sub new_sub : returns(HASH) ( $param : of(HASH) ) { return $param }
-my sub my_sub : returns(HASH) ( $param : of(HASH) ) { return $param }
-state sub state_sub : returns(HASH) ( $param : of(HASH) ) { return $param }
+sub old_sub :returns(HASH) { my $x :of(HASH) = shift; return $x }
+sub new_sub :returns(HASH) ( $param :of(HASH) ) { return $param }
+my sub my_sub :returns(HASH) ( $param :of(HASH) ) { return $param }
+state sub state_sub :returns(HASH) ( $param :of(HASH) ) { return $param }
 
-sub old_ret_sub : returns(HASH) { return shift }
-sub new_ret_sub : returns(HASH) ($param) { return $param }
-my sub my_ret_sub : returns(HASH) ($param) { return $param }
-state sub state_ret_sub : returns(HASH) ($param) { return $param }
+sub old_ret_sub :returns(HASH) { return shift }
+sub new_ret_sub :returns(HASH) ($param) { return $param }
+my sub my_ret_sub :returns(HASH) ($param) { return $param }
+state sub state_ret_sub :returns(HASH) ($param) { return $param }
 
 # With values that should pass the HASH check...
 for my $good_value (GOOD_VALUES) {

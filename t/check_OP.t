@@ -31,9 +31,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(OP[""]) = bless {}, 'Class::WithOverload';
-our $our_scalar : of(OP[""]) = bless {}, 'Class::WithOverload';
-state $state_scalar : of(OP[""]) = bless {}, 'Class::WithOverload';
+my $my_scalar :of(OP[""]) = bless {}, 'Class::WithOverload';
+our $our_scalar :of(OP[""]) = bless {}, 'Class::WithOverload';
+state $state_scalar :of(OP[""]) = bless {}, 'Class::WithOverload';
 
 # Variables have to be initialized with something that passes the OP[""] check...
 for my $good_value (GOOD_VALUES) {
@@ -45,15 +45,15 @@ for my $good_value (GOOD_VALUES) {
 
 # Implicit undef OP[""]OP[""] check...
 # (Note: can't check uninitialized our variable because that fails at compile-time)
-FAIL_ON_INIT { my $uninitialized : of(OP[""]) } 'uninitialized my scalar';
-FAIL_ON_INIT { state $uninitialized : of(OP[""]) } 'uninitialized state scalar';
+FAIL_ON_INIT { my $uninitialized :of(OP[""]) } 'uninitialized my scalar';
+FAIL_ON_INIT { state $uninitialized :of(OP[""]) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the OP[""] check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(OP[""])    = $bad_value } "   my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(OP[""])   = $bad_value } "  our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(OP[""]) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(OP[""])    = $bad_value } "   my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(OP[""])   = $bad_value } "  our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(OP[""]) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the OP[""] check...
@@ -73,15 +73,15 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(OP[""]) { my $x : of(OP[""]) = shift; return $x }
-sub new_sub : returns(OP[""]) ( $param : of(OP[""]) ) { return $param }
-my sub my_sub : returns(OP[""]) ( $param : of(OP[""]) ) { return $param }
-state sub state_sub : returns(OP[""]) ( $param : of(OP[""]) ) { return $param }
+sub old_sub :returns(OP[""]) { my $x :of(OP[""]) = shift; return $x }
+sub new_sub :returns(OP[""]) ( $param :of(OP[""]) ) { return $param }
+my sub my_sub :returns(OP[""]) ( $param :of(OP[""]) ) { return $param }
+state sub state_sub :returns(OP[""]) ( $param :of(OP[""]) ) { return $param }
 
-sub old_ret_sub : returns(OP[""]) { return shift }
-sub new_ret_sub : returns(OP[""]) ($param) { return $param }
-my sub my_ret_sub : returns(OP[""]) ($param) { return $param }
-state sub state_ret_sub : returns(OP[""]) ($param) { return $param }
+sub old_ret_sub :returns(OP[""]) { return shift }
+sub new_ret_sub :returns(OP[""]) ($param) { return $param }
+my sub my_ret_sub :returns(OP[""]) ($param) { return $param }
+state sub state_ret_sub :returns(OP[""]) ($param) { return $param }
 
 # With values that should pass the OP[""] check...
 for my $good_value (GOOD_VALUES) {

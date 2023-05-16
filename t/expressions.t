@@ -10,7 +10,7 @@ use Data::Checks;
 
 # Probably the most common usage...
 
-my $my_scalar : of(INT|UNDEF);
+my $my_scalar :of(INT|UNDEF);
 
 for my $good_val ( 1, '86', undef ) {
     my $good_val_str = Data::Checks::Parser::pp($good_val);
@@ -24,7 +24,7 @@ for my $bad_val ( 1.1, 'str', qr//, \99, \\99, [], {}, *STDIN ) {
 
 # A more complex example...
 
-my @list : of(DEF & !(ARRAY | HASH | GLOB));
+my @list :of(DEF & !(ARRAY | HASH | GLOB));
 
 for my $good_val ( 1, 'str', qr//, \99, \\99 ) {
     my $good_val_str = Data::Checks::Parser::pp($good_val);

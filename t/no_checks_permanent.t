@@ -10,12 +10,12 @@ use Data::Checks::TestUtils 'NUM';
 use Data::Checks;
 
 no checks;
-my $disabled : of(NUM) = 0;
-sub nonfunctional : returns(NUM) ( $x : of(NUM) ) { return 'defined' }
+my $disabled :of(NUM) = 0;
+sub nonfunctional :returns(NUM) ( $x :of(NUM) ) { return 'defined' }
 
 use checks;
-my $enabled : of(NUM) = 0;
-sub functional : returns(NUM) ( $x : of(NUM) ) { return 'defined' }
+my $enabled :of(NUM) = 0;
+sub functional :returns(NUM) ( $x :of(NUM) ) { return 'defined' }
 
 no checks;
 

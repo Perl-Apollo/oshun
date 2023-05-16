@@ -34,10 +34,10 @@ use Data::Checks;
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(SEQ[NUM, UINT, OPT[STR], OPT[HASH], ETC]) { return @{ $_[0] } }
-sub new_sub : returns(SEQ[NUM, UINT, OPT[STR], OPT[HASH], ETC]) ($param) { return @{$param} }
-my sub my_sub : returns(SEQ[NUM, UINT, OPT[STR], OPT[HASH], ETC]) ($param) { return @{$param} }
-state sub state_sub : returns(SEQ[NUM, UINT, OPT[STR], OPT[HASH], ETC]) ($param) { return @{$param} }
+sub old_sub :returns(SEQ[NUM, UINT, OPT[STR], OPT[HASH], ETC]) { return @{ $_[0] } }
+sub new_sub :returns(SEQ[NUM, UINT, OPT[STR], OPT[HASH], ETC]) ($param) { return @{$param} }
+my sub my_sub :returns(SEQ[NUM, UINT, OPT[STR], OPT[HASH], ETC]) ($param) { return @{$param} }
+state sub state_sub :returns(SEQ[NUM, UINT, OPT[STR], OPT[HASH], ETC]) ($param) { return @{$param} }
 
 # With values that should pass the SEQ[NUM, UINT, OPT[STR], OPT[HASH], ETC] check...
 for my $good_value (GOOD_VALUES) {

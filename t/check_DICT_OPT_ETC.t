@@ -49,9 +49,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) = { num => 1.1, '*u*' => 2, 99 => 'three', etc => {} };
-our $our_scalar : of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) = { num => 1.1, '*u*' => 2, 99 => 'three', etc => {} };
-state $state_scalar : of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) = { num => 1.1, '*u*' => 2, 99 => 'three', etc => {} };
+my $my_scalar :of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) = { num => 1.1, '*u*' => 2, 99 => 'three', etc => {} };
+our $our_scalar :of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) = { num => 1.1, '*u*' => 2, 99 => 'three', etc => {} };
+state $state_scalar :of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) = { num => 1.1, '*u*' => 2, 99 => 'three', etc => {} };
 
 # Variables have to be initialized with something that passes the DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC] check...
 for my $good_value (GOOD_VALUES) {
@@ -63,15 +63,15 @@ for my $good_value (GOOD_VALUES) {
 
 # Implicit undef DOESN'T pass the DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC] check...
 # (Note: can't check uninitialized our variable because that fails at compile-time)
-FAIL_ON_INIT { my $uninitialized : of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) } 'uninitialized my scalar';
-FAIL_ON_INIT { state $uninitialized : of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) } 'uninitialized state scalar';
+FAIL_ON_INIT { my $uninitialized :of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) } 'uninitialized my scalar';
+FAIL_ON_INIT { state $uninitialized :of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC] check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC])    = $bad_value } "   my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC])   = $bad_value } "  our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC])    = $bad_value } "   my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC])   = $bad_value } "  our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC] check...
@@ -91,28 +91,28 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) {
-    my $x : of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) = shift;
+sub old_sub :returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) {
+    my $x :of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) = shift;
     return $x;
 }
 
-sub new_sub : returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC])
-  ( $param : of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) ) {
+sub new_sub :returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC])
+  ( $param :of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) ) {
     return $param;
 }
-my sub my_sub : returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC])
-  ( $param : of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) ) {
+my sub my_sub :returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC])
+  ( $param :of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) ) {
     return $param;
 }
-state sub state_sub : returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC])
-  ( $param : of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) ) {
+state sub state_sub :returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC])
+  ( $param :of(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) ) {
     return $param;
 }
 
-sub old_ret_sub : returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) { return shift }
-sub new_ret_sub : returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) ($param) { return $param }
-my sub my_ret_sub : returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) ($param) { return $param }
-state sub state_ret_sub : returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) ($param) { return $param }
+sub old_ret_sub :returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) { return shift }
+sub new_ret_sub :returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) ($param) { return $param }
+my sub my_ret_sub :returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) ($param) { return $param }
+state sub state_ret_sub :returns(DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC]) ($param) { return $param }
 
 # With values that should pass the DICT[OPT[ num => NUM ], qq{*u*} => UINT, 99 => STR, 'etc' => HASH, ETC] check...
 for my $good_value (GOOD_VALUES) {

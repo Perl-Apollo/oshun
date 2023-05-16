@@ -27,20 +27,20 @@ use Data::Checks;
 
 # Test subroutines...
 
-sub old_ret_sub_good : returns(LIST[2=>NUM]) { my $x = shift; return ( $x, $x ); }
-sub new_ret_sub_good : returns(LIST[2=>NUM]) ($param) { return ( $param, $param ) }
-my sub my_ret_sub_good : returns(LIST[2=>NUM]) ($param) { return ( $param, $param ) }
-state sub state_ret_sub_good : returns(LIST[2=>NUM]) ($param) { return ( $param, $param ) }
+sub old_ret_sub_good :returns(LIST[2=>NUM]) { my $x = shift; return ( $x, $x ); }
+sub new_ret_sub_good :returns(LIST[2=>NUM]) ($param) { return ( $param, $param ) }
+my sub my_ret_sub_good :returns(LIST[2=>NUM]) ($param) { return ( $param, $param ) }
+state sub state_ret_sub_good :returns(LIST[2=>NUM]) ($param) { return ( $param, $param ) }
 
-sub old_ret_sub_bad_len : returns(LIST[2=>NUM]) { my $x = shift; return ($x); }
-sub new_ret_sub_bad_len : returns(LIST[2=>NUM]) ($param) { return ($param) }
-my sub my_ret_sub_bad_len : returns(LIST[2=>NUM]) ($param) { return ( $param, $param, $param ) }
-state sub state_ret_sub_bad_len : returns(LIST[2=>NUM]) ($param) { return () }
+sub old_ret_sub_bad_len :returns(LIST[2=>NUM]) { my $x = shift; return ($x); }
+sub new_ret_sub_bad_len :returns(LIST[2=>NUM]) ($param) { return ($param) }
+my sub my_ret_sub_bad_len :returns(LIST[2=>NUM]) ($param) { return ( $param, $param, $param ) }
+state sub state_ret_sub_bad_len :returns(LIST[2=>NUM]) ($param) { return () }
 
-sub old_ret_sub_bad_num : returns(LIST[2=>NUM]) { return ( shift, 'str' ) }
-sub new_ret_sub_bad_num : returns(LIST[2=>NUM]) ($param) { return ( $param, 'str' ) }
-my sub my_ret_sub_bad_num : returns(LIST[2=>NUM]) ($param) { return ( $param, 'str' ) }
-state sub state_ret_sub_bad_num : returns(LIST[2=>NUM]) ($param) { return ( 'str', $param ) }
+sub old_ret_sub_bad_num :returns(LIST[2=>NUM]) { return ( shift, 'str' ) }
+sub new_ret_sub_bad_num :returns(LIST[2=>NUM]) ($param) { return ( $param, 'str' ) }
+my sub my_ret_sub_bad_num :returns(LIST[2=>NUM]) ($param) { return ( $param, 'str' ) }
+state sub state_ret_sub_bad_num :returns(LIST[2=>NUM]) ($param) { return ( 'str', $param ) }
 
 # With values and subs that should pass the LIST[2=>NUM] check...
 for my $good_value (GOOD_VALUES) {

@@ -29,9 +29,9 @@ use Data::Checks;
 
 # Test assignment to scalars...
 
-my $my_scalar : of(GLOB) = *STDOUT;
-our $our_scalar : of(GLOB) = *STDERR;
-state $state_scalar : of(GLOB) = *STDIN;
+my $my_scalar :of(GLOB) = *STDOUT;
+our $our_scalar :of(GLOB) = *STDERR;
+state $state_scalar :of(GLOB) = *STDIN;
 
 # Variables have to be initialized with something that passes the GLOB check...
 for my $good_value (GOOD_VALUES) {
@@ -43,15 +43,15 @@ for my $good_value (GOOD_VALUES) {
 
 # Implicit undef DOESN'T pass the GLOB check...
 # (Note: can't check uninitialized our variable because that fails at compile-time)
-FAIL_ON_INIT { my $uninitialized : of(GLOB) } 'uninitialized my scalar';
-FAIL_ON_INIT { state $uninitialized : of(GLOB) } 'uninitialized state scalar';
+FAIL_ON_INIT { my $uninitialized :of(GLOB) } 'uninitialized my scalar';
+FAIL_ON_INIT { state $uninitialized :of(GLOB) } 'uninitialized state scalar';
 
 # Other explicit initializer values also don't pass the GLOB check...
 for my $bad_value (BAD_VALUES) {
     my $bad_value_str = Data::Checks::Parser::pp($bad_value);
-    FAIL_ON_INIT { my $uninitialized : of(GLOB)    = $bad_value } "   my scalar = $bad_value_str";
-    FAIL_ON_INIT { our $uninitialized : of(GLOB)   = $bad_value } "  our scalar = $bad_value_str";
-    FAIL_ON_INIT { state $uninitialized : of(GLOB) = $bad_value } "state scalar = $bad_value_str";
+    FAIL_ON_INIT { my $uninitialized :of(GLOB)    = $bad_value } "   my scalar = $bad_value_str";
+    FAIL_ON_INIT { our $uninitialized :of(GLOB)   = $bad_value } "  our scalar = $bad_value_str";
+    FAIL_ON_INIT { state $uninitialized :of(GLOB) = $bad_value } "state scalar = $bad_value_str";
 }
 
 # Assignments must likewise pass the GLOB check...
@@ -71,15 +71,15 @@ for my $bad_value (BAD_VALUES) {
 
 # Test subroutines: parameters, internal variables, return values...
 
-sub old_sub : returns(GLOB) { my $x : of(GLOB) = shift; return $x }
-sub new_sub : returns(GLOB) ( $param : of(GLOB) ) { return $param }
-my sub my_sub : returns(GLOB) ( $param : of(GLOB) ) { return $param }
-state sub state_sub : returns(GLOB) ( $param : of(GLOB) ) { return $param }
+sub old_sub :returns(GLOB) { my $x :of(GLOB) = shift; return $x }
+sub new_sub :returns(GLOB) ( $param :of(GLOB) ) { return $param }
+my sub my_sub :returns(GLOB) ( $param :of(GLOB) ) { return $param }
+state sub state_sub :returns(GLOB) ( $param :of(GLOB) ) { return $param }
 
-sub old_ret_sub : returns(GLOB) { return shift }
-sub new_ret_sub : returns(GLOB) ($param) { return $param }
-my sub my_ret_sub : returns(GLOB) ($param) { return $param }
-state sub state_ret_sub : returns(GLOB) ($param) { return $param }
+sub old_ret_sub :returns(GLOB) { return shift }
+sub new_ret_sub :returns(GLOB) ($param) { return $param }
+my sub my_ret_sub :returns(GLOB) ($param) { return $param }
+state sub state_ret_sub :returns(GLOB) ($param) { return $param }
 
 # With values that should pass the GLOB check...
 for my $good_value (GOOD_VALUES) {
