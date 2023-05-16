@@ -1,8 +1,11 @@
+# PODNAME: Data::Checks::Specification
+
 =encoding utf8
 
-=head1 VERSION
+=head1 CAVEAT
 
-This document describes Data::Checks::Parser version 0.002
+The MVP for L<Data::Checks> will be much smaller than what is in this
+documentation.
 
 =head1 THE GIST OF IT
 
