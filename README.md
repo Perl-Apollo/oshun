@@ -256,7 +256,7 @@ sub int num (str $name) {...}
 ```
 
 What's the name of that subroutine? I think it's `num`, but it might look like
-`int` to other. Who knows? We could do this:
+`int` to someone else. Who knows? We could do this:
 
 ```perl
 int sub num (str $name) {...}
@@ -307,11 +307,11 @@ I can no longer find the article, but I read a long post from a company
 explaining why they had abandoned their use of type inference.
 
 The absolutely loved it, but they spent so much time trying to patch
-third-party modules that they gave up. They were as much time trying to fix
-other's code than writing their own.
+third-party modules that they gave up. They were spending as much time trying
+to fix other's code than writing their own.
 
-This is one of the many dangers of retrofitting a system like "data checks"
-onto an existing language. Thus, we're being extremely conservative.
+This is a danger of retrofitting a system like "data checks" onto an existing
+language. Thus, we're being extremely conservative.
 
 ### Signature checks
 
@@ -385,7 +385,8 @@ my $name :of(LongStr[10]) = get_name(); # must be at least 10 characters
 ```
 
 The body of a check definition should return a true or false value, or
-die/croak with a more useful message.
+die/croak with a more useful message (exceptions would be strongly preferred),
+but that's a battle for another day. A `Loki` project, perhaps?)
 
 A user-defined check is not allowed to change the value of the variable passed
 in. Otherwise, we could not safely disable checks on demand (coercions are not
@@ -444,7 +445,8 @@ Many people want coercions. We have a plan for them, but they're not part of
 the MVP. However, we're trying to make sure that they can be added later if
 necessary. Currently, there are some significant limitations to them. First,
 if we downgrade checks to warnings or disable them, we can't do that with
-coercions because the code expects the coerced value.
+coercions because the code expects the coerced value. Any user-defined check
+which is built from a coercion would automatically be upgraded to a coercion.
 
 Second, coercions are action at a distance. Thus, if you're trying to debug
 why a method failed, you might not realize that the method was passed a UUID
@@ -482,18 +484,23 @@ It's only mentioned now because people have asked about this a few times.
 # About the `Data::Checks` module
 
 The `Data::Checks` module is a proof-of-concept implementation of the above.
-However, due to current limitations of Perl, it's an unholy combination of
-[PPR](https://metacpan.org/pod/PPR), [Filter::Simple](https://metacpan.org/pod/Filter::Simple),
+However, due to current limitations of Perl, it's a scary combination of
+[PPR](https://metacpan.org/pod/PPR),
+[Filter::Simple](https://metacpan.org/pod/Filter::Simple),
 [Variable::Magic](https://metacpan.org/pod/Variable::Magic), and tied
 variables. It's not pretty, but it works. However, Damian's very clear that
-this is an unholy abomination (my words, not his, but I think he'd agree).
-Amongst other issues:
+this is an unholy abomination (my words, not his, but he was very clear that
+his code is a proof-of-concept and not something he'd ever release).
+
+Amongst other issues that had to be dealt with:
 
 * `Variable::Magic` has significant limitations with array and hashrefs
 * Attributes are not allowed inside subroutine signatures
+* Fast parsing and rewriting of Perl documents is hard
 
-After he turned it over to me, I fixed a bug and rewrote part of it match some
-expecations clearer. In particular, `use Data::Checks;` is equivalent to:
+After he turned it over to me, I fixed a bug and rewrote part of it to make
+some expectations clearer. In particular, `use Data::Checks;` is equivalent
+to:
 
 ```perl
 use strict;
@@ -506,4 +513,3 @@ use Data::Checks::Parser;
 The `Data::Checks::Parser` module is the core of the module and was originally
 named `Data::Checks` (to be fair `Data::Checks::Parser` is a terrible name
 because it's rewriting your code, not just parsing it).
-
