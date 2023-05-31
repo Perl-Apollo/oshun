@@ -504,7 +504,7 @@ to:
 
 ```perl
 use strict;
-ues warnings;
+use warnings;
 use v5.22;
 use experimental 'signatures';
 use Data::Checks::Parser;
