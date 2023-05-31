@@ -31,7 +31,8 @@ we're a community, there are those who disagree with the need to have them.
 
 Shortly thereafter, Damian Conway and I started talking and he shared a
 private gist with me. It was an incredibly detailed plan for runtime data
-checks. (The term "type" is avoided because of the baggage it carries).
+checks. (The term "type" is avoided because of the baggage it carries). A few
+others were quietly invited to the conversation.
 
 We spent a few months discussing this and he wrote a prototype, which is the
 code in this repository. The protoype is **ALPHA** code and absolutely should
@@ -73,7 +74,9 @@ what we want without worrying about Perl's limitations.
 # What we need to design
 
 There are two aspects of data checks: syntax and semantics. Obviously these
-are tightly coupled, but we can discuss them separately.
+are tightly coupled, but we can discuss them separately. If we can get basic
+agreement on the syntax and core semantics (there will always be edge cases),
+then we can move forward on writing up the full specification.
 
 ## Syntax
 
@@ -87,23 +90,6 @@ impact existing code. This is why we have the `:returns` and `:of` keywords.
     my TYPE VARLIST
     my VARLIST : ATTRS
     my TYPE VARLIST : ATTRS
-            A "my" declares the listed variables to be local (lexically) to
-            the enclosing block, file, or "eval". If more than one variable
-            is listed, the list must be placed in parentheses.
-
-            The exact semantics and interface of TYPE and ATTRS are still
-            evolving. TYPE may be a bareword, a constant declared with "use
-            constant", or "__PACKAGE__". It is currently bound to the use of
-            the fields pragma, and attributes are handled using the
-            attributes pragma, or starting from Perl 5.8.0 also via the
-            Attribute::Handlers module. See "Private Variables via my()" in
-            perlsub for details.
-
-            Note that with a parenthesised list, "undef" can be used as a
-            dummy placeholder, for example to skip assignment of initial
-            values:
-
-                my ( undef, $min, $hour ) = localtime;
 ```
 
 We very much want that `TYPE` syntax. Fortunately, because data checks are lexically
@@ -155,17 +141,21 @@ people to write custom checks that more accurately reflect their intent.
 
 They also clearly distinguished between built-in and user-defined checks.
 
-Another benefit is that tests are easier. I used to program in Java and I
-wrote tests using [JUnit](https://junit.org/junit5/). You know what I didn't
-test? I didn't have to test what would happen if the type I passed in was not
-an expected type. The compiler caught that for me. I could focus on testing
-the actual functional bits of my code, not the infrastructure. In a sense,
-Java tests could be more compact _and_ reliable than Perl tests.
-
 However, the SHOUTY checks were a touch controversial in some earlier private
 discussions. You don't always need a user-defined check. Sometimes it's just
 burdensome and if you find a built-in check is wrong, you can later upgrade
 that to a user-defined check.
+
+Another benefit of data checks is that tests are easier. I used to program in
+Java and I wrote tests using [JUnit](https://junit.org/junit5/). You know what
+I didn't test? I didn't have to test what would happen if the type I passed in
+was not an expected type. I didn't have to write tests to verify that the
+structure I got back was correct. The compiler caught that for me. I could
+focus on testing the actual functional bits of my code, not the
+infrastructure. In a sense, Java tests could be more compact _and_ reliable
+than Perl tests.
+
+But getting back to the shouty checks ...
 
 Or we could look at how other languages deal with this. For Java, primitive types
 are lower-case and include things like `int`, `char`, `double`, and so on.
@@ -219,7 +209,14 @@ Responses to this were mixed. Many people prefer a syntax like this:
 
 ```perl
 my hash[int => array[obj[Account]]] @data;
-my uint $count;
+my uint $count = 1;
+```
+
+Or this:
+
+```perl
+my @hash hash[int => array[obj[Account]]];
+my $count uint = 1;
 ```
 
 Still others were happy with the KIM syntax, but wanted to use anything other
@@ -256,7 +253,7 @@ What's the name of that subroutine? I think it's `num`, but it might look like
 int sub num (str $name) {...}
 ```
 
-That's much clearer, but if `int()` is a function in this namespace, I imagine
+That's much clearer, but if `&int` is a function in this namespace, I imagine
 that's going to create all sorts of parsing problems (not to mention that this
 will likely confict with existing code). We could do this:
 
@@ -301,11 +298,11 @@ I can no longer find the article, but I read a long post from a company
 explaining why they had abandoned their use of type inference.
 
 The absolutely loved it, but they spent so much time trying to patch
-third-party modules that they gave up. They were spending more time trying to
-fix other's code instead of writing their own.
+third-party modules that they gave up. They were as much time trying to fix
+other's code than writing their own.
 
 This is one of the many dangers of retrofitting a system like "data checks"
-onto an existing language. Thus, we're being extremely conservative here.
+onto an existing language. Thus, we're being extremely conservative.
 
 ### Signature checks
 
@@ -334,8 +331,8 @@ int foo;
 ```
 
 But as soon as you assign something to `foo`, it's fatal if it's not an
-integer.  For Perl, that's a bit tricky as there's no clear difference between
-uninitialized and undef. While using that variable prior to assignment is
+integer.  For Perl, that's a bit tricky as there's no difference between
+uninitialized and undefined. While using that variable prior to assignment is
 fatal in many languages, that would be more difficult in Perl. Thus, we
 require a valid assignment.
 
@@ -431,3 +428,73 @@ invariants over a variable’s entire nested data structure.
 
 This is unsatisfying, but we're playing with the matches we have, not the
 flamethrower we want.
+
+# Coercions
+
+Many people want coercions. We have a plan for them, but they're not part of
+the MVP. However, we're trying to make sure that they can be added later if
+necessary. Currently, there are some significant limitations to them. First,
+if we downgrade checks to warnings or disable them, we can't do that with
+coercions because the code expects the coerced value.
+
+Second, coercions are action at a distance. Thus, if you're trying to debug
+why a method failed, you might not realize that the method was passed a UUID
+instead of a `Customer` object.
+
+We're not ruling out coercions, but they introduce new problems we'd rather
+not have in the MVP
+
+# Compile-time checks
+
+We're not planning on compile-time checks. We're not ruling them out, but
+they're not for the MVP. However, we can envision a future where we have this
+being a compile-time failure:
+
+```perl
+my $foo :of(INT) = "bar"
+```
+
+It would be nice to see this a a compile-time failure:
+
+```perl
+sub find_customer :returns(OBJ[Customer]) ($self, $id :of(UUID)) {
+    ...
+}
+
+# in other code:
+my $customer :of(HASH) = $object->find_customer($UUID);
+```
+
+However, due to the extreme late binding in Perl, that's like to be
+impossible, so we're simply not worrying about it.
+
+It's only mentioned now because people have asked about this a few times.
+
+# About the `Data::Checks` module
+
+The `Data::Checks` module is a proof-of-concept implementation of the above.
+However, due to current limitations of Perl, it's an unholy combination of
+[PPR](https://metacpan.org/pod/PPR), [Filter::Simple](https://metacpan.org/pod/Filter::Simple),
+[Variable::Magic](https://metacpan.org/pod/Variable::Magic), and tied
+variables. It's not pretty, but it works. However, Damian's very clear that
+this is an unholy abomination (my words, not his, but I think he'd agree).
+Amongst other issues:
+
+* `Variable::Magic` has significant limitations with array and hashrefs
+* Attributes are not allowed inside subroutine signatures
+
+After he turned it over to me, I fixed a bug and rewrote part of it match some
+expecations clearer. In particular, `use Data::Checks;` is equivalent to:
+
+```perl
+use strict;
+ues warnings;
+use v5.22;
+use experimental 'signatures';
+use Data::Checks::Parser;
+```
+
+The `Data::Checks::Parser` module is the core of the module and was originally
+named `Data::Checks` (to be fair `Data::Checks::Parser` is a terrible name
+because it's rewriting your code, not just parsing it).
+
