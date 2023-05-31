@@ -208,7 +208,13 @@ which Corinna now uses:
   my      $fahrenheit :of(NUM)   = 32;
 ```
 
-Responses to this were mixed. Many people prefer a syntax like this:
+Personally, I would like most new Perl features to use KIM. It's very
+consistent and avoids the issue of adding a ton of new keywords to the
+language. _More_ consistency to Perl is a good thing, but many prefer the
+quirky nature of our beloved langauge.
+
+Responses to the proposed syntax were mixed. Many people prefer a syntax like
+this:
 
 ```perl
 my hash[int => array[obj[Account]]] @data;
