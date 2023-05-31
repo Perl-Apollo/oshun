@@ -1,224 +1,434 @@
-# NAME
+# This is Heimdall
 
-Data::Checks - Declarative data validation for variables and subroutines
+Heimdall is a Norse god who keeps watch for invaders and the onset of
+Ragnarök. He is know for this particularly eyesight and hearing.
 
-# VERSION
+In other words, he carefully watches to ensure that only those allowed in are
+allowed in.
 
-version 0.00001
-
-# SYNOPSIS
+In software terms:
 
 ```perl
-use Data::Checks;
-
-my $count :of(INT) = 0;
-$count++;        # valid
-undef $count;    # fatal: undef is not an integer
-
-sub rand_arrayref :returns(ARRAY[INT]) ( $max_size :of(UINT) ) {
-    my @array = map { int( 1 + rand($max_size) ) } 0 .. $max_size - 1;
-    return \@array;
+sub fibonacci :returns(UINT) ($nth :of(PositiveInt)) {
+    ...
 }
-
-my $aref = rand_arrayref(4);
 ```
 
-# CEÇI N'EST PAS UN TYPE
+In
 
-This is NOT a type system for Perl.
+**Note**: do not worry about that syntax. It's not real. It's just a
+placeholder for whatever will be agreed upon.
 
-The fundamental problem with type systems is that every individual programmer
-knows exactly what they mean by – and want in – and need from – a “type
-system” ...but no two programmers can ever agree precisely what that is.
+Heimdall is not a module to be installed (though there is code and almost 200K
+tests). Instead, it's intended to be a specification like
+[Corinna](https://github.com/Ovid/Cor), with the goal of seeing if we can get
+it into the Perl core.
 
-What most Perl users actually need is a practical way to ensure that, when a
-value that is assigned to a variable, or passed to a parameter, or returned
-from a subroutine, that value conforms to the designer’s original expectations
-and assumptions (e.g. did their subroutine get passed a positive integer
-and a filehandle, and did it return a reference to a hash of strings?)
+# History
 
-So this is not a compile-time type-system for Perl.  It’s a runtime
-data-checking system for Perl: a system of “checks”.
+In December of 2022, I again wrote about [a type system for
+Perl](https://gist.github.com/Ovid/5ae3752e260219a575ddfdea4c2194f7). There
+was a fair amount of discussion about it on Mastodon, but that's not the place
+to gain concensus.
 
-A check is an assertion about the value(s) that can be assigned to a variable,
-passed to a parameter, or returned by a subroutine. This module provides a
-large number of built-in checks and will eventually offer a mechanism for
-specifying user-defined checks as well.
+Shortly thereafter, Damian Conway and I started talking and he shared a
+private gist with me. It was an incredibly detailed plan for runtime data
+checks. (The term "type" is avoided because of the baggage it carries).
 
-# USE DATA::CHECKS
+We spent a few months discussing this and he wrote a prototype, which is the
+code in this repository. The protoype is **ALPHA** code and absolutely should
+not be used in production. Instead, it's a proof of concept to explore the
+problem space. It's also a way to get feedback from the community, which is
+why this repository is here.
 
-The statement `use Data::Checks` is equivalent to:
+After a few months of discussion, [Damian rewrote that
+gist](https://gist.github.com/thoughtstream/08b7fd48b09c99ae47d6d9f82b913986).
+It covers the full spec, but it's long and daunting. I'll just touch on key
+points here.
+
+**Note**: Damian regrets that for personal reasons, he is not able to continue
+working on Heimdall at this time. He might answer questions, but he does not
+have much free time available right now.
+
+# Why "data checks"?
+
+We're not using the word "type" because:
+
+1. Computer scientists have reasonable expectations of what a type system is
+2. Computer programmers have screaming matches
+
+We'd like to avoid screaming matches.
+
+What I want out a "type system" is probably not feasible in Perl and certainly
+won't match everyone's expectations. So we've taken a look at what Perl
+developers currently do. [Type::Tiny](https://metacpan.org/pod/Type::Tiny) and
+[Moose](https://metacpan.org/pod/Moose) (and `Moo`) are heavy inspirations for
+this work. We also looked at [Dios](https://metacpan.org/pod/Dios),
+[Zydeco](https://metacpan.org/pod/Zydeco), Raku, and other languages for
+inspiration, but mostly this matches what Perl is doing today, keeping in mind
+that popular systems are working within the limitation of Perl. Just as
+Corinna is better because Sawyer X told me to design something great and not
+worry about Perl's current limitations, so are data checks designed to give us
+what we want without worrying about Perl's limitations.
+
+# What we need to design
+
+There are two aspects of data checks: syntax and semantics. Obviously these
+are tightly coupled, but we can discuss them separately.
+
+## Syntax
+
+The syntax is probably the hard part. The initial design was made on the
+possibly unfounded assumption that P5P would reject any syntax which might
+impact existing code. This is why we have the `:returns` and `:of` keywords.
+`perldoc -f my` has the following:
+
+```
+    my VARLIST
+    my TYPE VARLIST
+    my VARLIST : ATTRS
+    my TYPE VARLIST : ATTRS
+            A "my" declares the listed variables to be local (lexically) to
+            the enclosing block, file, or "eval". If more than one variable
+            is listed, the list must be placed in parentheses.
+
+            The exact semantics and interface of TYPE and ATTRS are still
+            evolving. TYPE may be a bareword, a constant declared with "use
+            constant", or "__PACKAGE__". It is currently bound to the use of
+            the fields pragma, and attributes are handled using the
+            attributes pragma, or starting from Perl 5.8.0 also via the
+            Attribute::Handlers module. See "Private Variables via my()" in
+            perlsub for details.
+
+            Note that with a parenthesised list, "undef" can be used as a
+            dummy placeholder, for example to skip assignment of initial
+            values:
+
+                my ( undef, $min, $hour ) = localtime;
+```
+
+We very much want that `TYPE` syntax. Fortunately, because data checks are lexically
+scoped and not global, it turns out that we probably _can_ have the type `TYPE` syntax,
+but we need to be careful.
+
+So we have the following syntax:
 
 ```perl
-use strict;
-use warnings;
-use v5.22;
-use experimental 'signatures';
-use Data::Checks::Parser;    # this is the magic
+sub fibonacci :returns(UINT) ($nth :of(PositiveInt)) {
+    ...
+}
 ```
 
-# CORE CHECKS
-
-To have an MVP (minimum viable product), the first pass of Data::Checks is
-designed to be as minimal as possible. As such, we currently only support
-_core_ types of Perl, along with a few restrictive types such as `TUPLE` and
-`DICT`.
-
-These come in two forms:
-
-- `:of(...)`
-
-    This is how you attach a check to a variable:
-
-    ```perl
-    my @array :of(HASH[INT]);
-    ```
-
-    You can only assign hashrefs of integers to the individual elements of the array.
-
-- `:returns(...)`
-
-    This is attached to subroutines to express what they are allowed to return:
-
-    ```perl
-    sub fibonacci :returns(UINT) ($nth: of(UINT) {
-        ...
-    }
-    ```
-
-    Like `:of(...)` declarations, the can be complex data structures, but also include multiple
-    values:
-
-    ```perl
-    sub foo :returns(INT, STR, LIST[INT]) { ... }
-    ```
-
-    The above is guaranteed to return two or more elements: a integer, a string, and zero or
-    more integers after the string.
-
-## Builtin Checks
-
-For the below description of checks, we also check to see if the thing in
-question is overloaded. So an object with overloaded stringification should
-satify a `STR` check.
-
-- `ANY`
-
-    Matches anything
-
-- `LIST`
-
-    A list values. Can only be used with `:returns` checks, not `:of` checks.
-
-- `VOID`
-
-    Allows a void return. Can only be used with `:returns` checks, not `:of` checks.
-
-    Almost all `:return` checks will fail in void context because there is no
-    return value for the check to test. If you want to allow a checked return
-    value to be discarded without complaint in void context, change the check
-    from `:returns(WHATEVER)` to `:returns(WHATEVER | VOID)`.
-
-- `UNDEF`
-
-    The value must be undefined.
-
-- `DEF`
-
-    The value must be defined.
-
-- `HANDLE`
-
-    Must be an open filehandle.
-
-- `NONREF`
-
-    Must not be a reference.
-
-- `REF`
-
-    Must be a reference.
-
-- `GLOB`
-
-    Must be a typeglob.
-
-- `BOOL`
-
-    Must be able to evaluate as a boolean (overloaded boolean is fine).
-
-- `NUM`
-
-    Must be a number.
-
-- `INT`
-
-    Must be an integer.
-
-- `UINT`
-
-    Must be an unsigned integer.
-
-- `STR`
-
-    Must be a string.
-
-- `VSTR`
-
-    Must be a v-string.
-
-- `CLASS`
-
-    Must be a string. If parameterized (e.g., `my $animal :of(CLASS[Dog];`),
-    the inner value is a string, assumed to be a classname, and any assigned value
-    must pass an `isa` check.
-
-- `ROLE`
-
-    Similar to `CLASS`, but for roles. This is not yet implemented.
-
-- `SCALAR`
-
-    Must be a scalar references.
-
-- `CODE`
-
-    Must be a code reference.
-
-- `ARRAY`
-
-    Must be an array reference.
-
-- `HASH`
-
-    Must be a hash reference.
-
-- `REGEXP`
-
-    Must be a regular expression reference.
-
-- `OBJ`
-
-    Must be a blessed reference. Like `CLASS`, you may parameterize this with the name of a class.
-
-# DEPENDENCIES
-
-Requires Perl 5.22 or later.
-
-# MAINTAINERS
-
-- Curtis "Ovid" Poe <ovid@cpan.org>
-
-# AUTHOR
-
-Damian Conway <damian@conway.org>
-
-# COPYRIGHT AND LICENSE
-
-This software is Copyright (c) 2023 by Damian Conway.
-
-This is free software, licensed under:
+But let's dig in. We'll consider naming and declaration separately.
+
+### Naming
+
+We have two kinds of data check declarations: built-in and user-defined.
+Built-in checks were defined as all uppercase: `INT`, `ARRAY`, `HASH`, etc.
+The reason is this problem:
+
+```perl
+sub f_to_c :returns(NUM) ($f :of(NUM)) {...}
+```
+
+`f_to_c(32)` returns `0`. `f_to_c(-1000)` returns `-573.333333333333`.
+
+However, that doesn't really make sense, since that's below absolute zero.
+So we have user-defined checks:
+
+```perl
+check Celsius    :isa(NUM[-273.14..inf]);
+check Fahrenheit :isa(NUM[−459.67..inf]);
+```
+
+Which gives us a much safer, and self-documenting signature:
+
+```perl
+sub f_to_c :returns(Celsius) ($f :of(Fahrenheit) {...}
+```
+
+Now, if you discover that your user-defined check is wrong, you can fix it and
+it will be globally applied. This is a huge win (er, except when your code
+doesn't really match the check).
+
+UPPER-CASE CHECKS were designed to be a subtle disaffordance to encourage
+people to write custom checks that more accurately reflect their intent.
+
+They also clearly distinguished between built-in and user-defined checks.
+
+Another benefit is that tests are easier. I used to program in Java and I
+wrote tests using [JUnit](https://junit.org/junit5/). You know what I didn't
+test? I didn't have to test what would happen if the type I passed in was not
+an expected type. The compiler caught that for me. I could focus on testing
+the actual functional bits of my code, not the infrastructure. In a sense,
+Java tests could be more compact _and_ reliable than Perl tests.
+
+However, the SHOUTY checks were a touch controversial in some earlier private
+discussions. You don't always need a user-defined check. Sometimes it's just
+burdensome and if you find a built-in check is wrong, you can later upgrade
+that to a user-defined check.
+
+Or we could look at how other languages deal with this. For Java, primitive types
+are lower-case and include things like `int`, `char`, `double`, and so on.
+These map directly to what the underlying hardware supports. These correspond
+to the "built-in" checks for Heimdall, with the caveat that we focus on types
+that map naturally to what _perl_ supports, not what the underlying hardware
+expects. For example, we have a `GLOB` type:
+
+```perl
+my    $my_scalar    :of(GLOB) = *STDOUT;
+our   $our_scalar   :of(GLOB) = *STDERR;
+state $state_scalar :of(GLOB) = *STDIN;
+```
+
+Java also has non-primitive types, which are defined by the programmer. These
+correspond to our user-defined checks. In Java, these are defined using class
+names. In Heimdall, we use `check` and the name of a check is an unqualified
+Perl identifier, which must contain at least one upper-case character and at
+least one lower-case character.
+
+```perl
+# Newly assigned values must never decrease...
+check Monotonic :isa(NUM) ($value, %value) { $value >= $value{old} }
+```
+
+However, since SHOUTY checks are controversial, we could use all lower-case
+for the built-in checks and require user-defined checks to start with an
+upper-case letter.
+
+```perl
+# @data must be an array of hashes, where the hash keys must be integers
+# and values must be arrayrefs of Account objects.
+my @data :of(hash[int => array[obj[Account]]]);
+```
+
+### Declaration
+
+That brings us to the next contentious issue: how do we declare data checks?
+
+We used attributes because they were not likely to conflict with existing
+code. Further, they correspond to the [KIM
+syntax](https://ovid.github.io/articles/language-design-consistency.html)
+which Corinna now uses:
 
 ```
-The Artistic License 2.0 (GPL Compatible)
+# KEYWORD IDENTIFIER MODIFIERS                   SETUP
+  sub     f_to_c     :returns(NUM) ($f :of(NUM)) {...}
 ```
+
+Responses to this were mixed. Many people prefer a syntax like this:
+
+```perl
+my hash[int => array[obj[Account]]] @data;
+my uint $count;
+```
+
+Still others were happy with the KIM syntax, but wanted to use anything other
+than `:of`. `:is`, `:check`, `:contract` were all suggested. I won't take a
+position here, other than to say that whatever syntax we should choose should
+only be cumbersome for things we think we should actively discourage.
+
+### Return Values From Subroutines
+
+If we don't use the `:returns(...)` syntax for specifying the checks on values
+subs/methods return, what then? Looking at [how Raku handles
+this](https://docs.raku.org/language/functions#Return_type_constraints):
+
+```perl
+sub foo(--> Int)      {}; say &foo.returns; # OUTPUT: «(Int)␤»
+sub foo() returns Int {}; say &foo.returns; # OUTPUT: «(Int)␤»
+sub foo() of Int      {}; say &foo.returns; # OUTPUT: «(Int)␤»
+my Int sub foo()      {}; say &foo.returns; # OUTPUT: «(Int)␤» 
+```
+
+I don't know the design discussions which led Raku to that place, but I don't
+think it's controversial to suggest that Perl is not Raku and we probably
+don't want that many different ways of declaring the return check. But if we
+don't use `:returns(...)`, what then?
+
+```perl
+sub int num (str $name) {...}
+```
+
+What's the name of that subroutine? I think it's `num`, but it might look like
+`int` to other. Who knows? We could do this:
+
+```perl
+int sub num (str $name) {...}
+```
+
+That's much clearer, but if `int()` is a function in this namespace, I imagine
+that's going to create all sorts of parsing problems (not to mention that this
+will likely confict with existing code). We could do this:
+
+```perl
+sub num (str $name) returns int {...}
+```
+
+I think that's the clearest, but it's also the most verbose. I have no strong
+preference here, so long as whatever we do it doesn't conflict with existing
+code and is easy to use.
+
+## Semantics
+
+For a full discussion of the semantics, [check Damian's
+gist](https://gist.github.com/thoughtstream/08b7fd48b09c99ae47d6d9f82b913986).
+Here's the short version, including the rather controversial final point.
+
+### Checks are on the variable, not the data
+
+```perl
+my $foo :of(INT) = 4;
+$foo = 'hello'; # fatal
+```
+
+However:
+
+```perl
+my $foo :of(INT) = 4;
+my $bar = $foo;
+$bar = 'hello'; # legal
+```
+
+This is because we don't want checks to have "infectious" side effects that
+might surprise you. The developer should have full control over the data
+checks.
+
+### No type inference
+
+No surprises. The developer should have full control over the data checks.
+
+I can no longer find the article, but I read a long post from a company
+explaining why they had abandoned their use of type inference.
+
+The absolutely loved it, but they spent so much time trying to patch
+third-party modules that they gave up. They were spending more time trying to
+fix other's code instead of writing their own.
+
+This is one of the many dangers of retrofitting a system like "data checks"
+onto an existing language. Thus, we're being extremely conservative here.
+
+### Signature checks
+
+We need to work out the syntax, but the current plan is something like this:
+
+```perl
+sub count_valid :returns(UINT) (@customers :of(OBJ[Customer])) {
+	...
+}
+```
+
+The `@customers` variable should maintain the check in the body of the sub, but
+the return check is applied once and only once on the data returned at the time
+that it's returned.
+
+### Scalars require valid assignments
+
+```perl
+my $total :of(NUM); # fatal, because undef fails the check
+```
+
+This is per previous discussions. Many languages allow this:
+
+```perl
+int foo;
+```
+
+But as soon as you assign something to `foo`, it's fatal if it's not an
+integer.  For Perl, that's a bit tricky as there's no clear difference between
+uninitialized and undef. While using that variable prior to assignment is
+fatal in many languages, that would be more difficult in Perl. Thus, we
+require a valid assignment.
+
+As a workaround, this is bad, but valid:
+
+```perl
+my $total :of(INT|UNDEF);
+```
+
+This restriction doesn't apply to arrays or hashes because being empty
+trivially passes the check.
+
+### Fatal
+
+By default, a failed check is fatal. We have provisions to downgrade them to
+warnings or disable them completely.
+
+### Internal representation
+
+```perl
+my $foo :of(INT) = "0";
+Dump($foo);
+```
+
+`0` naturally coerces to an integer, so that's allowed. However, we don't plan
+(for the MVP) to guarantee that Dump shows an `IV` instead of a `PV`. We're
+hoping that can be addressed post-MVP.
+
+### User-defined checks
+
+Users should be able to define their own checks:
+
+```perl
+check LongStr :params($N :of(PosInt)) :isa(STR) ($n) { length $n >= $N }
+```
+
+The above would allow this:
+
+```perl
+my $name :of(LongStr[10]) = get_name(); # must be at least 10 characters
+```
+
+The body of a check definition should return a true or false value, or
+die/croak with a more useful message.
+
+A user-defined check is not allowed to change the value of the variable passed
+in. Otherwise, we could not safely disable checks on demand (coercions are not
+planned for the MVP, but we have them specced and they use a separate syntax).
+
+User-defined checks could be post-MVP, but it's unclear to me how useful
+checks would be without them.
+
+### Checks are on assignment to the variable
+
+This is probably the most problematic bit.
+
+A check applied to a variable is not an invariant on that variable. It's a
+prerequisite for assignment to that variable.
+
+An invariant on the variable would guarantee that the contents of the variable
+must always meet a given constraint; a "prerequisite for assignment" only
+guarantees that each element must be assigned values that meet the constraint
+at the moment they are assigned.
+
+So an array such as `my @data :of(HASH[INT])` only requires that each element
+of `@data` must be assigned a hashref whose values are integers. If you were
+to subsequently modify an element like so (with the caveat that the two lines
+aren't exactly equivalent):
+
+```perl
+$data[$idx]       = { $key => 'not an integer' }; # fatal
+$data[$idx]{$key} = 'not an integer";             # not fatal !
+```
+
+The second assignment is not modifying `@data` directly, only retrieving a
+value from it and modifying the contents of an entirely different variable
+through the retrieved reference value.
+
+We *could* specify that checks are invariants, instead of prerequisites, but
+that would require that any reference value stored within a checked arrayref
+or hashref would have to have checks automatically and recursively applied to
+them as well, which would greatly increase the cost of checking, and might
+also lead to unexpected action-at-a-distance, when the now-checked references
+are modified through some other access mechanism.
+
+Moreover, we would have to ensure that such auto-subchecked references were
+appropriately “de-checked” if they are ever removed from the checked
+container. And how would we manage any conflict if the nested referents
+happened to have their own (possibly inconsistent) checks?
+
+So the checks are simply assertions on direct assignments, rather than
+invariants over a variable’s entire nested data structure.
+
+This is unsatisfying, but we're playing with the matches we have, not the
+flamethrower we want.
