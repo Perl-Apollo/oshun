@@ -1,10 +1,10 @@
 # This is Heimdall
 
 Heimdall is a Norse god who keeps watch for invaders and the onset of
-Ragnarök. He is know for this particularly eyesight and hearing.
+Ragnarök. He is known for his keen eyesight and hearing.
 
-In other words, he carefully watches to ensure that only those allowed in are
-allowed in.
+In other words, he carefully watches to ensure that only those who are allowed
+in are actually allowed in.
 
 In software terms:
 
@@ -14,10 +14,8 @@ sub fibonacci :returns(UINT) ($nth :of(PositiveInt)) {
 }
 ```
 
-In
-
 **Note**: do not worry about that syntax. It's not real. It's just a
-placeholder for whatever will be agreed upon.
+placeholder for whatever will be agreed upon. We'll get to that later.
 
 Heimdall is not a module to be installed (though there is code and almost 200K
 tests). Instead, it's intended to be a specification like
@@ -27,9 +25,9 @@ it into the Perl core.
 # History
 
 In December of 2022, I again wrote about [a type system for
-Perl](https://gist.github.com/Ovid/5ae3752e260219a575ddfdea4c2194f7). There
-was a fair amount of discussion about it on Mastodon, but that's not the place
-to gain concensus.
+Perl](https://gist.github.com/Ovid/5ae3752e260219a575ddfdea4c2194f7). I've
+done this before and the the discussion is usually positive, though given that
+we're a community, there are those who disagree with the need to have them.
 
 Shortly thereafter, Damian Conway and I started talking and he shared a
 private gist with me. It was an incredibly detailed plan for runtime data
@@ -54,7 +52,8 @@ have much free time available right now.
 
 We're not using the word "type" because:
 
-1. Computer scientists have reasonable expectations of what a type system is
+1. Computer scientists have reasonable differences about what they want from a
+type system
 2. Computer programmers have screaming matches
 
 We'd like to avoid screaming matches.
