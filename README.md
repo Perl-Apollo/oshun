@@ -203,6 +203,9 @@ which Corinna now uses:
 ```
 # KEYWORD IDENTIFIER MODIFIERS                   SETUP
   sub     f_to_c     :returns(NUM) ($f :of(NUM)) {...}
+
+# KEYWORD IDENTIFIER   MODIFIERS SETUP
+  my      $fahrenheit :of(NUM)   = 32;
 ```
 
 Responses to this were mixed. Many people prefer a syntax like this:
