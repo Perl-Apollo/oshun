@@ -1,10 +1,8 @@
-# This is Heimdall
+# This is Oshun
 
-Heimdall is a Norse god who keeps watch for invaders and the onset of
-Ragnarök. He is known for his keen eyesight and hearing.
+Oshun is a Nigerian Yoruba river diety. She is is a protector, a savior.
 
-In other words, he carefully watches to ensure that only those who are allowed
-in are actually allowed in.
+She will protect your data.
 
 In software terms:
 
@@ -17,7 +15,7 @@ sub fibonacci :returns(UINT) ($nth :of(PositiveInt)) {
 **Note**: do not worry about that syntax. It's not real. It's just a
 placeholder for whatever will be agreed upon. We'll get to that later.
 
-Heimdall is not a module to be installed (though there is code and almost 200K
+Oshun is not a module to be installed (though there is code and almost 200K
 tests). Instead, it's intended to be a specification like
 [Corinna](https://github.com/Ovid/Cor), with the goal of seeing if we can get
 it into the Perl core.
@@ -46,7 +44,7 @@ It covers the full spec, but it's long and daunting. I'll just touch on key
 points here.
 
 **Note**: Damian regrets that for personal reasons, he is not able to continue
-working on Heimdall at this time. He might answer questions, but he does not
+working on Oshun at this time. He might answer questions, but he does not
 have much free time available right now.
 
 # Why "data checks"?
@@ -160,7 +158,7 @@ But getting back to the shouty checks ...
 Or we could look at how other languages deal with this. For Java, primitive types
 are lower-case and include things like `int`, `char`, `double`, and so on.
 These map directly to what the underlying hardware supports. These correspond
-to the "built-in" checks for Heimdall, with the caveat that we focus on types
+to the "built-in" checks for Oshun, with the caveat that we focus on types
 that map naturally to what _perl_ supports, not what the underlying hardware
 expects. For example, we have a `GLOB` type:
 
@@ -172,7 +170,7 @@ state $state_scalar :of(GLOB) = *STDIN;
 
 Java also has non-primitive types, which are defined by the programmer. These
 correspond to our user-defined checks. In Java, these are defined using class
-names. In Heimdall, we use `check` and the name of a check is an unqualified
+names. In Oshun, we use `check` and the name of a check is an unqualified
 Perl identifier, which must contain at least one upper-case character and at
 least one lower-case character.
 
