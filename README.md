@@ -32,7 +32,7 @@ it into the Perl core.
 
 In December of 2022, I again wrote about [a type system for
 Perl](https://gist.github.com/Ovid/5ae3752e260219a575ddfdea4c2194f7). I've
-done this before and the the discussion is usually positive, though given that
+done this before and the discussion is usually positive, though given that
 we're a community, there are those who disagree with the need to have them.
 
 Shortly thereafter, Damian Conway and I started talking and he shared a
