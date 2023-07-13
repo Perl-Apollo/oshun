@@ -8,7 +8,7 @@ Primary change from spec might be to use established `my TYPE VARLIST` syntax fr
 
 # This is Oshun
 
-Oshun is a Nigerian Yoruba river diety. She is is a protector, a savior.
+Oshun is a Nigerian Yoruba river deity. She is a protector, a savior.
 
 She will protect your data.
 
@@ -51,7 +51,7 @@ gist](https://gist.github.com/thoughtstream/08b7fd48b09c99ae47d6d9f82b913986).
 It covers the full spec, but it's long and daunting. I'll just touch on key
 points here.
 
-**Note**: Damian regrets that for personal reasons, he is not able to continue
+**Note**: Damian regrets that, for personal reasons, he is not able to continue
 working on Oshun at this time. He might answer questions, but he does not
 have much free time available right now.
 
