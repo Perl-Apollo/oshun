@@ -1,10 +1,10 @@
 # Not So Quick Start
 
-[Here's the full spec](https://gist.github.com/thoughtstream/08b7fd48b09c99ae47d6d9f82b913986). it's very
-long and much of the current discussion is in ... [discussions](https://github.com/Ovid/oshun/discussions).
+[Here's the full spec](https://gist.github.com/thoughtstream/08b7fd48b09c99ae47d6d9f82b913986).
+It's very long and much of the current discussion is in [Discussions](https://github.com/Ovid/oshun/discussions).
 
 Primary change from spec might be to use established `my TYPE VARLIST` syntax from 
-`perldoc -f my` instead of attributes.
+[`perldoc -f my`](https://perldoc.perl.org/functions/my) instead of attributes.
 
 # This is Oshun
 
