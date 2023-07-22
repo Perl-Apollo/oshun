@@ -114,6 +114,11 @@ individual, or aggression toward or disparagement of classes of individuals.
 **Consequence**: A permanent ban from any sort of public interaction within
 the community.
 
+Note: In the event we cannot determine how to contect someone privately,
+we will do so publicly. We will first ask for private contact information. If
+not received in a timely manner, we will still need to act to ensure violations
+of our standards are dealt with in a timely manner.
+
 ## Attribution
 
 This Code of Conduct is adapted from the [Contributor Covenant][homepage],
