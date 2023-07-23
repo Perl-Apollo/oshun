@@ -2,6 +2,7 @@
 
 use Test::Most;
 use Data::Checks;
+use experimental qw(postderef);
 
 explain <<'END';
 There was a bug where feature 'state' wasn't always imported. Further, there

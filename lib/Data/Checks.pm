@@ -18,7 +18,7 @@ sub import {
     strict->import::into($caller);
     warnings->import::into($caller);
     feature->import::into( $caller, ':5.22' );
-    experimental->import::into( $caller, 'signatures' );
+    experimental->import::into( $caller, 'signatures', 'lexical_subs' );
     Data::Checks::Parser->import::into( $caller, @args );
 }
 
@@ -86,7 +86,7 @@ The statement C<use Data::Checks> is equivalent to:
     use strict;
     use warnings;
     use v5.22;
-    use experimental 'signatures';
+    use experimental 'signatures', 'lexical_subs';
     use Data::Checks::Parser;    # this is the magic
 
 =head1 CORE CHECKS
