@@ -10,6 +10,7 @@ requires "Sub::Uplevel" => "0.2800";
 requires "Variable::Magic" => "0.63";
 requires "attributes" => "0";
 requires "experimental" => "0";
+requires "perl" => "v5.22.0";
 
 on 'test' => sub {
   requires "ExtUtils::MakeMaker" => "0";
