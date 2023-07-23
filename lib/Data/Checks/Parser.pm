@@ -1457,6 +1457,7 @@ sub _rewrite_sub ($decl_ref) {
             «ws_preblock»      {
                 state sub __IMPL__ «sig» {
                     local *__ANON__ = __PACKAGE__ . q{::«name»};
+                    if ((((caller 4)[10] // {})->{'Data::Checks::Parser/mode'}//q{}) ne 'NONE') {$OF_CHECKS}
                     no warnings 'once', 'redefine';
                     local *CORE::GLOBAL::caller = \\&Data::Checks::Parser::_caller;
                     «block»
