@@ -1376,6 +1376,7 @@ sub _rewrite_sub ($decl_ref) {
 
     # Extract parameter :of specifiers (if any)...
     my $OF_CHECKS = q{};
+    my $OF_CHECKS_INNER = q{};
     if ( $decl_ref->{syn_sig} ) {
         while ( $decl_ref->{syn_sig} =~ s{ $EXTRACT_OF }{$+{param}}xms ) {
 
@@ -1393,7 +1394,9 @@ sub _rewrite_sub ($decl_ref) {
 
                 # Install extra code at start of sub to check parameter...
                 $OF_CHECKS
-                  .= qq{Data::Checks::Parser::FAIL q{Can't pass } . Data::Checks::Parser::pp($of{param}) . q{ to parameter $of{param} in call to $decl_ref->{syn_name}\() at } . join(' line ', (caller)[1,2]) . qq{:\\nValue failed parameter's \Q$of{check}\E check.\\n} if !$pass_check; Variable::Magic::cast $of{param}, \$Data::Checks::Parser::SCALAR_WIZARD_FOR{q{$of{param}/$of{check}}}; };
+                  .= qq{Data::Checks::Parser::FAIL q{Can't pass } . Data::Checks::Parser::pp($of{param}) . q{ to parameter $of{param} in call to $decl_ref->{syn_name}\() at } . join(' line ', (caller)[1,2]) . qq{:\\nValue failed parameter's \Q$of{check}\E check.\\n} if !$pass_check; };
+                $OF_CHECKS_INNER
+                  .= qq{Variable::Magic::cast $of{param}, \$Data::Checks::Parser::SCALAR_WIZARD_FOR{q{$of{param}/$of{check}}}; };
             }
             elsif ( $of{sigil} eq '@' ) {
 
@@ -1458,6 +1461,7 @@ sub _rewrite_sub ($decl_ref) {
                 state sub __IMPL__ «sig» {
                     local *__ANON__ = __PACKAGE__ . q{::«name»};
                     no warnings 'once', 'redefine';
+                    if ((((caller 1)[10] // {})->{'Data::Checks::Parser/mode'}//q{}) ne 'NONE') {$OF_CHECKS_INNER}
                     local *CORE::GLOBAL::caller = \\&Data::Checks::Parser::_caller;
                     «block»
                 }
