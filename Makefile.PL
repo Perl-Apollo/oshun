@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-
+use 5.022000;
 
 use ExtUtils::MakeMaker;
 
@@ -13,6 +13,7 @@ my %WriteMakefileArgs = (
   },
   "DISTNAME" => "Data-Checks",
   "LICENSE" => "artistic_2",
+  "MIN_PERL_VERSION" => "5.022000",
   "NAME" => "Data::Checks",
   "PREREQ_PM" => {
     "Data::Dump" => "0.25",
