@@ -128,7 +128,7 @@ However, that doesn't really make sense, since that's below absolute zero.
 So we have user-defined checks:
 
 ```perl
-check Celsius    :isa(NUM[-273.14..inf]);
+check Celsius    :isa(NUM[-273.15..inf]);
 check Fahrenheit :isa(NUM[−459.67..inf]);
 ```
 
