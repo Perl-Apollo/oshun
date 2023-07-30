@@ -57,6 +57,16 @@ __END__
 
     my $aref = rand_arrayref(4);
 
+=head1 WARNING
+
+This is a proof-of-concept release. It is not ready for production use. That means
+B<I<DO NOT USE THIS IN PRODUCTION CODE>>.
+
+The interface is going to change. The sementantics are going to change. This is here
+merely as a testbed of ideas to get feedback on the general concept.
+
+See [the Oshun project](https://github.com/Perl-Oshun/oshun) for more information.
+
 =head1 CEÇI N'EST PAS UN TYPE
 
 This is NOT a type system for Perl.
