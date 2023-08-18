@@ -1,7 +1,3 @@
-# Who is "Oshun"?
-
-[Oshun](https://www.britannica.com/topic/Oshun) is a Nigerian Yoruba river deity. She is a protector, a savior.
-
 # Not So Quick Start
 
 [Here]([https://gist.github.com/thoughtstream/08b7fd48b09c99ae47d6d9f82b913986](https://github.com/Perl-Oshun/oshun/wiki/Initial-Specification))'s the full spec.
